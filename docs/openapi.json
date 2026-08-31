@@ -1,0 +1,2333 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "JWLCode Frappe API",
+    "version": "0.1.0",
+    "description": "C++ 教学平台 API。成功响应统一包装在 message 字段；浏览器使用 Session Cookie。"
+  },
+  "servers": [
+    {
+      "url": "http://school.localhost:8000",
+      "description": "本地 Docker Compose"
+    }
+  ],
+  "security": [
+    {
+      "cookieAuth": []
+    },
+    {
+      "tokenAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "认证"
+    },
+    {
+      "name": "课程学习"
+    },
+    {
+      "name": "代码评测"
+    },
+    {
+      "name": "教师"
+    },
+    {
+      "name": "Judge 回调"
+    },
+    {
+      "name": "Frappe 原生"
+    }
+  ],
+  "paths": {
+    "/api/method/login": {
+      "post": {
+        "tags": [
+          "认证"
+        ],
+        "summary": "Session 登录",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "usr",
+                  "pwd"
+                ],
+                "properties": {
+                  "usr": {
+                    "type": "string"
+                  },
+                  "pwd": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Logged In"
+                    },
+                    "home_page": {
+                      "type": "string",
+                      "example": "desk"
+                    },
+                    "full_name": {
+                      "type": "string",
+                      "example": "Administrator"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/logout": {
+      "post": {
+        "tags": [
+          "认证"
+        ],
+        "summary": "Session 退出",
+        "responses": {
+          "200": {
+            "description": "已退出"
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.me": {
+      "get": {
+        "tags": [
+          "认证"
+        ],
+        "summary": "当前用户、角色和数据范围",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "required": [
+                        "user",
+                        "roles",
+                        "data_scope"
+                      ],
+                      "properties": {
+                        "user": {
+                          "type": "string"
+                        },
+                        "full_name": {
+                          "type": "string"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "data_scope": {
+                          "type": "object",
+                          "properties": {
+                            "student_id": {
+                              "type": "string"
+                            },
+                            "teacher_id": {
+                              "type": "string"
+                            },
+                            "class_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.courses": {
+      "get": {
+        "tags": [
+          "课程学习"
+        ],
+        "summary": "有权访问的课程",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "从零开始的偏移量",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "page_length",
+            "in": "query",
+            "required": false,
+            "description": "分页大小，最大 100",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "required": [
+                        "data",
+                        "has_more"
+                      ],
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "version": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "owner_teacher": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "modified": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "has_more": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.lesson": {
+      "get": {
+        "tags": [
+          "课程学习"
+        ],
+        "summary": "课时详情与本人进度",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "query",
+            "required": true,
+            "description": "JWL Lesson ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "chapter_id": {
+                          "type": "string"
+                        },
+                        "course_id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "sort_order": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "progress": {
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string"
+                                },
+                                "percent": {
+                                  "type": "number"
+                                },
+                                "modified": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.problem": {
+      "get": {
+        "tags": [
+          "课程学习"
+        ],
+        "summary": "题目和公开资源限制",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "query",
+            "required": true,
+            "description": "JWL Problem ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "lesson_id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "statement": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "code_template": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "max_score": {
+                          "type": "number"
+                        },
+                        "limits": {
+                          "type": "object",
+                          "properties": {
+                            "allowed_languages": {
+                              "type": "string"
+                            },
+                            "time_limit_ms": {
+                              "type": "integer"
+                            },
+                            "memory_limit_kb": {
+                              "type": "integer"
+                            },
+                            "mode": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.create_code_run": {
+      "post": {
+        "tags": [
+          "代码评测"
+        ],
+        "summary": "创建自定义输入试运行",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "problem_id",
+                  "language",
+                  "source_code",
+                  "client_request_id"
+                ],
+                "properties": {
+                  "problem_id": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "string",
+                    "example": "cpp17"
+                  },
+                  "source_code": {
+                    "type": "string",
+                    "description": "最大 128 KiB"
+                  },
+                  "client_request_id": {
+                    "type": "string",
+                    "maxLength": 140
+                  },
+                  "custom_input": {
+                    "type": "string",
+                    "description": "最大 64 KiB"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "submission_id": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "const": "QUEUED"
+                        },
+                        "trace_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "idempotent_replay": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.create_submission": {
+      "post": {
+        "tags": [
+          "代码评测"
+        ],
+        "summary": "创建正式提交并快速返回",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "problem_id",
+                  "language",
+                  "source_code",
+                  "client_request_id"
+                ],
+                "properties": {
+                  "problem_id": {
+                    "type": "string"
+                  },
+                  "assignment_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "language": {
+                    "type": "string",
+                    "example": "cpp17"
+                  },
+                  "source_code": {
+                    "type": "string",
+                    "description": "最大 128 KiB"
+                  },
+                  "client_request_id": {
+                    "type": "string",
+                    "maxLength": 140
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "submission_id": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "const": "QUEUED"
+                        },
+                        "trace_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "idempotent_replay": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.submission": {
+      "get": {
+        "tags": [
+          "代码评测"
+        ],
+        "summary": "查询标准化判题结果",
+        "parameters": [
+          {
+            "name": "submission_id",
+            "in": "query",
+            "required": true,
+            "description": "JWL Submission ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "submission_id": {
+                          "type": "string"
+                        },
+                        "problem_id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "Run",
+                            "Submission"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "QUEUED",
+                            "COMPILING",
+                            "RUNNING",
+                            "ACCEPTED",
+                            "WRONG_ANSWER",
+                            "TIME_LIMIT_EXCEEDED",
+                            "MEMORY_LIMIT_EXCEEDED",
+                            "RUNTIME_ERROR",
+                            "COMPILE_ERROR",
+                            "SYSTEM_ERROR",
+                            "CANCELED"
+                          ]
+                        },
+                        "status_version": {
+                          "type": "integer"
+                        },
+                        "score": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "time_ms": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "memory_kb": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "compiler_message": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "finished_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "source_code": {
+                          "type": "string",
+                          "description": "仅本人"
+                        },
+                        "output": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "仅 Run"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.student_progress": {
+      "get": {
+        "tags": [
+          "课程学习"
+        ],
+        "summary": "学生学习进度",
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "query",
+            "required": true,
+            "description": "JWL Student ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "student_id": {
+                          "type": "string"
+                        },
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lesson": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "percent": {
+                                "type": "number"
+                              },
+                              "modified": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.create_assignment": {
+      "post": {
+        "tags": [
+          "教师"
+        ],
+        "summary": "创建草稿作业",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "academic_class",
+                  "course_id",
+                  "opens_at",
+                  "due_at"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "academic_class": {
+                    "type": "string"
+                  },
+                  "course_id": {
+                    "type": "string"
+                  },
+                  "opens_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "due_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "max_score": {
+                    "type": "number",
+                    "default": 100
+                  },
+                  "grading_rule": {
+                    "type": "string",
+                    "default": "Highest score"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "assignment_id": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "const": "Draft"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.class_analytics": {
+      "get": {
+        "tags": [
+          "教师"
+        ],
+        "summary": "班级提交和成绩分析",
+        "parameters": [
+          {
+            "name": "academic_class",
+            "in": "query",
+            "required": true,
+            "description": "JWL Academic Class ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "class_id": {
+                          "type": "string"
+                        },
+                        "student_count": {
+                          "type": "integer"
+                        },
+                        "submissions_by_status": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "QUEUED",
+                                  "COMPILING",
+                                  "RUNNING",
+                                  "ACCEPTED",
+                                  "WRONG_ANSWER",
+                                  "TIME_LIMIT_EXCEEDED",
+                                  "MEMORY_LIMIT_EXCEEDED",
+                                  "RUNTIME_ERROR",
+                                  "COMPILE_ERROR",
+                                  "SYSTEM_ERROR",
+                                  "CANCELED"
+                                ]
+                              },
+                              "count": {
+                                "type": "integer"
+                              },
+                              "average_score": {
+                                "type": [
+                                  "number",
+                                  "null"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.adjust_score": {
+      "post": {
+        "tags": [
+          "教师"
+        ],
+        "summary": "人工调分并审计",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "submission_id",
+                  "new_score",
+                  "reason"
+                ],
+                "properties": {
+                  "submission_id": {
+                    "type": "string"
+                  },
+                  "new_score": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "submission_id": {
+                          "type": "string"
+                        },
+                        "score_id": {
+                          "type": "string"
+                        },
+                        "final_score": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/jwlcode.api.v1.judge_callback": {
+      "post": {
+        "tags": [
+          "Judge 回调"
+        ],
+        "summary": "标准化判题结果回调",
+        "security": [],
+        "description": "hex(HMAC-SHA256(callback_secret, timestamp + '.' + raw_request_body))；时间偏差最多五分钟。",
+        "parameters": [
+          {
+            "name": "X-JWL-Timestamp",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-JWL-Signature",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(sha256=)?[a-fA-F0-9]{64}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "event_id",
+                  "judge_request_id",
+                  "submission_id",
+                  "status",
+                  "status_version"
+                ],
+                "properties": {
+                  "event_id": {
+                    "type": "string"
+                  },
+                  "judge_request_id": {
+                    "type": "string"
+                  },
+                  "submission_id": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "QUEUED",
+                      "COMPILING",
+                      "RUNNING",
+                      "ACCEPTED",
+                      "WRONG_ANSWER",
+                      "TIME_LIMIT_EXCEEDED",
+                      "MEMORY_LIMIT_EXCEEDED",
+                      "RUNTIME_ERROR",
+                      "COMPILE_ERROR",
+                      "SYSTEM_ERROR",
+                      "CANCELED"
+                    ]
+                  },
+                  "status_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "score": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0
+                  },
+                  "time_ms": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  },
+                  "memory_kb": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  },
+                  "compiler_message": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "output": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "finished_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "object",
+                      "properties": {
+                        "accepted": {
+                          "type": "boolean"
+                        },
+                        "duplicate": {
+                          "type": "boolean"
+                        },
+                        "stale": {
+                          "type": "boolean"
+                        },
+                        "submission_id": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "QUEUED",
+                            "COMPILING",
+                            "RUNNING",
+                            "ACCEPTED",
+                            "WRONG_ANSWER",
+                            "TIME_LIMIT_EXCEEDED",
+                            "MEMORY_LIMIT_EXCEEDED",
+                            "RUNTIME_ERROR",
+                            "COMPILE_ERROR",
+                            "SYSTEM_ERROR",
+                            "CANCELED"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "签名无效或过期",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resource/{doctype}": {
+      "parameters": [
+        {
+          "name": "doctype",
+          "in": "path",
+          "required": true,
+          "description": "URL 编码的 DocType",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Frappe 原生"
+        ],
+        "summary": "DocType 列表",
+        "responses": {
+          "200": {
+            "description": "data 包装"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Frappe 原生"
+        ],
+        "summary": "创建 DocType 记录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "已创建"
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resource/{doctype}/{name}": {
+      "parameters": [
+        {
+          "name": "doctype",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Frappe 原生"
+        ],
+        "summary": "DocType 详情",
+        "responses": {
+          "200": {
+            "description": "data 包装"
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Frappe 原生"
+        ],
+        "summary": "更新 DocType 记录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "已更新"
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Frappe 原生"
+        ],
+        "summary": "删除 DocType 记录",
+        "responses": {
+          "200": {
+            "description": "已删除"
+          },
+          "401": {
+            "description": "未登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无权限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "417": {
+            "description": "业务校验失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exception": {
+                      "type": "string"
+                    },
+                    "exc_type": {
+                      "type": "string"
+                    },
+                    "_server_messages": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sid",
+        "description": "由 /api/method/login 获取"
+      },
+      "tokenAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "token API_KEY:API_SECRET；仅可信服务使用"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "exception": {
+            "type": "string"
+          },
+          "exc_type": {
+            "type": "string"
+          },
+          "_server_messages": {
+            "type": "string"
+          }
+        }
+      },
+      "SubmissionStatus": {
+        "type": "string",
+        "enum": [
+          "QUEUED",
+          "COMPILING",
+          "RUNNING",
+          "ACCEPTED",
+          "WRONG_ANSWER",
+          "TIME_LIMIT_EXCEEDED",
+          "MEMORY_LIMIT_EXCEEDED",
+          "RUNTIME_ERROR",
+          "COMPILE_ERROR",
+          "SYSTEM_ERROR",
+          "CANCELED"
+        ]
+      }
+    }
+  }
+}

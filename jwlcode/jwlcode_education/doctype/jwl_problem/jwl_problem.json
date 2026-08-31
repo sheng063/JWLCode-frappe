@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "lesson",
+  "title",
+  "statement",
+  "problem_type",
+  "judge_policy",
+  "status",
+  "version",
+  "code_template",
+  "test_case_ref",
+  "test_case_checksum",
+  "max_score"
+ ],
+ "fields": [
+  {
+   "fieldname": "lesson",
+   "fieldtype": "Link",
+   "label": "Lesson",
+   "reqd": 1,
+   "options": "JWL Lesson"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "statement",
+   "fieldtype": "Text Editor",
+   "label": "Statement",
+   "reqd": 1
+  },
+  {
+   "fieldname": "problem_type",
+   "fieldtype": "Select",
+   "label": "Problem Type",
+   "reqd": 1,
+   "options": "Programming"
+  },
+  {
+   "fieldname": "judge_policy",
+   "fieldtype": "Link",
+   "label": "Judge Policy",
+   "reqd": 1,
+   "options": "JWL Judge Policy"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "reqd": 1,
+   "options": "Draft\nPublished\nArchived"
+  },
+  {
+   "fieldname": "version",
+   "fieldtype": "Int",
+   "label": "Version",
+   "reqd": 1
+  },
+  {
+   "fieldname": "code_template",
+   "fieldtype": "Code",
+   "label": "Code Template"
+  },
+  {
+   "fieldname": "test_case_ref",
+   "fieldtype": "Data",
+   "label": "Test Case Reference",
+   "reqd": 1
+  },
+  {
+   "fieldname": "test_case_checksum",
+   "fieldtype": "Data",
+   "label": "Test Case Checksum",
+   "reqd": 1
+  },
+  {
+   "fieldname": "max_score",
+   "fieldtype": "Float",
+   "label": "Maximum Score",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "module": "JWLCode Education",
+ "name": "JWL Problem",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "JWL Campus Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "JWL Teacher",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

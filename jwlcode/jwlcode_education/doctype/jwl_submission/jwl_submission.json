@@ -1,0 +1,197 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "student",
+  "problem",
+  "assignment",
+  "submission_type",
+  "language",
+  "source_code",
+  "custom_input",
+  "custom_output",
+  "client_request_id",
+  "trace_id",
+  "status",
+  "status_version",
+  "judge_request_id",
+  "problem_version",
+  "policy_snapshot",
+  "test_case_ref",
+  "test_case_checksum",
+  "score",
+  "time_ms",
+  "memory_kb",
+  "compiler_message",
+  "finished_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "student",
+   "fieldtype": "Link",
+   "label": "Student",
+   "reqd": 1,
+   "options": "JWL Student"
+  },
+  {
+   "fieldname": "problem",
+   "fieldtype": "Link",
+   "label": "Problem",
+   "reqd": 1,
+   "options": "JWL Problem"
+  },
+  {
+   "fieldname": "assignment",
+   "fieldtype": "Link",
+   "label": "Assignment",
+   "options": "JWL Assignment"
+  },
+  {
+   "fieldname": "submission_type",
+   "fieldtype": "Select",
+   "label": "Submission Type",
+   "reqd": 1,
+   "options": "Run\nSubmission"
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Data",
+   "label": "Language",
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_code",
+   "fieldtype": "Code",
+   "label": "Source Code",
+   "permlevel": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "custom_input",
+   "fieldtype": "Long Text",
+   "label": "Custom Input",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "custom_output",
+   "fieldtype": "Long Text",
+   "label": "Custom Output"
+  },
+  {
+   "fieldname": "client_request_id",
+   "fieldtype": "Data",
+   "label": "Client Request ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "trace_id",
+   "fieldtype": "Data",
+   "label": "Trace ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "reqd": 1,
+   "options": "QUEUED\nCOMPILING\nRUNNING\nACCEPTED\nWRONG_ANSWER\nTIME_LIMIT_EXCEEDED\nMEMORY_LIMIT_EXCEEDED\nRUNTIME_ERROR\nCOMPILE_ERROR\nSYSTEM_ERROR\nCANCELED"
+  },
+  {
+   "fieldname": "status_version",
+   "fieldtype": "Int",
+   "label": "Status Version",
+   "reqd": 1
+  },
+  {
+   "fieldname": "judge_request_id",
+   "fieldtype": "Data",
+   "label": "Judge Request ID",
+   "unique": 1
+  },
+  {
+   "fieldname": "problem_version",
+   "fieldtype": "Int",
+   "label": "Problem Version",
+   "reqd": 1
+  },
+  {
+   "fieldname": "policy_snapshot",
+   "fieldtype": "Code",
+   "label": "Policy Snapshot",
+   "permlevel": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "test_case_ref",
+   "fieldtype": "Data",
+   "label": "Test Case Reference",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "test_case_checksum",
+   "fieldtype": "Data",
+   "label": "Test Case Checksum",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "score",
+   "fieldtype": "Float",
+   "label": "Score"
+  },
+  {
+   "fieldname": "time_ms",
+   "fieldtype": "Int",
+   "label": "Time (ms)"
+  },
+  {
+   "fieldname": "memory_kb",
+   "fieldtype": "Int",
+   "label": "Memory (KB)"
+  },
+  {
+   "fieldname": "compiler_message",
+   "fieldtype": "Long Text",
+   "label": "Compiler Message"
+  },
+  {
+   "fieldname": "finished_at",
+   "fieldtype": "Datetime",
+   "label": "Finished At"
+  }
+ ],
+ "links": [],
+ "module": "JWLCode Education",
+ "name": "JWL Submission",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "permlevel": 1
+  },
+  {
+   "role": "JWL Campus Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "JWL Teacher",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

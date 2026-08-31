@@ -1,0 +1,20 @@
+[project]
+name = "jwlcode"
+version = "0.1.0"
+description = "Frappe business backend for the JWLCode teaching platform"
+authors = [{ name = "JWLCode Team" }]
+readme = "README.md"
+requires-python = ">=3.11"
+# Frappe is installed and versioned by bench.
+dependencies = []
+
+[build-system]
+requires = ["flit_core>=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["jwlcode/tests"]

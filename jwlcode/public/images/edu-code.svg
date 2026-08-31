@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Edu Code">
+  <rect width="64" height="64" rx="14" fill="#3b82f6"/>
+  <path d="M13 20l19-9 19 9-19 9-19-9z" fill="#fff"/>
+  <path d="M20 26v12c0 5 8 9 12 9s12-4 12-9V26l-12 6-12-6z" fill="#dbeafe"/>
+  <path d="M51 21v17" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="4"/>
+</svg>

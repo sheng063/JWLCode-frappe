@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "score",
+  "old_score",
+  "new_score",
+  "reason",
+  "adjusted_by",
+  "adjusted_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "score",
+   "fieldtype": "Link",
+   "label": "Score",
+   "options": "JWL Score",
+   "reqd": 1
+  },
+  {
+   "fieldname": "old_score",
+   "fieldtype": "Float",
+   "label": "Old Score",
+   "reqd": 1
+  },
+  {
+   "fieldname": "new_score",
+   "fieldtype": "Float",
+   "label": "New Score",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason",
+   "reqd": 1
+  },
+  {
+   "fieldname": "adjusted_by",
+   "fieldtype": "Link",
+   "label": "Adjusted By",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "adjusted_at",
+   "fieldtype": "Datetime",
+   "label": "Adjusted At",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "module": "JWLCode Education",
+ "name": "JWL Score Adjustment",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "JWL Campus Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "JWL Teacher",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

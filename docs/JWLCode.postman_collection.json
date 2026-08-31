@@ -1,0 +1,700 @@
+{
+  "info": {
+    "_postman_id": "7b01bb65-7ab4-4b7e-a690-33c9bdce9f61",
+    "name": "JWLCode Frappe API",
+    "description": "JWLCode 前端和 Judge Service 联调集合。浏览器优先使用 Session Cookie；集合级 API Key/Secret 仅用于可信联调环境。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "Authorization",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "token {{api_key}}:{{api_secret}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "认证",
+      "item": [
+        {
+          "name": "登录（Session Cookie）",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usr\": \"Administrator\",\n  \"pwd\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "退出",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "课程学习",
+      "item": [
+        {
+          "name": "当前用户",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "课程列表",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.courses?start=0&page_length=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.courses"
+              ],
+              "query": [
+                {
+                  "key": "start",
+                  "value": "0"
+                },
+                {
+                  "key": "page_length",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "课时详情",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.lesson?lesson_id={{lesson_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.lesson"
+              ],
+              "query": [
+                {
+                  "key": "lesson_id",
+                  "value": "{{lesson_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "题目详情",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.problem?problem_id={{problem_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.problem"
+              ],
+              "query": [
+                {
+                  "key": "problem_id",
+                  "value": "{{problem_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "学生进度",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.student_progress?student_id={{student_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.student_progress"
+              ],
+              "query": [
+                {
+                  "key": "student_id",
+                  "value": "{{student_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "代码评测",
+      "item": [
+        {
+          "name": "自定义输入运行",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.create_code_run",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.create_code_run"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"problem_id\": \"{{problem_id}}\",\n  \"language\": \"cpp17\",\n  \"source_code\": \"#include <iostream>\\nint main() { std::cout << \\\"ok\\\"; }\",\n  \"client_request_id\": \"{{$guid}}\",\n  \"custom_input\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "正式提交",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.create_submission",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.create_submission"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"problem_id\": \"{{problem_id}}\",\n  \"assignment_id\": \"{{assignment_id}}\",\n  \"language\": \"cpp17\",\n  \"source_code\": \"#include <iostream>\\nint main() { return 0; }\",\n  \"client_request_id\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "查询提交",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.submission?submission_id={{submission_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.submission"
+              ],
+              "query": [
+                {
+                  "key": "submission_id",
+                  "value": "{{submission_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "教师",
+      "item": [
+        {
+          "name": "创建作业",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.create_assignment",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.create_assignment"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"第一章作业\",\n  \"academic_class\": \"{{class_id}}\",\n  \"course_id\": \"{{course_id}}\",\n  \"opens_at\": \"2026-09-01T00:00:00+08:00\",\n  \"due_at\": \"2026-09-08T23:59:59+08:00\",\n  \"max_score\": 100,\n  \"grading_rule\": \"Highest score\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "班级分析",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.class_analytics?academic_class={{class_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.class_analytics"
+              ],
+              "query": [
+                {
+                  "key": "academic_class",
+                  "value": "{{class_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "人工调分",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.adjust_score",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.adjust_score"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"submission_id\": \"{{submission_id}}\",\n  \"new_score\": 95,\n  \"reason\": \"人工复核\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Judge Service",
+      "item": [
+        {
+          "name": "判题结果回调",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-JWL-Timestamp",
+                "value": "{{callback_timestamp}}",
+                "type": "text"
+              },
+              {
+                "key": "X-JWL-Signature",
+                "value": "sha256={{callback_signature}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/method/jwlcode.api.v1.judge_callback",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "method",
+                "jwlcode.api.v1.judge_callback"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": \"event-{{$guid}}\",\n  \"judge_request_id\": \"judge-10086\",\n  \"submission_id\": \"{{submission_id}}\",\n  \"status\": \"ACCEPTED\",\n  \"status_version\": 3,\n  \"score\": 100,\n  \"time_ms\": 42,\n  \"memory_kb\": 8192,\n  \"compiler_message\": null,\n  \"output\": null,\n  \"finished_at\": \"2026-08-31T08:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const timestamp = Math.floor(Date.now() / 1000).toString();",
+                  "pm.collectionVariables.set('callback_timestamp', timestamp);",
+                  "const rawBody = pm.variables.replaceIn(pm.request.body.raw);",
+                  "pm.request.body.raw = rawBody;",
+                  "const secret = pm.collectionVariables.get('callback_secret');",
+                  "const signature = CryptoJS.HmacSHA256(`${timestamp}.${rawBody}`, secret).toString(CryptoJS.enc.Hex);",
+                  "pm.collectionVariables.set('callback_signature', signature);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Frappe 原生 CRUD",
+      "item": [
+        {
+          "name": "课程资源列表",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/resource/JWL%20Course?fields=[\"name\",\"title\",\"version\",\"status\"]&limit_page_length=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "resource",
+                "JWL%20Course"
+              ],
+              "query": [
+                {
+                  "key": "fields",
+                  "value": "[\"name\",\"title\",\"version\",\"status\"]"
+                },
+                {
+                  "key": "limit_page_length",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "课程资源详情",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/resource/JWL%20Course/{{course_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "resource",
+                "JWL%20Course",
+                "{{course_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://school.localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "api_secret",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "callback_secret",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "callback_timestamp",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "callback_signature",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "course_id",
+      "value": "course-id",
+      "type": "string"
+    },
+    {
+      "key": "chapter_id",
+      "value": "chapter-id",
+      "type": "string"
+    },
+    {
+      "key": "lesson_id",
+      "value": "lesson-id",
+      "type": "string"
+    },
+    {
+      "key": "problem_id",
+      "value": "problem-id",
+      "type": "string"
+    },
+    {
+      "key": "assignment_id",
+      "value": "assignment-id",
+      "type": "string"
+    },
+    {
+      "key": "submission_id",
+      "value": "submission-id",
+      "type": "string"
+    },
+    {
+      "key": "student_id",
+      "value": "student-id",
+      "type": "string"
+    },
+    {
+      "key": "class_id",
+      "value": "class-id",
+      "type": "string"
+    }
+  ]
+}

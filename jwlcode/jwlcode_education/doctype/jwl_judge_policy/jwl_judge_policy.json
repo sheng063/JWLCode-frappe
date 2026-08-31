@@ -1,0 +1,88 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "policy_code",
+  "allowed_languages",
+  "time_limit_ms",
+  "memory_limit_kb",
+  "engine",
+  "mode",
+  "compiler_options"
+ ],
+ "fields": [
+  {
+   "fieldname": "policy_code",
+   "fieldtype": "Data",
+   "label": "Policy Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "allowed_languages",
+   "fieldtype": "Small Text",
+   "label": "Allowed Languages",
+   "reqd": 1
+  },
+  {
+   "fieldname": "time_limit_ms",
+   "fieldtype": "Int",
+   "label": "Time Limit (ms)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "memory_limit_kb",
+   "fieldtype": "Int",
+   "label": "Memory Limit (KB)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "engine",
+   "fieldtype": "Select",
+   "label": "Engine",
+   "reqd": 1,
+   "options": "Judge0\nHydro"
+  },
+  {
+   "fieldname": "mode",
+   "fieldtype": "Select",
+   "label": "Mode",
+   "reqd": 1,
+   "options": "ACM\nOI"
+  },
+  {
+   "fieldname": "compiler_options",
+   "fieldtype": "Small Text",
+   "label": "Compiler Options"
+  }
+ ],
+ "links": [],
+ "module": "JWLCode Education",
+ "name": "JWL Judge Policy",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "JWL Campus Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "JWL Teacher",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

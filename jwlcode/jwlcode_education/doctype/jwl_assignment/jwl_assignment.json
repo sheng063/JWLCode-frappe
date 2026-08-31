@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "academic_class",
+  "course",
+  "opens_at",
+  "due_at",
+  "status",
+  "max_score",
+  "grading_rule"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "academic_class",
+   "fieldtype": "Link",
+   "label": "Academic Class",
+   "reqd": 1,
+   "options": "JWL Academic Class"
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Link",
+   "label": "Course",
+   "reqd": 1,
+   "options": "JWL Course"
+  },
+  {
+   "fieldname": "opens_at",
+   "fieldtype": "Datetime",
+   "label": "Opens At",
+   "reqd": 1
+  },
+  {
+   "fieldname": "due_at",
+   "fieldtype": "Datetime",
+   "label": "Due At",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "reqd": 1,
+   "options": "Draft\nPublished\nClosed"
+  },
+  {
+   "fieldname": "max_score",
+   "fieldtype": "Float",
+   "label": "Maximum Score",
+   "reqd": 1
+  },
+  {
+   "fieldname": "grading_rule",
+   "fieldtype": "Small Text",
+   "label": "Grading Rule"
+  }
+ ],
+ "links": [],
+ "module": "JWLCode Education",
+ "name": "JWL Assignment",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "JWL Campus Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "JWL Teacher",
+   "read": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
