@@ -1,32 +1,73 @@
-version: "3.7"
-name: lms
+name: jwl-learning
+
 services:
   mariadb:
-    image: mariadb:10.8
+    image: mariadb:10.11
+    restart: unless-stopped
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --skip-character-set-client-handshake
-      - --skip-innodb-read-only-compressed # Temporary fix for MariaDB 10.6
     environment:
-      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-123}
     volumes:
       - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test:
+        - CMD
+        - healthcheck.sh
+        - --connect
+        - --innodb_initialized
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   frappe:
     image: frappe/bench:latest
-    command: bash /workspace/init.sh
+    user: root
+    restart: unless-stopped
+    command: ["bash", "/workspace/init.sh"]
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
-      - SHELL=/bin/bash
+      SHELL: /bin/bash
+      SITE_NAME: ${SITE_NAME:-school.localhost}
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-123}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      FRAPPE_BRANCH: ${FRAPPE_BRANCH:-develop}
+      PAYMENTS_BRANCH: ${PAYMENTS_BRANCH:-develop}
+      LMS_SOURCE: /workspace/lms
     working_dir: /home/frappe
     volumes:
-      - .:/workspace
+      - bench-data:/home/frappe/bench-data
+      - ..:/workspace/lms:ro
+      - ./init.sh:/workspace/init.sh:ro
     ports:
-      - 8000:8000
-      - 9000:9000
+      - "${HTTP_PORT:-8000}:8000"
+      - "${SOCKETIO_PORT:-9000}:9000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent --header 'Host: ${SITE_NAME:-school.localhost}' http://127.0.0.1:8000/api/method/ping >/dev/null",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
 
 volumes:
   mariadb-data:
+  bench-data:

@@ -1,47 +1,73 @@
-**Step 1:** Clone the repo
+# Docker Compose 运行说明
 
-```
-$ git clone https://github.com/frappe/lms.git
+此配置用于本地开发和验收，运行当前仓库中的汉化版 Frappe Learning，不会重新下载官方 LMS 覆盖本地修改。Bench、站点和数据库均使用 Docker Volume 持久化。公开部署时应改用生产级 WSGI、反向代理和正式密码。
 
-$ cd lms
+## 启动
 
-$ cd docker
-```
+首次克隆时包含 `frappe-ui` 子模块：
 
-**Step 2:** Run docker-compose
-
-```
-$ docker-compose up
-```
-
-**Step 3:** Visit the website at http://localhost:8000/
-
-You'll have to go through the setup wizard to setup the website for the first time you access it. Login using the following credentials to complete the setup wizard.
-
-```
-Username: Administrator
-password: admin
+```bash
+git clone --branch learning-cn --recurse-submodules \
+  git@github.com:sheng063/JWLCode-frappe.git
+cd JWLCode-frappe/docker
+docker compose up -d
 ```
 
-These credentials are intended for local development only. Change the administrator password before using the site outside a local test environment.
+首次初始化需要下载 Frappe、Payments 和前端依赖，通常需要数分钟。查看进度：
 
-## Loading demo data
-
-The LMS app creates demo data when the setup wizard completes. If you need to recreate the demo course after clearing it, run the following command from another terminal while the Docker services are running:
-
-```
-$ docker-compose exec frappe bash -lc "cd frappe-bench && bench --site lms.localhost execute lms.demo.demo_data.create_demo_data"
+```bash
+docker compose logs -f frappe
 ```
 
-This creates the sample course, instructor, learners, lessons, quizzes, and progress records used for local evaluation. To remove the demo course later, open the user menu in the LMS interface and choose **Clear Demo Data**.
+容器健康后访问：
 
-## Stopping the server
+- 教学平台：http://school.localhost:8000/lms
+- Frappe 后台：http://school.localhost:8000/app
 
-Press `ctrl+c` in the terminal to stop the server. You can also run `docker-compose down` in another terminal to stop it.
+默认管理员账号为 `Administrator`，密码为 `admin`。默认密码仅用于本机开发，公开部署前必须修改。
 
-To completely reset the instance, do the following:
+## 自定义配置
 
+复制示例环境变量后修改：
+
+```bash
+cp .env.example .env
 ```
-$ docker-compose down --volumes
-$ docker-compose up
+
+可配置站点域名、端口、数据库密码、管理员密码和 Frappe 分支。`.env` 已被 Git 忽略，不要提交真实密码。
+
+## 常用命令
+
+查看状态：
+
+```bash
+docker compose ps
 ```
+
+查看初始化日志：
+
+```bash
+docker compose logs -f frappe
+```
+
+创建演示课程：
+
+```bash
+docker compose exec frappe runuser -u frappe -- bash -lc \
+  "cd /home/frappe/bench-data/frappe-bench && /home/frappe/.local/bin/bench --site school.localhost execute lms.demo.demo_data.create_demo_data"
+```
+
+停止服务但保留数据：
+
+```bash
+docker compose down
+```
+
+完全清空本套教学平台的数据并重新初始化：
+
+```bash
+docker compose down --volumes
+docker compose up -d
+```
+
+`down --volumes` 会永久删除本 Compose 项目的 MariaDB 和 Bench 数据，只应在确认需要重置时使用。
