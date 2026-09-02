@@ -9873,3 +9873,17 @@ msgstr "{} 通过"
 msgid "{} Published"
 msgstr "{} 已发布"
 
+
+
+#: frontend/src/pages/Forms/MemberForm.vue
+msgid "Leave blank to keep the current password"
+msgstr "留空则保持当前密码不变"
+
+#: frontend/src/pages/Forms/MemberForm.vue lms/lms/api.py
+msgid "First name is required"
+msgstr "名字为必填项"
+
+
+#: frontend/src/pages/Batches/Batches.vue
+msgid "Active"
+msgstr "有效"

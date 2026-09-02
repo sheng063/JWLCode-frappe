@@ -126,7 +126,7 @@ const applyDefaultRoles = () => {
 	roles.course_creator = props.defaultRoles?.includes('course_creator') ?? false
 	roles.batch_evaluator =
 		props.defaultRoles?.includes('batch_evaluator') ?? false
-	roles.lms_student = props.defaultRoles?.includes('lms_student') ?? false
+	roles.lms_student = props.defaultRoles?.includes('lms_student') ?? true
 }
 
 const loadMember = () => {
@@ -151,17 +151,10 @@ const submit = (close?: () => void) => {
 	return isEdit.value ? saveRoles(close) : addMember(close)
 }
 
-const assignRoles = async (userEmail: string) => {
-	const selectedRoles = Object.entries(roles).filter(([_, checked]) => checked)
-
-	for (const [key, _] of selectedRoles) {
-		await call('lms.lms.api.save_role', {
-			user: userEmail,
-			role: ROLE_MAP[key],
-			value: 1,
-		})
-	}
-}
+const selectedRoles = () =>
+	Object.entries(roles)
+		.filter(([, checked]) => checked)
+		.map(([key]) => ROLE_MAP[key])
 
 const addMember = async (close?: () => void) => {
 	if (!member.email?.trim()) {
@@ -171,16 +164,12 @@ const addMember = async (close?: () => void) => {
 
 	submitting.value = true
 	try {
-		const user = await call('frappe.client.insert', {
-			doc: {
-				doctype: 'User',
-				email: member.email.trim(),
-				first_name: member.first_name.trim() || undefined,
-				last_name: member.last_name.trim() || undefined,
-			},
+		const user = await call('lms.lms.api.create_member', {
+			email: member.email.trim(),
+			first_name: member.first_name.trim(),
+			last_name: member.last_name.trim(),
+			roles: selectedRoles(),
 		})
-
-		await assignRoles(user.name)
 
 		toast.success(__('Member added successfully'))
 		emit('created', user)

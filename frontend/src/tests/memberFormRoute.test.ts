@@ -299,7 +299,15 @@ describe('the member form route', () => {
 			// and strip every role the member holds.
 			expect(save(wrapper).attributes('disabled')).toBeDefined()
 
-			lookup.data = { name: MEMBER, roles: ['LMS Student', 'Course Creator'] }
+			lookup.data = {
+				name: MEMBER,
+				email: MEMBER,
+				first_name: 'Jane',
+				last_name: 'Doe',
+				phone: '021-5555-1234',
+				mobile_no: '13800138000',
+				roles: ['LMS Student', 'Course Creator'],
+			}
 			await flushPromises()
 
 			expect(save(wrapper).attributes('disabled')).toBeUndefined()
@@ -337,22 +345,18 @@ describe('the member form route', () => {
 			await wrapper
 				.find('[data-testid="field-Email"] input')
 				.setValue('  jane@doe.com  ')
-			await wrapper.find('[data-testid="role-Student"]').trigger('click')
 			await save(wrapper).trigger('click')
 			await flushPromises()
 
-			expect(callMock).toHaveBeenCalledWith('frappe.client.insert', {
-				doc: {
-					doctype: 'User',
-					email: MEMBER,
-					first_name: undefined,
-					last_name: undefined,
-				},
-			})
-			expect(callMock).toHaveBeenCalledWith('lms.lms.api.save_role', {
-				user: MEMBER,
-				role: 'LMS Student',
-				value: 1,
+			expect(callMock).toHaveBeenCalledTimes(1)
+			expect(callMock).toHaveBeenCalledWith('lms.lms.api.create_member', {
+				email: MEMBER,
+				first_name: '',
+				last_name: '',
+				phone: '',
+				mobile_no: '',
+				new_password: '',
+				roles: ['LMS Student'],
 			})
 			expect(toastMock.success).toHaveBeenCalled()
 			expect(router.currentRoute.value.name).toBe('MobileYou')
@@ -406,13 +410,21 @@ describe('the member form route', () => {
 		expect(router.currentRoute.value.name).toBe('Home')
 	})
 
-	// Edit mode only writes the roles that changed, exactly as the modal did.
-	it('saves only the roles the edit actually toggled', async () => {
+	// Edit mode saves profile fields, password and roles in one request.
+	it('saves the complete member record in one request', async () => {
 		const router = makeRouter()
 		await router.push(`/settings/users/${MEMBER}`)
 		const wrapper = await mountForm(router)
 
-		lookup.data = { name: MEMBER, roles: ['LMS Student'] }
+		lookup.data = {
+			name: MEMBER,
+			email: MEMBER,
+			first_name: 'Jane',
+			last_name: 'Doe',
+			phone: '021-1111-2222',
+			mobile_no: '13900139000',
+			roles: ['LMS Student'],
+		}
 		await flushPromises()
 
 		await wrapper.find('[data-testid="role-Moderator"]').trigger('click')
@@ -421,10 +433,14 @@ describe('the member form route', () => {
 		await flushPromises()
 
 		expect(callMock).toHaveBeenCalledTimes(1)
-		expect(callMock).toHaveBeenCalledWith('lms.lms.api.save_role', {
-			user: MEMBER,
-			role: 'Moderator',
-			value: 1,
+		expect(callMock).toHaveBeenCalledWith('lms.lms.api.update_member', {
+			member: MEMBER,
+			first_name: 'Jane',
+			last_name: 'Doe',
+			phone: '021-1111-2222',
+			mobile_no: '13900139000',
+			new_password: '',
+			roles: ['Moderator', 'LMS Student'],
 		})
 	})
 })

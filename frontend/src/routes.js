@@ -369,6 +369,11 @@ export const routes = [
 		component: () => import('@/pages/DataImport.vue'),
 	},
 	{
+		path: '/students',
+		name: 'Students',
+		component: () => import('@/pages/Students.vue'),
+	},
+	{
 		path: '/data-import/doctype/:doctype',
 		name: 'NewDataImport',
 		component: () => import('@/pages/DataImport.vue'),

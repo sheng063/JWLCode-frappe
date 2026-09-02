@@ -1,5 +1,53 @@
 import type { LMSBatch } from '@/types/lms/LMSBatch'
 
+const CHECKBOX_FIELDS: (keyof LMSBatch)[] = [
+	'published',
+	'paid_batch',
+	'allow_self_enrollment',
+	'certification',
+	'evaluation',
+]
+
+const SEPARATELY_MANAGED_CHILD_TABLES: (keyof LMSBatch)[] = [
+	'courses',
+	'assessment',
+	'timetable',
+	'timetable_legends',
+]
+
+const formatTime = (time: string): string => {
+	const [hours, minutes] = time.split(':')
+	return `${hours.padStart(2, '0')}:${minutes}`
+}
+
+// Normalize server values before createDocumentResource stores its baseline.
+// Mutating time/check fields later inside a deep watcher made the form dirty
+// immediately after every response and started an endless autosave cycle.
+export function normalizeBatchDoc(doc: LMSBatch): LMSBatch {
+	const normalized = {
+		...doc,
+		start_time: formatTime(doc.start_time),
+		end_time: formatTime(doc.end_time),
+	} as LMSBatch
+	for (const key of CHECKBOX_FIELDS) {
+		;(normalized as unknown as Record<string, unknown>)[key] = Boolean(doc[key])
+	}
+	return normalized
+}
+
+// Courses, assessments and timetables have their own resources and save flows.
+// A settings form can stay mounted with an older snapshot while one of those
+// resources changes; never send its stale child arrays back to the parent.
+export function batchSettingsPayload(
+	doc: LMSBatch,
+	instructors: readonly string[]
+): Record<string, unknown> {
+	const payload = { ...doc } as Record<string, unknown>
+	for (const field of SEPARATELY_MANAGED_CHILD_TABLES) delete payload[field]
+	payload.instructors = instructors.map((instructor) => ({ instructor }))
+	return payload
+}
+
 // Client-side mirror of LMS Batch's mandatory fields (lms_batch.json `reqd`).
 // `batch_details` is a Text Editor field, so an "empty" editor still serializes
 // to markup like "<p></p>", so strip tags before treating it as filled.

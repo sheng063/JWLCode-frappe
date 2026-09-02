@@ -8,12 +8,20 @@
   "exercise",
   "exercise_title",
   "status",
+  "score",
+  "judge_request_id",
+  "client_request_id",
+  "status_version",
+  "event_id",
   "column_break_jkjs",
   "member",
   "member_name",
   "member_image",
   "section_break_onmz",
   "code",
+  "time_ms",
+  "memory_kb",
+  "compiler_message",
   "section_break_idyi",
   "test_cases"
  ],
@@ -45,8 +53,13 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nPassed\nFailed"
+   "options": "\nQueued\nCompiling\nRunning\nPassed\nFailed\nTime Limit Exceeded\nMemory Limit Exceeded\nCompilation Error\nRuntime Error\nSystem Error\nCanceled"
   },
+  {"default": "0", "fieldname": "score", "fieldtype": "Percent", "label": "Score", "read_only": 1},
+  {"fieldname": "judge_request_id", "fieldtype": "Data", "label": "Judge Request ID", "read_only": 1, "unique": 1},
+  {"fieldname": "client_request_id", "fieldtype": "Data", "label": "Client Request ID", "read_only": 1},
+  {"default": "0", "fieldname": "status_version", "fieldtype": "Int", "hidden": 1, "label": "Status Version", "read_only": 1},
+  {"fieldname": "event_id", "fieldtype": "Data", "hidden": 1, "label": "Event ID", "read_only": 1},
   {
    "fieldname": "column_break_jkjs",
    "fieldtype": "Column Break"
@@ -71,6 +84,9 @@
    "label": "Code",
    "reqd": 1
   },
+  {"fieldname": "time_ms", "fieldtype": "Int", "label": "Time (ms)", "read_only": 1},
+  {"fieldname": "memory_kb", "fieldtype": "Int", "label": "Memory (KB)", "read_only": 1},
+  {"fieldname": "compiler_message", "fieldtype": "Long Text", "label": "Compiler Message", "read_only": 1},
   {
    "fetch_from": "exercise.title",
    "fieldname": "exercise_title",

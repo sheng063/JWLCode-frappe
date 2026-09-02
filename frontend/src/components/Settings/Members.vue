@@ -13,10 +13,11 @@
 		empty-icon="lucide-user"
 		@new="openNewMember"
 		@load-more="fetchMembers()"
-		@row-click="(member) => openProfile(member.username)"
+		@row-click="handleRowClick"
 	>
 		<template #header-bottom>
 			<Select
+				v-if="showRoleFilter"
 				v-model="currentRole"
 				class="w-40"
 				:aria-label="__('Filter by role')"
@@ -69,10 +70,26 @@ type Member = {
 	user_image?: string
 }
 
+const props = withDefaults(
+	defineProps<{
+		label: string
+		description?: string
+		defaultRole?: string
+		showRoleFilter?: boolean
+		editOnRowClick?: boolean
+	}>(),
+	{
+		description: '',
+		defaultRole: 'All',
+		showRoleFilter: true,
+		editOnRowClick: false,
+	}
+)
+
 const router = useRouter()
 const show = defineModel('show')
 const search = ref('')
-const currentRole = ref('All')
+const currentRole = ref(props.defaultRole)
 const start = ref(0)
 
 const roleOptions = [
@@ -88,17 +105,6 @@ const hasNextPage = ref(false)
 
 const showDeleteDialog = ref(false)
 const memberToDelete = ref<Member | null>(null)
-
-defineProps({
-	label: {
-		type: String,
-		required: true,
-	},
-	description: {
-		type: String,
-		default: '',
-	},
-})
 
 // No frappe-ui `cache` key on purpose: makeParams closes over this component's
 // refs, and createResource hands back the FIRST instance for a key without
@@ -180,6 +186,14 @@ const openEditMember = (member: Member) => {
 		name: 'MemberForm',
 		params: { memberID: member.name },
 	})
+}
+
+const handleRowClick = (member: Member) => {
+	if (props.editOnRowClick) {
+		openEditMember(member)
+		return
+	}
+	openProfile(member.username)
 }
 
 const openNewMember = () => {

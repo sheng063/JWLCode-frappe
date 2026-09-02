@@ -9,6 +9,9 @@
   "title",
   "column_break_jlzi",
   "language",
+  "evaluation_mode",
+  "time_limit_seconds",
+  "memory_limit_kb",
   "section_break_tjwv",
   "problem_statement",
   "section_break_ftkh",
@@ -34,8 +37,30 @@
    "fieldname": "language",
    "fieldtype": "Select",
    "label": "Language",
-   "options": "Python\nJavaScript\nRust\nGo",
+   "options": "Python\nJavaScript\nC++\nRust\nGo",
    "reqd": 1
+  },
+  {
+   "default": "Judge Service",
+   "fieldname": "evaluation_mode",
+   "fieldtype": "Select",
+   "label": "Evaluation Mode",
+   "options": "Judge Service\nBrowser",
+   "reqd": 1
+  },
+  {
+   "default": "2",
+   "fieldname": "time_limit_seconds",
+   "fieldtype": "Float",
+   "label": "Time Limit (seconds)",
+   "non_negative": 1
+  },
+  {
+   "default": "128000",
+   "fieldname": "memory_limit_kb",
+   "fieldtype": "Int",
+   "label": "Memory Limit (KB)",
+   "non_negative": 1
   },
   {
    "fieldname": "column_break_jlzi",

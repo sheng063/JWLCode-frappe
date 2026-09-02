@@ -1711,9 +1711,9 @@ def categorize_batches(batches: list) -> dict:
 	for batch in batches:
 		if not batch.published:
 			private.append(batch)
-		elif getdate(batch.start_date) < getdate():
+		elif getdate(batch.end_date) < getdate():
 			archived.append(batch)
-		elif getdate(batch.start_date) == getdate() and str(batch.start_time) < nowtime():
+		elif getdate(batch.end_date) == getdate() and has_ended_today(batch):
 			archived.append(batch)
 		else:
 			upcoming.append(batch)
@@ -2872,7 +2872,7 @@ def get_batches(
 		page_length=resolve_page_length(limit_page_length),
 	)
 
-	batches = filter_batches_based_on_start_time(batches, filters)
+	batches = filter_batches_based_on_end_time(batches, filters)
 	batches = get_batch_card_details(batches)
 	return batches
 
@@ -2892,9 +2892,9 @@ def update_batch_filters(filters: dict) -> None:
 def get_batch_count(filters: dict = None) -> int:
 	"""How many batches the same filters `get_batches` takes actually match.
 
-	The list footer cannot ask `frappe.client.get_count` for this: the Upcoming
+	The list footer cannot ask `frappe.client.get_count` for this: the Active
 	and Archived tabs turn on the time of day, and the query only settles the
-	date, so `filter_batches_based_on_start_time` decides the rest in Python.
+	date, so `filter_batches_based_on_end_time` decides the rest in Python.
 
 	Counted as two COUNTs rather than by fetching the rows and repeating that
 	pass over them: the endpoint is open to guests, so the work it does must not
@@ -2917,56 +2917,54 @@ def get_batch_count(filters: dict = None) -> int:
 
 
 def count_batches_the_clock_decides(filters: dict, batch_type: str) -> int:
-	"""How many matching batches `filter_batches_based_on_start_time` drops.
+	"""How many matching batches `filter_batches_based_on_end_time` drops.
 
-	Only today's are ever in question. Every other date the query has already
-	settled. Upcoming drops the ones already under way; Archived, the ones still
-	to come. Both conditions are added rather than replacing the caller's date
-	filter, so a tab asking for `start_date > today` still counts nothing today.
+	Only batches ending today are ever in question. Every other date the query
+	has already settled. Active drops the ones already over; Archived drops the
+	ones that have not ended yet. The time condition narrows rather than replacing
+	the caller's end-date filter.
 	"""
-	started = "<" if batch_type == "upcoming" else ">="
+	ended = "<" if batch_type == "active" else ">="
 	conditions = as_filter_conditions(filters) + [
-		["start_date", "=", getdate()],
-		["start_time", started, nowtime()],
+		["end_date", "=", getdate()],
+		["end_time", ended, nowtime()],
 	]
 	return count_matching("LMS Batch", conditions)
 
 
-def has_started_today(batch) -> bool:
-	"""Whether a batch dated today has already begun.
+def has_ended_today(batch) -> bool:
+	"""Whether a batch ending today has already finished.
 
-	Compared as times rather than as strings. `start_time` comes back from the
-	database as a timedelta, and `str()` renders a single-digit hour without a
-	leading zero. That sorted "9:00:00" above "14:30:00", so a batch that began
-	at nine that morning still counted as upcoming at half past two.
+	Compared as times rather than as strings. `end_time` comes back from the
+	database as a timedelta, and `str()` may omit a leading zero.
 	"""
-	if getdate(batch.start_date) != getdate():
+	if getdate(batch.end_date) != getdate():
 		return False
-	return to_timedelta(str(batch.start_time)) < to_timedelta(nowtime())
+	return to_timedelta(str(batch.end_time)) < to_timedelta(nowtime())
 
 
-def filter_batches_based_on_start_time(batches: list, filters: dict) -> list:
-	batchType = get_batch_type(filters)
-	if batchType == "upcoming":
-		batches = [batch for batch in batches if not has_started_today(batch)]
-	elif batchType == "archived":
+def filter_batches_based_on_end_time(batches: list, filters: dict) -> list:
+	batch_type = get_batch_type(filters)
+	if batch_type == "active":
+		batches = [batch for batch in batches if not has_ended_today(batch)]
+	elif batch_type == "archived":
 		batches = [
-			batch for batch in batches if getdate(batch.start_date) != getdate() or has_started_today(batch)
+			batch for batch in batches if getdate(batch.end_date) != getdate() or has_ended_today(batch)
 		]
 	return batches
 
 
 def get_batch_type(filters: dict) -> str:
-	start_date_filter = filters.get("start_date")
-	batchType = None
-	if start_date_filter:
-		sign = start_date_filter[0]
+	end_date_filter = filters.get("end_date")
+	batch_type = None
+	if end_date_filter:
+		sign = end_date_filter[0]
 		if ">" in sign:
-			batchType = "upcoming"
+			batch_type = "active"
 		elif "<" in sign:
-			batchType = "archived"
+			batch_type = "archived"
 
-	return batchType
+	return batch_type
 
 
 def get_batch_card_details(batches: list) -> list:

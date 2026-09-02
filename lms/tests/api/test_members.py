@@ -1,7 +1,65 @@
 import frappe
 
-from lms.lms.api import MEMBERS_PAGE_LENGTH, get_member, get_members
+from frappe.utils.password import check_password
+
+from lms.lms.api import MEMBERS_PAGE_LENGTH, create_member, get_member, get_members, update_member
 from lms.lms.test_helpers import BaseTestUtils
+
+
+class TestCreateMember(BaseTestUtils):
+	def setUp(self):
+		super().setUp()
+		self.moderator = self._create_user("member-moderator@example.com", "Member", "Moderator", ["Moderator"])
+		frappe.set_user(self.moderator.name)
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+		super().tearDown()
+
+	def test_creates_a_website_student_with_a_name_fallback_and_selected_roles(self):
+		created = create_member("  Quick.Student@Example.com  ", roles=["Course Creator"])
+		self.cleanup_items.append(("User", created["name"]))
+
+		user = frappe.get_doc("User", created["name"])
+		self.assertEqual(user.name, "quick.student@example.com")
+		self.assertEqual(user.first_name, "quick.student")
+		self.assertEqual(user.user_type, "Website User")
+		self.assertIn("LMS Student", created["roles"])
+		self.assertIn("Course Creator", created["roles"])
+
+	def test_updates_profile_password_and_roles_together(self):
+		student = self._create_user("editable-student@example.com", "Old", "Name", ["LMS Student"])
+		password = "S3cure-Learning-Password!"
+
+		updated = update_member(
+			student.name,
+			first_name="New",
+			last_name="Student",
+			phone="021-5555-1234",
+			mobile_no="13800138000",
+			new_password=password,
+			roles=["LMS Student", "Course Creator"],
+		)
+
+		user = frappe.get_doc("User", student.name)
+		self.assertEqual(user.first_name, "New")
+		self.assertEqual(user.last_name, "Student")
+		self.assertEqual(user.phone, "021-5555-1234")
+		self.assertEqual(user.mobile_no, "13800138000")
+		self.assertEqual(check_password(student.name, password), student.name)
+		self.assertIn("Course Creator", updated.roles)
+		self.assertNotIn("new_password", updated)
+
+	def test_rejects_non_lms_roles_without_creating_a_user(self):
+		email = "forbidden-role@example.com"
+		with self.assertRaises(frappe.PermissionError):
+			create_member(email, first_name="Forbidden", roles=["System Manager"])
+		self.assertFalse(frappe.db.exists("User", email))
+
+	def test_non_moderator_cannot_create_a_member(self):
+		frappe.set_user("Guest")
+		with self.assertRaises(frappe.PermissionError):
+			create_member("blocked@example.com", first_name="Blocked")
 
 
 class TestGetMembers(BaseTestUtils):
@@ -17,7 +75,7 @@ class TestGetMembers(BaseTestUtils):
 		self.moderator = self._create_user("moderator@example.com", "Mod", "Erator", ["Moderator"])
 		self.members = [
 			self._create_user(f"member{index}@example.com", "Member", str(index), ["LMS Student"])
-			for index in range(MEMBERS_PAGE_LENGTH + 3)
+			for index in range(2 * MEMBERS_PAGE_LENGTH + 3)
 		]
 		frappe.set_user(self.moderator.name)
 

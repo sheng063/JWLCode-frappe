@@ -24,9 +24,10 @@
 		<template #actions>
 			<HeaderButton
 				v-if="!refusal"
+				data-testid="batch-course-save"
 				:label="__('Save')"
 				variant="solid"
-				:loading="batchCourses.insert.loading"
+				:loading="addBatchCourse.loading"
 				@click="submit"
 			/>
 		</template>
@@ -35,7 +36,7 @@
 
 <script setup>
 import { computed, inject, ref } from 'vue'
-import { createListResource, getCachedListResource, toast } from 'frappe-ui'
+import { createResource, getCachedListResource, toast } from 'frappe-ui'
 import { useOnboarding } from 'frappe-ui/frappe'
 import { useRoute, useRouter } from 'vue-router'
 import Link from '@/components/Controls/Link.vue'
@@ -80,20 +81,22 @@ const refusal = computed(() => {
 	return ''
 })
 
-// This form's own insert resource. BatchCourses.vue used to hand its list down
-// through `v-model:courses`; a routed page has no parent to receive it from,
-// and a deep link has no parent mounted at all.
-const batchCourses = createListResource({
-	doctype: 'Batch Course',
-	parent: 'LMS Batch',
+// Use the batch-specific endpoint so the parent is locked and reloaded before
+// appending, and the response is the persisted child row rather than the parent.
+const addBatchCourse = createResource({
+	url: 'lms.lms.api.add_batch_course',
 })
 
-// The list this page inserted into lives on the tab behind it. Null when that
-// tab is not mounted (a deep link), which is correct — it fetches on mount
-// anyway. Mirrors LiveClassForm.vue's reloadLiveClassList().
-const reloadBatchCourses = () => {
-	getCachedListResource(['batchCourses', props.batchName])?.reload()
-}
+// Refresh both views of the batch before navigating back. The courses tab owns
+// the cached list, while overview/settings use get_batch_details; leaving the
+// latter stale can make a newly saved course appear to vanish on page reuse.
+const reloadBatchDetails = inject('reloadBatchDetails', null)
+
+const reloadBatchData = () =>
+	Promise.all([
+		getCachedListResource(['batchCourses', props.batchName])?.reload(),
+		reloadBatchDetails?.(),
+	])
 
 // Link calls this with one argument unless it is in `inlineCreate` mode, which
 // this field is not — it closes its own dropdown first, so there is no second
@@ -109,20 +112,18 @@ const openNewCourse = () => {
 const submit = () => {
 	if (refusal.value) return
 	return submitResource(
-		batchCourses.insert,
+		addBatchCourse,
 		{
+			batch: props.batchName,
 			course: course.value,
 			evaluator: evaluator.value,
-			parent: props.batchName,
-			parenttype: 'LMS Batch',
-			parentfield: 'courses',
 		},
 		{
-			onSuccess() {
+			async onSuccess() {
 				if (user.data?.is_system_manager) {
 					updateOnboardingStep('add_batch_course')
 				}
-				reloadBatchCourses()
+				await reloadBatchData()
 				toast.success(__('Course added to batch successfully'))
 				saveAndReplace(
 					batchRouteLocation('BatchDetail', props.batchName, route.hash)

@@ -1,7 +1,7 @@
 <template>
 	<FrappeUIProvider>
 		<Layout class="isolate text-p-base">
-			<router-view />
+			<router-view :key="pageKey" />
 		</Layout>
 		<NotificationPanel />
 		<InstallPrompt v-if="isMobile && !settings.data?.disable_pwa" />
@@ -23,6 +23,17 @@ import NotificationPanel from '@/components/Notifications/NotificationPanel.vue'
 
 const { isMobile } = useScreenSize()
 const route = useRoute()
+// Vue Router reuses a route component when only its params change. The
+// programming-exercise page owns document resources and editor state bound to
+// those params, so reusing it leaks the previous exercise's starter code into
+// the next one. Give just this route a per-exercise key; other pages retain
+// their existing reuse behaviour.
+const pageKey = computed(() => {
+	if (route.name === 'ProgrammingExerciseSubmission') {
+		return `${String(route.name)}:${String(route.params.exerciseID)}`
+	}
+	return String(route.name || route.path)
+})
 const { settings } = useSettings()
 
 // Derive the layout from the current route, not a navigation guard. Flipping it

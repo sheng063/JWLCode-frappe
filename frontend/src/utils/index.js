@@ -548,6 +548,13 @@ const getSidebarItems = (forMobile = false) => {
 					activeFor: ['Batches', 'BatchDetail', 'Batch', 'BatchForm'],
 				},
 				{
+					label: 'Students',
+					icon: 'UserRound',
+					to: 'Students',
+					activeFor: ['Students', 'MemberForm'],
+					condition: () => userResource?.data?.is_moderator,
+				},
+				{
 					label: 'Certifications',
 					icon: 'GraduationCap',
 					to: 'CertifiedParticipants',

@@ -8,11 +8,19 @@ from frappe import _
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.model.document import Document
 
+from lms.lms.batch_enrollment_sync import (
+	enroll_member_in_batch_courses,
+	remove_member_from_batch_courses,
+)
+
 
 class LMSBatchEnrollment(Document):
 	def after_insert(self):
 		send_confirmation_email(self)
 		self.add_member_to_live_class()
+
+	def on_trash(self):
+		remove_member_from_batch_courses(self.batch, self.member)
 
 	def validate(self):
 		self.validate_owner()
@@ -82,25 +90,9 @@ class LMSBatchEnrollment(Document):
 			frappe.throw(_("There are no seats available in this batch."))
 
 	def validate_course_enrollment(self):
-		courses = frappe.get_all("Batch Course", filters={"parent": self.batch}, fields=["course"])
-
-		for course in courses:
-			# Same reasoning as validate_duplicate_members, one level down: without
-			# the lock, two batches sharing a course can both read "absent" for the
-			# same member and the loser's inner insert throws, failing an enrolment
-			# that should have skipped. Batch row first, then course row, in that
-			# order everywhere — the reverse order exists nowhere, so no cycle.
-			frappe.db.get_value("LMS Course", course.course, "name", for_update=True)
-
-			if not frappe.db.exists(
-				"LMS Enrollment",
-				{"course": course.course, "member": self.member},
-			):
-				enrollment = frappe.new_doc("LMS Enrollment")
-				enrollment.course = course.course
-				enrollment.member = self.member
-				enrollment.enrollment_from_batch = self.batch
-				enrollment.save()
+		# The batch row is already locked by validate_duplicate_members. The
+		# shared helper acquires each course lock next, preserving that order.
+		enroll_member_in_batch_courses(self.batch, self.member)
 
 	def add_member_to_live_class(self):
 		live_classes = frappe.get_all("LMS Live Class", {"batch_name": self.batch}, ["name", "event"])

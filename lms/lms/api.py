@@ -16,7 +16,7 @@ from frappe.integrations.frappe_providers.frappecloud_billing import (
 	current_site_info,
 	is_fc_site,
 )
-from frappe.translate import get_all_translations
+from frappe.translate import get_all_translations, get_user_lang
 from frappe.utils import (
 	add_days,
 	cint,
@@ -28,6 +28,7 @@ from frappe.utils import (
 	get_time,
 	getdate,
 	now,
+	validate_email_address,
 )
 from frappe.utils.response import Response
 from pypika import functions as fn
@@ -154,11 +155,7 @@ def _doctype_permissions():
 
 @frappe.whitelist(allow_guest=True)
 def get_translations():
-	if frappe.session.user != "Guest":
-		language = frappe.db.get_value("User", frappe.session.user, "language")
-	else:
-		language = frappe.db.get_single_value("System Settings", "language")
-	return get_all_translations(language)
+	return get_all_translations(get_user_lang())
 
 
 @frappe.whitelist()
@@ -1046,7 +1043,18 @@ def update_chapter_index(chapter: str, course: str, idx: int):
 # Matches SETTINGS_PAGE_LENGTH in the frontend, which pages `start` by this.
 MEMBERS_PAGE_LENGTH = 13
 
-MEMBER_FIELDS = ["name", "full_name", "user_image", "username", "last_active"]
+MEMBER_FIELDS = [
+	"name",
+	"email",
+	"first_name",
+	"last_name",
+	"full_name",
+	"phone",
+	"mobile_no",
+	"user_image",
+	"username",
+	"last_active",
+]
 
 
 def member_roles(member: str) -> list[str]:
@@ -1059,6 +1067,112 @@ def member_roles(member: str) -> list[str]:
 		pluck="role",
 	)
 	return [role for role in LMS_ROLES if role in roles]
+
+
+@frappe.whitelist()
+def create_member(
+	email: str,
+	first_name: str = "",
+	last_name: str = "",
+	phone: str = "",
+	mobile_no: str = "",
+	new_password: str = "",
+	roles: list[str] | None = None,
+):
+	"""Create an LMS website user and assign the selected LMS roles atomically."""
+	frappe.only_for("Moderator")
+
+	if not isinstance(email, str):
+		frappe.throw(_("Email must be text."), frappe.ValidationError)
+	email = email.strip().lower()
+	validate_email_address(email, True)
+	if frappe.db.exists("User", email):
+		frappe.throw(_("User {0} already exists.").format(email), frappe.DuplicateEntryError)
+
+	if any(not isinstance(value, str) for value in [first_name, last_name, phone, mobile_no, new_password]):
+		frappe.throw(_("Member details must be text."), frappe.ValidationError)
+	if roles is not None and not isinstance(roles, list):
+		frappe.throw(_("Roles must be a list."), frappe.ValidationError)
+
+	selected_roles = list(dict.fromkeys(roles or []))
+	if any(not isinstance(role, str) or role not in LMS_ROLES for role in selected_roles):
+		frappe.throw(_("Only LMS roles can be assigned."), frappe.PermissionError)
+	if "LMS Student" not in selected_roles:
+		selected_roles.append("LMS Student")
+
+	first_name = first_name.strip() or email.split("@", 1)[0]
+	last_name = last_name.strip()
+	user = frappe.new_doc("User")
+	user.email = email
+	user.first_name = first_name
+	user.last_name = last_name
+	user.full_name = f"{first_name} {last_name}".strip()
+	user.phone = phone.strip()
+	user.mobile_no = mobile_no.strip()
+	if new_password:
+		user.new_password = new_password
+	user.user_type = "Website User"
+	for role in selected_roles:
+		user.append("roles", {"role": role})
+	user.insert(ignore_permissions=True)
+
+	if "Batch Evaluator" in selected_roles:
+		save_evaluator_role(user.name, 1)
+
+	return {
+		"name": user.name,
+		"email": user.email,
+		"full_name": user.full_name,
+		"username": user.username,
+		"roles": member_roles(user.name),
+	}
+
+
+@frappe.whitelist()
+def update_member(
+	member: str,
+	first_name: str,
+	last_name: str = "",
+	phone: str = "",
+	mobile_no: str = "",
+	new_password: str = "",
+	roles: list[str] | None = None,
+):
+	"""Update an LMS member profile, password and LMS roles in one request."""
+	frappe.only_for("Moderator")
+
+	if not isinstance(member, str):
+		frappe.throw(_("Invalid member."), frappe.ValidationError)
+	member = member.strip()
+	if not member or member in ["Administrator", "Guest"] or not frappe.db.exists("User", member):
+		frappe.throw(_("Invalid member."), frappe.ValidationError)
+	if any(not isinstance(value, str) for value in [first_name, last_name, phone, mobile_no, new_password]):
+		frappe.throw(_("Member details must be text."), frappe.ValidationError)
+	first_name = first_name.strip()
+	if not first_name:
+		frappe.throw(_("First name is required."), frappe.MandatoryError)
+	if roles is not None and not isinstance(roles, list):
+		frappe.throw(_("Roles must be a list."), frappe.ValidationError)
+
+	selected_roles = list(dict.fromkeys(roles or []))
+	if any(not isinstance(role, str) or role not in LMS_ROLES for role in selected_roles):
+		frappe.throw(_("Only LMS roles can be assigned."), frappe.PermissionError)
+
+	user = frappe.get_doc("User", member)
+	user.first_name = first_name
+	user.last_name = last_name.strip()
+	user.phone = phone.strip()
+	user.mobile_no = mobile_no.strip()
+	if new_password:
+		user.new_password = new_password
+	user.save(ignore_permissions=True)
+
+	current_roles = set(member_roles(member))
+	for role in LMS_ROLES:
+		if (role in selected_roles) != (role in current_roles):
+			save_role(member, role, int(role in selected_roles))
+
+	return get_member(member)
 
 
 @frappe.whitelist()
@@ -1418,6 +1532,22 @@ def delete_course(course: str):
 		frappe.delete_doc("Course Chapter", chapter)
 
 	frappe.delete_doc("LMS Course", course)
+
+
+@frappe.whitelist()
+def add_batch_course(batch: str, course: str, evaluator: str | None = None):
+	"""Append a course under a parent lock and return the persisted child row."""
+	if not can_modify_batch(batch):
+		frappe.throw(_("You do not have permission to modify this batch."), frappe.PermissionError)
+
+	# Lock and reload the parent so duplicate validation and concurrent additions
+	# operate on the latest child table before the batch is saved.
+	frappe.db.get_value("LMS Batch", batch, "name", for_update=True)
+	batch_doc = frappe.get_doc("LMS Batch", batch)
+	row = batch_doc.append("courses", {"course": course, "evaluator": evaluator or None})
+	batch_doc.save(ignore_permissions=True)
+
+	return row.as_dict()
 
 
 @frappe.whitelist()
@@ -2168,6 +2298,11 @@ def validate_meta_data_permissions(meta_type: str):
 @frappe.whitelist()
 def create_programming_exercise_submission(exercise: str, submission: str, code: str, test_cases: list):
 	frappe.only_for(["Moderator", "Course Creator", "Batch Evaluator"])
+	if frappe.db.get_value("LMS Programming Exercise", exercise, "evaluation_mode") == "Judge Service":
+		frappe.throw(
+			_("This exercise must be evaluated by Judge Service."),
+			frappe.PermissionError,
+		)
 	if submission == "new":
 		return make_new_exercise_submission(exercise, code, test_cases)
 	else:

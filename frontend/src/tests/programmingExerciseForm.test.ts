@@ -107,6 +107,7 @@ vi.mock('frappe-ui', () => ({
 		template: `<button v-bind="$attrs"><slot name="prefix" /><slot name="icon" /><slot /></button>`,
 	},
 	FormControl: {
+		name: 'FormControl',
 		props: ['modelValue', 'label', 'type', 'required', 'options'],
 		emits: ['update:modelValue'],
 		template: `<label>{{ label }}<input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" /></label>`,
@@ -236,6 +237,20 @@ describe('ProgrammingExerciseForm as a route', () => {
 		expect(
 			wrapper.find('[data-testid="programming-exercise-fields"]').exists()
 		).toBe(true)
+	})
+
+	it('offers C++ when creating a programming exercise', async () => {
+		const router = makeRouter()
+		await router.push('/programming-exercises/edit/new')
+		const wrapper = await mountForm(router, moderator)
+		const language = wrapper
+			.findAllComponents({ name: 'FormControl' })
+			.find((component) => component.props('label') === 'Language')
+
+		expect(language).toBeDefined()
+		expect(language?.props('options')).toContainEqual(
+			{ label: 'C++', value: 'C++' }
+		)
 	})
 
 	it('refuses to render the form for a user who cannot manage exercises', async () => {

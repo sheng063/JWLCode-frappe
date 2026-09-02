@@ -18,10 +18,11 @@
 					:disabled="isEdit"
 					@keyup.enter="submit()"
 				/>
-				<div v-if="!isEdit" class="flex items-center gap-3">
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<FormControl
 						v-model="member.first_name"
 						:label="__('First Name')"
+						:required="isEdit"
 						placeholder="Jane"
 						type="text"
 						class="w-full"
@@ -32,6 +33,31 @@
 						placeholder="Doe"
 						type="text"
 						class="w-full"
+					/>
+				</div>
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<FormControl
+						v-model="member.phone"
+						:label="__('Phone')"
+						type="tel"
+					/>
+					<FormControl
+						v-model="member.mobile_no"
+						:label="__('Mobile No')"
+						type="tel"
+					/>
+				</div>
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<FormControl
+						v-model="member.new_password"
+						:label="isEdit ? __('New Password') : __('Password')"
+						type="password"
+						:placeholder="isEdit ? __('Leave blank to keep the current password') : ''"
+					/>
+					<FormControl
+						v-model="member.confirm_password"
+						:label="__('Confirm New Password')"
+						type="password"
 					/>
 				</div>
 				<div class="flex flex-col gap-2">
@@ -89,7 +115,15 @@ import { notifyMembersChanged } from '@/stores/members'
 import { cleanError } from '@/utils'
 import type { Resource, SessionUser } from '@/types'
 
-type MemberRow = { name: string; roles?: string[] }
+type MemberRow = {
+	name: string
+	email?: string
+	first_name?: string
+	last_name?: string
+	phone?: string
+	mobile_no?: string
+	roles?: string[]
+}
 
 const props = defineProps<{ memberID: string }>()
 
@@ -138,16 +172,19 @@ const member = reactive({
 	email: isEdit.value ? props.memberID : '',
 	first_name: '',
 	last_name: '',
+	phone: '',
+	mobile_no: '',
+	new_password: '',
+	confirm_password: '',
 })
 
 const roles = reactive({
 	moderator: false,
 	course_creator: false,
 	batch_evaluator: false,
-	lms_student: false,
+	lms_student: !isEdit.value,
 })
 
-const initialRoles = reactive({ ...roles })
 const submitting = ref(false)
 
 // C4 — edit mode used to be seeded from the row Members.vue already held in
@@ -179,10 +216,15 @@ const memberRow = computed<MemberRow | null>(() =>
 watch(
 	memberRow,
 	(found) => {
-		const current = found?.roles ?? []
+		if (!isEdit.value || !found) return
+		member.email = found.email ?? found.name
+		member.first_name = found.first_name ?? ''
+		member.last_name = found.last_name ?? ''
+		member.phone = found.phone ?? ''
+		member.mobile_no = found.mobile_no ?? ''
+		const current = found.roles ?? []
 		for (const key of Object.keys(ROLE_MAP) as (keyof typeof roles)[]) {
 			roles[key] = current.includes(ROLE_MAP[key])
-			initialRoles[key] = roles[key]
 		}
 	},
 	{ immediate: true }
@@ -200,15 +242,17 @@ const reloadMembers = () => {
 const errorMessage = (err: { messages?: string[] }, fallback: string): string =>
 	cleanError(err.messages?.[0]) || fallback
 
-const assignRoles = async (userEmail: string) => {
-	for (const [key, checked] of Object.entries(roles)) {
-		if (checked)
-			await call('lms.lms.api.save_role', {
-				user: userEmail,
-				role: ROLE_MAP[key],
-				value: 1,
-			})
+const selectedRoles = () =>
+	Object.entries(roles)
+		.filter(([, checked]) => checked)
+		.map(([key]) => ROLE_MAP[key])
+
+const passwordsMatch = () => {
+	if (member.new_password !== member.confirm_password) {
+		toast.error(__('Passwords do not match'))
+		return false
 	}
+	return true
 }
 
 const addMember = async () => {
@@ -216,19 +260,19 @@ const addMember = async () => {
 		toast.error(__('Email is required'))
 		return
 	}
+	if (!passwordsMatch()) return
 
 	submitting.value = true
 	try {
-		const created = await call('frappe.client.insert', {
-			doc: {
-				doctype: 'User',
-				email: member.email.trim(),
-				first_name: member.first_name.trim() || undefined,
-				last_name: member.last_name.trim() || undefined,
-			},
+		await call('lms.lms.api.create_member', {
+			email: member.email.trim(),
+			first_name: member.first_name.trim(),
+			last_name: member.last_name.trim(),
+			phone: member.phone.trim(),
+			mobile_no: member.mobile_no.trim(),
+			new_password: member.new_password,
+			roles: selectedRoles(),
 		})
-
-		await assignRoles(created.name)
 
 		if (user.data?.is_system_manager) updateOnboardingStep('invite_students')
 		capture('user_added')
@@ -242,18 +286,24 @@ const addMember = async () => {
 	}
 }
 
-const saveRoles = async () => {
+const updateMember = async () => {
+	if (!member.first_name.trim()) {
+		toast.error(__('First name is required'))
+		return
+	}
+	if (!passwordsMatch()) return
+
 	submitting.value = true
 	try {
-		for (const key of Object.keys(ROLE_MAP) as (keyof typeof roles)[]) {
-			if (roles[key] !== initialRoles[key]) {
-				await call('lms.lms.api.save_role', {
-					user: props.memberID,
-					role: ROLE_MAP[key],
-					value: roles[key] ? 1 : 0,
-				})
-			}
-		}
+		await call('lms.lms.api.update_member', {
+			member: props.memberID,
+			first_name: member.first_name.trim(),
+			last_name: member.last_name.trim(),
+			phone: member.phone.trim(),
+			mobile_no: member.mobile_no.trim(),
+			new_password: member.new_password,
+			roles: selectedRoles(),
+		})
 
 		toast.success(__('Member updated'))
 		reloadMembers()
@@ -271,6 +321,6 @@ const submit = () => {
 	// snapshot and strip every role the member has; the button is disabled for
 	// the same reason.
 	if (isEdit.value && !memberRow.value) return
-	return isEdit.value ? saveRoles() : addMember()
+	return isEdit.value ? updateMember() : addMember()
 }
 </script>

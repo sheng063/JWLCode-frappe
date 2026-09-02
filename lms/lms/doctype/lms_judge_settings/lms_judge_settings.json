@@ -1,0 +1,25 @@
+{
+ "actions": [],
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["enabled", "service_url", "api_token", "callback_url", "callback_secret", "request_timeout_seconds"],
+ "fields": [
+  {"default": "0", "fieldname": "enabled", "fieldtype": "Check", "label": "Enabled"},
+  {"fieldname": "service_url", "fieldtype": "Data", "label": "Judge Service URL", "mandatory_depends_on": "eval:doc.enabled"},
+  {"fieldname": "api_token", "fieldtype": "Password", "label": "Service API Token", "mandatory_depends_on": "eval:doc.enabled"},
+  {"description": "Optional internal URL reachable from Judge Service", "fieldname": "callback_url", "fieldtype": "Data", "label": "Frappe Callback URL"},
+  {"fieldname": "callback_secret", "fieldtype": "Password", "label": "Callback Secret", "mandatory_depends_on": "eval:doc.enabled"},
+  {"default": "15", "fieldname": "request_timeout_seconds", "fieldtype": "Int", "label": "Request Timeout (seconds)"}
+ ],
+ "issingle": 1,
+ "links": [],
+ "module": "LMS",
+ "name": "LMS Judge Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {"create": 1, "read": 1, "role": "System Manager", "write": 1},
+  {"create": 1, "read": 1, "role": "Moderator", "write": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

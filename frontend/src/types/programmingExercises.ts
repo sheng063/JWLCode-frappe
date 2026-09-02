@@ -1,7 +1,7 @@
 export interface ProgrammingExercise {
     name: string;
     title: string;
-    language: 'Python' | 'JavaScript';
+    language: 'Python' | 'JavaScript' | 'C++';
     test_cases_count: number;
     problem_statement: string;
     test_cases: [TestCase];

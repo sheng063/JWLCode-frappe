@@ -53,7 +53,9 @@ const props = defineProps({
 		type: [Object, String, Array],
 	},
 	type: {
-		type: String as PropType<'JSON' | 'HTML' | 'Python' | 'JavaScript' | 'CSS'>,
+		type: String as PropType<
+			'JSON' | 'HTML' | 'Python' | 'JavaScript' | 'C++' | 'CSS'
+		>,
 		default: 'JSON',
 	},
 	label: {
@@ -134,6 +136,10 @@ const setupEditor = () => {
 	} else if (props.type === 'Python') {
 		import('ace-builds/src-noconflict/mode-python').then(() => {
 			aceEditor?.session.setMode('ace/mode/python')
+		})
+	} else if (props.type === 'C++') {
+		import('ace-builds/src-noconflict/mode-c_cpp').then(() => {
+			aceEditor?.session.setMode('ace/mode/c_cpp')
 		})
 	} else if (props.type === 'JSON') {
 		import('ace-builds/src-noconflict/mode-json').then(() => {

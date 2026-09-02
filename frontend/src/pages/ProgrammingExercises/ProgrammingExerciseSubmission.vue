@@ -14,8 +14,8 @@
 			{{ __('Settings') }}
 		</Button>
 	</div>
-	<div class="grid grid-cols-2 h-[calc(100vh_-_3rem)]">
-		<div class="border-e py-5 px-8 h-full">
+	<div class="programming-workspace grid grid-cols-1 lg:grid-cols-2 h-[calc(100vh_-_3rem)] bg-surface-gray-1">
+		<div class="border-e py-5 px-8 h-full overflow-y-auto bg-surface-white">
 			<h2 class="font-semibold mb-2 text-ink-gray-9">
 				{{ __('Problem Statement') }}
 			</h2>
@@ -23,29 +23,40 @@
 				v-safe-html:rich="exercise.doc?.problem_statement"
 				class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal"
 			></div>
+			<section v-if="exercise.doc?.test_cases?.length" class="mt-8 pt-6 border-t">
+				<h2 class="font-semibold text-ink-gray-9">{{ __('Test Cases') }}</h2>
+				<div class="mt-3 space-y-3">
+					<div v-for="(testCase, index) in exercise.doc.test_cases" :key="testCase.name || index" class="rounded-lg border border-outline-gray-2 bg-surface-gray-1 p-4">
+						<div class="text-sm font-medium text-ink-gray-9">{{ __('Test {0}').format(index + 1) }}</div>
+						<div class="mt-3 grid gap-3 sm:grid-cols-2">
+							<div><div class="text-xs text-ink-gray-6">{{ __('Input') }}</div><pre class="test-case-value">{{ testCase.input || '—' }}</pre></div>
+							<div><div class="text-xs text-ink-gray-6">{{ __('Expected Output') }}</div><pre class="test-case-value">{{ testCase.expected_output }}</pre></div>
+						</div>
+					</div>
+				</div>
+			</section>
 		</div>
-		<div>
-			<div class="flex items-center justify-between p-2 bg-surface-gray-2">
+		<div class="flex min-h-0 flex-col">
+			<div class="flex items-center justify-between p-3 bg-surface-white border-b">
 				<div class="font-semibold text-ink-gray-9">
 					{{ exercise.doc?.language }}
 				</div>
 				<div class="flex items-center gap-x-2">
 					<Badge
 						v-if="submission.doc?.status"
-						:theme="submission.doc.status == 'Passed' ? 'green' : 'red'"
+						:theme="submission.doc.status == 'Passed' ? 'green' : 'gray'"
 					>
 						{{ submission.doc.status }}
 					</Badge>
 					<Button
 						v-if="
-							!falconError &&
+							(exercise.doc?.evaluation_mode === 'Judge Service' || !falconError) &&
 							(submissionID == 'new' ||
 								user.data?.name == submission.doc?.owner)
 						"
-						variant="solid"
-						@click="submitCode"
+						@click="runCodeOnly"
 						:loading="running"
-						:disabled="running"
+						:disabled="running || submitting"
 						class="text-ink-gray-9"
 					>
 						<template #prefix>
@@ -53,38 +64,55 @@
 						</template>
 						{{ running ? __('Running') : __('Run') }}
 					</Button>
+					<Button
+						v-if="
+							(exercise.doc?.evaluation_mode === 'Judge Service' || !falconError) &&
+							(submissionID == 'new' ||
+								user.data?.name == submission.doc?.owner)
+						"
+						@click="submitCode"
+						:loading="submitting"
+						:disabled="running || submitting"
+						class="text-ink-gray-9 !bg-transparent hover:!bg-surface-gray-2"
+					>
+						<template #prefix>
+							<span class="lucide-send size-3" />
+						</template>
+						{{ submitting ? __('Submitting') : __('Submit') }}
+					</Button>
 				</div>
 			</div>
-			<div class="flex flex-col space-y-4 pt-5 border-b">
-				<Code
+			<div class="flex flex-col p-4 bg-surface-white border-b">
+				<CodeEditor
 					v-model="code"
-					:language="exercise.doc?.language.toLowerCase()"
+					:type="editorLanguage"
 					height="400px"
-					maxHeight="1000px"
+					:show-line-numbers="true"
 				/>
-				<div class="flex flex-col space-y-1">
-					<span v-if="error" class="text-xs text-ink-gray-5 px-1">
-						{{ __('Compiler Message') }}:
-					</span>
-					<textarea
-						v-if="error"
-						v-model="errorMessage"
-						:aria-label="__('Compiler Message')"
-						class="font-mono text-ink-red-3 bg-surface-gray-1 border-none text-sm h-32 leading-6"
-						readonly
-					/>
-				</div>
+
 			</div>
 
-			<div ref="testCaseSection" class="p-5">
-				<h2 class="text-md font-semibold text-ink-gray-9">
-					{{ __('Test Cases') }}
-				</h2>
-				<div v-if="testCases.length" class="divide-y mt-5">
+			<div ref="testCaseSection" class="min-h-0 flex-1 overflow-y-auto bg-surface-white">
+				<div class="flex items-center gap-6 border-b px-5">
+					<button class="test-panel-tab" :class="{ 'test-panel-tab-active': activeTestPanel === 'cases' }" @click="activeTestPanel = 'cases'"><span class="lucide-list-checks size-4" />{{ __('Test Cases') }}</button>
+					<button class="test-panel-tab" :class="{ 'test-panel-tab-active': activeTestPanel === 'results' }" @click="activeTestPanel = 'results'"><span class="lucide-terminal size-4" />{{ __('Test Results') }}</button>
+				</div>
+				<div v-if="activeTestPanel === 'cases'" class="p-5">
+					<div v-if="exercise.doc?.test_cases?.length" class="divide-y">
+						<div v-for="(testCase, index) in exercise.doc.test_cases" :key="testCase.name || index" class="py-3 first:pt-0">
+							<div class="font-medium text-ink-gray-9">{{ __('Test {0}').format(index + 1) }}</div>
+							<div class="mt-2 grid gap-3 sm:grid-cols-2 text-sm"><div><span class="text-ink-gray-6">{{ __('Input') }}:</span> {{ testCase.input || '—' }}</div><div><span class="text-ink-gray-6">{{ __('Expected Output') }}:</span> {{ testCase.expected_output }}</div></div>
+						</div>
+					</div>
+					<div v-else class="text-sm text-ink-gray-6">{{ __('No test cases available.') }}</div>
+				</div>
+				<div v-else class="p-5">
+					<div v-if="resultMessage" class="result-notice mb-5" :class="`result-notice-${resultMessage.tone}`"><div class="font-semibold">{{ resultMessage.title }}</div><div v-if="resultMessage.detail" class="mt-2 whitespace-pre-wrap font-mono text-sm">{{ resultMessage.detail }}</div></div>
+					<div v-if="testCases.length" class="divide-y">
 					<div
 						v-for="(testCase, index) in testCases"
 						:key="testCase.input"
-						class="py-3"
+						class="py-3 first:pt-0"
 					>
 						<div class="flex items-center mb-3">
 							<span class="text-ink-gray-9">
@@ -101,7 +129,7 @@
 								{{ testCase.status }}
 							</span>
 						</div>
-						<div class="flex items-center justify-between w-[60%]">
+						<div class="grid gap-4 sm:grid-cols-3">
 							<div v-if="testCase.input" class="space-y-2">
 								<div class="text-xs text-ink-gray-7">
 									{{ __('Input') }}
@@ -128,10 +156,11 @@
 					</div>
 				</div>
 				<div v-else class="text-sm text-ink-gray-6 mt-4">
-					{{ __('Please run the code to execute the test cases.') }}
+					{{ __('Run or submit your code to view the test results.') }}
 				</div>
 			</div>
 		</div>
+	</div>
 	</div>
 </template>
 <script setup lang="ts">
@@ -143,8 +172,9 @@ import {
 	toast,
 	usePageMeta,
 } from 'frappe-ui'
-import { computed, inject, onMounted, ref, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import PageHeader from '@/components/Layouts/PageHeader.vue'
+import CodeEditor from '@/components/Controls/CodeEditor.vue'
 import { sessionStore } from '@/stores/session'
 import { useRouter } from 'vue-router'
 import { openSettings } from '@/utils'
@@ -173,6 +203,8 @@ const error = ref<boolean | null>(null)
 const errorMessage = ref<string | null>(null)
 const testCaseSection = ref<HTMLElement | null>(null)
 const testCases = ref<TestCase[]>([])
+const activeTestPanel = ref<'cases' | 'results'>('cases')
+const resultMessage = ref<{ tone: 'success' | 'error' | 'info'; title: string; detail?: string | null } | null>(null)
 const boilerplate = ref<string>('')
 const { brand } = sessionStore()
 const { settings } = useSettings()
@@ -181,6 +213,8 @@ const fromLesson = ref(false)
 const falconURL = ref<string>('https://falcon.frappe.io')
 const falconError = ref<string | null>(null)
 const running = ref<boolean>(false)
+const submitting = ref<boolean>(false)
+let statusTimer: ReturnType<typeof setTimeout> | null = null
 
 const props = withDefaults(
 	defineProps<{
@@ -197,6 +231,10 @@ onMounted(() => {
 	checkIfUserIsPermitted()
 	checkIfInLesson()
 	fetchSubmission()
+})
+
+onBeforeUnmount(() => {
+	if (statusTimer) clearTimeout(statusTimer)
 })
 
 const checkIfInLesson = () => {
@@ -221,6 +259,12 @@ const exercise = createDocumentResource({
 	auto: true,
 })
 
+const editorLanguage = computed<'Python' | 'JavaScript' | 'C++'>(() => {
+	if (exercise.doc?.language === 'JavaScript') return 'JavaScript'
+	if (exercise.doc?.language === 'C++') return 'C++'
+	return 'Python'
+})
+
 const submission = createDocumentResource({
 	doctype: 'LMS Programming Exercise Submission',
 	name: props.submissionID,
@@ -237,27 +281,30 @@ const submission = createDocumentResource({
 	},
 })
 
-watch(exercise, () => {
-	updateCode()
-})
+const loadedSubmissionCode = ref('')
 
-const updateCode = (submissionCode = '') => {
+const updateCode = () => {
+	if (!exercise.doc) return
 	updateBoilerPlate()
-	if (!code.value?.includes(boilerplate.value)) {
-		code.value = `${boilerplate.value}${code.value}`
-	}
-	if (submissionCode && !code.value?.includes(submissionCode)) {
-		code.value = `${code.value}${submissionCode}`
-	} else if (!submissionCode && !code.value) {
-		code.value = boilerplate.value
-	}
+	const submissionCode = loadedSubmissionCode.value
+	code.value =
+		exercise.doc.evaluation_mode === 'Judge Service' && submissionCode
+			? submissionCode
+			: `${boilerplate.value}${submissionCode}`
 }
+
+watch(() => exercise.doc, updateCode)
 
 const updateBoilerPlate = () => {
 	if (exercise.doc?.language == 'Python') {
-		boilerplate.value = `with open("stdin", "r") as f:\n    data = f.read()\n\ninputs = data.split() if len(data) else []\n\n# inputs is a list of strings\n# write your code below\n\n`
+		boilerplate.value = exercise.doc?.evaluation_mode === 'Judge Service'
+			? `import sys\n\ndata = sys.stdin.read()\ninputs = data.split() if len(data) else []\n\n# inputs is a list of strings\n# write your code below\n\n`
+			: `with open("stdin", "r") as f:\n    data = f.read()\n\ninputs = data.split() if len(data) else []\n\n# inputs is a list of strings\n# write your code below\n\n`
 	} else if (exercise.doc?.language == 'JavaScript') {
-		boilerplate.value = `const fs = require('fs');\n\nlet input = fs.readFileSync('/app/stdin', 'utf8').trim();\nconst inputs = input.split("\\n");\n// inputs is an array of strings\n// write your code below\n`
+		const inputPath = exercise.doc?.evaluation_mode === 'Judge Service' ? '0' : "'/app/stdin'"
+		boilerplate.value = `const fs = require('fs');\n\nlet input = fs.readFileSync(${inputPath}, 'utf8').trim();\nconst inputs = input.split("\\n");\n// inputs is an array of strings\n// write your code below\n`
+	} else if (exercise.doc?.language == 'C++') {
+		boilerplate.value = `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    // write your code below\n\n    return 0;\n}\n`
 	}
 }
 
@@ -295,7 +342,8 @@ watch(
 		if (doc) {
 			checkIfUserIsPermitted(doc)
 			updateTestCases(doc)
-			updateCode(doc.code)
+			loadedSubmissionCode.value = doc.code || ''
+			updateCode()
 		}
 	},
 	{ immediate: true }
@@ -317,10 +365,108 @@ const loadFalcon = () => {
 }
 
 const submitCode = async () => {
+	submitting.value = true
+	try {
+		if (exercise.doc?.evaluation_mode === 'Judge Service') {
+			await createJudgeSubmission()
+		} else {
+			await runCode()
+			await createSubmission()
+		}
+	} finally {
+		submitting.value = false
+	}
+}
+
+const runCodeOnly = async () => {
 	running.value = true
-	await runCode()
-	createSubmission()
-	running.value = false
+	error.value = false
+	errorMessage.value = null
+	try {
+		if (exercise.doc?.evaluation_mode === 'Judge Service') {
+			await runJudgeCode()
+		} else {
+			await runCode()
+		}
+	} catch (e: any) {
+		error.value = true
+		errorMessage.value = e?.messages?.[0] || e?.message || String(e)
+		showResult('error', __('Unable to run code'), errorMessage.value)
+	} finally {
+		running.value = false
+	}
+}
+
+const runJudgeCode = async () => {
+	testCases.value = []
+	resultMessage.value = null
+	activeTestPanel.value = 'results'
+	if (testCaseSection.value) {
+		testCaseSection.value.scrollIntoView({ behavior: 'smooth' })
+	}
+	const result = await call('lms.lms.judge_service.run_programming_exercise', {
+		exercise: props.exerciseID,
+		code: code.value || '',
+	})
+	if (result.compiler_message) {
+		error.value = true
+		errorMessage.value = result.compiler_message
+		showResult('error', __('Compilation Error'), result.compiler_message)
+	}
+	testCases.value = (result.cases || []).map((item: any) => {
+		const testCase = exercise.doc?.test_cases?.[item.index - 1]
+		return {
+			input: testCase?.input || '',
+			output: (item.stdout || '').trim(),
+			expected_output: testCase?.expected_output || '',
+			status: item.status === 'Accepted' ? 'Passed' : 'Failed',
+		}
+	})
+	if (!result.compiler_message) showTestCaseSummary()
+}
+
+const createJudgeSubmission = async () => {
+	const data = await call('lms.lms.judge_service.submit_programming_exercise', {
+		exercise: props.exerciseID,
+		submission: props.submissionID,
+		code: code.value || '',
+		client_request_id: crypto.randomUUID(),
+	})
+	const submissionName = data.submission
+	if (props.submissionID === 'new') {
+		await router.push({
+			name: 'ProgrammingExerciseSubmission',
+			params: { exerciseID: props.exerciseID, submissionID: submissionName },
+		})
+	}
+	fetchSubmission(submissionName)
+	pollJudgeStatus(submissionName)
+	showResult('info', __('Submission queued'), __('Your code is being evaluated.'))
+}
+
+const pollJudgeStatus = (submissionName: string) => {
+	if (statusTimer) clearTimeout(statusTimer)
+	statusTimer = setTimeout(async () => {
+		try {
+			const result = await call(
+				'lms.lms.judge_service.get_programming_submission_status',
+				{ submission: submissionName }
+			)
+			await submission.reload()
+			if (result.compiler_message) {
+				error.value = true
+				errorMessage.value = result.compiler_message
+				showResult('error', __('Compilation Error'), result.compiler_message)
+			}
+			if (['Queued', 'Compiling', 'Running'].includes(result.status)) {
+				pollJudgeStatus(submissionName)
+			} else if (!result.compiler_message) {
+				showResult(result.status === 'Passed' ? 'success' : 'error', result.status === 'Passed' ? __('All tests passed') : __('Submission failed'))
+			}
+		} catch (e) {
+			console.error('Unable to refresh judge status', e)
+		}
+	}, 1500)
 }
 
 const runCode = async () => {
@@ -348,13 +494,25 @@ const runCode = async () => {
 			status: status,
 		})
 	}
+	if (error.value) showResult('error', __('Execution Error'), errorMessage.value)
+	else showTestCaseSummary()
+}
+
+const showTestCaseSummary = () => {
+	const passed = testCases.value.filter((testCase) => testCase.status === 'Passed').length
+	showResult(passed === testCases.value.length ? 'success' : 'error', passed === testCases.value.length ? __('All tests passed') : __('Some tests failed'), __('Passed {0} of {1} test cases.').format(passed, testCases.value.length))
+}
+
+const showResult = (tone: 'success' | 'error' | 'info', title: string, detail: string | null = null) => {
+	activeTestPanel.value = 'results'
+	resultMessage.value = { tone, title, detail }
 }
 
 const createSubmission = () => {
 	if (!testCases.value.length) return
 	let codeToSave = code.value?.replace(boilerplate.value, '') || ''
 
-	call('lms.lms.api.create_programming_exercise_submission', {
+	return call('lms.lms.api.create_programming_exercise_submission', {
 		exercise: props.exerciseID,
 		submission: props.submissionID,
 		code: codeToSave,
@@ -370,13 +528,11 @@ const createSubmission = () => {
 			} else {
 				fetchSubmission(props.submissionID)
 			}
-			toast.success(__('Submission saved!'))
+			showTestCaseSummary()
 		})
 		.catch((error: any) => {
 			console.error('Error creating submission:', error)
-			toast.error(
-				__('Failed to submit. Please try again. {0}').format({ error })
-			)
+			showResult('error', __('Unable to submit code'), String(error))
 		})
 }
 
@@ -448,4 +604,12 @@ usePageMeta(() => {
 	background: theme('colors.gray.200');
 	color: theme('colors.gray.900');
 }
+
+.test-case-value { margin: 0.35rem 0 0; padding: 0.5rem 0.625rem; white-space: pre-wrap; word-break: break-word; border-radius: 0.375rem; background: theme('colors.gray.100'); color: theme('colors.gray.900'); font-size: 0.8125rem; }
+.test-panel-tab { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 0; border-bottom: 2px solid transparent; color: theme('colors.gray.600'); font-size: 0.875rem; font-weight: 500; }
+.test-panel-tab-active { border-color: theme('colors.green.500'); color: theme('colors.gray.900'); }
+.result-notice { border-radius: 0.5rem; padding: 1rem; }
+.result-notice-success { background: theme('colors.green.100'); color: theme('colors.green.800'); }
+.result-notice-error { background: theme('colors.red.100'); color: theme('colors.red.700'); }
+.result-notice-info { background: theme('colors.blue.100'); color: theme('colors.blue.800'); }
 </style>

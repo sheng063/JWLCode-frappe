@@ -1,7 +1,9 @@
 import glob
 import os
 import re
+import unittest
 import zipfile
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import flt
@@ -10,11 +12,23 @@ from lms.lms.api import (
 	export_course_as_zip,
 	get_certified_participants,
 	get_course_assessment_progress,
+	get_translations,
 	import_course_from_zip,
 	track_video_watch_duration,
 )
 from lms.lms.course_import_export import sanitize_string
 from lms.lms.test_helpers import BaseTestUtils
+
+
+class TestTranslations(unittest.TestCase):
+	@patch("lms.lms.api.get_all_translations")
+	@patch("lms.lms.api.get_user_lang", return_value="zh")
+	def test_uses_frappe_language_fallback(self, mock_get_user_lang, mock_get_all_translations):
+		mock_get_all_translations.return_value = {"Course": "课程"}
+
+		self.assertEqual(get_translations(), {"Course": "课程"})
+		mock_get_user_lang.assert_called_once_with()
+		mock_get_all_translations.assert_called_once_with("zh")
 
 
 class TestLMSAPI(BaseTestUtils):
@@ -235,8 +249,6 @@ class TestTrackVideoWatchDuration(BaseTestUtils):
 		)
 		self.assertEqual(len(self._watch_rows()), 2)
 
-
-import unittest  # noqa: E402
 
 from lms.lms.api import get_assessment_from_lesson  # noqa: E402
 

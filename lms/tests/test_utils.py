@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.tests import UnitTestCase
-from frappe.utils import get_system_timezone, getdate, to_timedelta
+from frappe.utils import add_days, get_system_timezone, getdate, to_timedelta
 
 from lms.lms.doctype.lms_certificate.lms_certificate import is_certified
 from lms.lms.test_helpers import BaseTestUtils
@@ -447,7 +447,8 @@ class TestListEndpointPaging(BaseTestUtils):
 	"""
 
 	CATEGORY = "Paging Test Category"
-	STARTED_TODAY = "Paging Batch Already Started"
+	ENDED_TODAY = "Paging Batch Already Ended"
+	ONGOING = "Paging Batch Still Running"
 
 	def setUp(self):
 		super().setUp()
@@ -523,31 +524,40 @@ class TestListEndpointPaging(BaseTestUtils):
 		listed = get_batches(filters=filters.copy(), start=0, limit_page_length=MAX_PAGE_LENGTH)
 		self.assertEqual(get_batch_count(filters=filters.copy()), len(listed))
 
+	def test_an_ongoing_multi_day_batch_remains_active(self):
+		self._create_ongoing_batch()
+		filters = {"published": 1, "end_date": [">=", getdate()]}
+
+		listed = get_batches(filters=filters.copy(), start=0, limit_page_length=MAX_PAGE_LENGTH)
+
+		self.assertIn(self.ONGOING, [batch.title for batch in listed])
+		self.assertEqual(get_batch_count(filters=filters.copy()), len(listed))
+
 	def test_the_batch_count_drops_the_batches_the_list_drops(self):
 		"""
-		Upcoming is settled in Python, not in the query: a batch that started
-		earlier today still matches `start_date >= today` but is already under
-		way, so the list removes it. A count taken straight from the query would
+		Active is settled in Python, not in the query: a batch that ended
+		earlier today still matches `end_date >= today` but is already over,
+		so the list removes it. A count taken straight from the query would
 		keep it, and the footer would promise a row that is not there.
 		"""
-		self._create_started_today_batch()
-		filters = {"published": 1, "start_date": [">=", getdate()]}
+		self._create_ended_today_batch()
+		filters = {"published": 1, "end_date": [">=", getdate()]}
 
 		listed = get_batches(filters=filters.copy(), start=0, limit_page_length=MAX_PAGE_LENGTH)
 		titles = [batch.title for batch in listed]
 
-		self.assertNotIn(self.STARTED_TODAY, titles)
+		self.assertNotIn(self.ENDED_TODAY, titles)
 		self.assertEqual(get_batch_count(filters=filters.copy()), len(listed))
 
 	def test_the_archived_batch_count_agrees_with_the_archived_list(self):
-		"""The other side of the same boundary: a batch that started earlier today
-		is archived, and the query's `start_date <= today` cannot say so."""
-		self._create_started_today_batch()
-		filters = {"published": 1, "start_date": ["<=", getdate()]}
+		"""The other side of the same boundary: a batch that ended earlier today
+		is archived, and the query's `end_date <= today` cannot say so."""
+		self._create_ended_today_batch()
+		filters = {"published": 1, "end_date": ["<=", getdate()]}
 
 		listed = get_batches(filters=filters.copy(), start=0, limit_page_length=MAX_PAGE_LENGTH)
 
-		self.assertIn(self.STARTED_TODAY, [batch.title for batch in listed])
+		self.assertIn(self.ENDED_TODAY, [batch.title for batch in listed])
 		self.assertEqual(get_batch_count(filters=filters.copy()), len(listed))
 
 	def test_the_batch_count_never_walks_the_rows(self):
@@ -557,21 +567,42 @@ class TestListEndpointPaging(BaseTestUtils):
 		the lot, which made an anonymous request cost as much as the site has
 		batches. Nothing may call that pass on the counting path again.
 		"""
-		self._create_started_today_batch()
-		filters = {"published": 1, "start_date": [">=", getdate()]}
+		self._create_ended_today_batch()
+		filters = {"published": 1, "end_date": [">=", getdate()]}
 		expected = get_batch_count(filters=filters.copy())
 
-		with patch("lms.lms.utils.filter_batches_based_on_start_time") as walked:
+		with patch("lms.lms.utils.filter_batches_based_on_end_time") as walked:
 			walked.side_effect = AssertionError("the count fetched and filtered the rows")
 			self.assertEqual(get_batch_count(filters=filters.copy()), expected)
 
-	def _create_started_today_batch(self):
-		if frappe.db.exists("LMS Batch", {"title": self.STARTED_TODAY}):
+	def _create_ongoing_batch(self):
+		if frappe.db.exists("LMS Batch", {"title": self.ONGOING}):
 			return
 		batch = frappe.new_doc("LMS Batch")
 		batch.update(
 			{
-				"title": self.STARTED_TODAY,
+				"title": self.ONGOING,
+				"start_date": add_days(getdate(), -1),
+				"end_date": add_days(getdate(), 1),
+				"start_time": "00:00:00",
+				"end_time": "23:59:59",
+				"timezone": "Asia/Kolkata",
+				"published": 1,
+				"description": "Paging fixture",
+				"batch_details": "Paging fixture",
+				"instructors": [{"instructor": "Administrator"}],
+			}
+		)
+		batch.insert(ignore_permissions=True)
+		self.cleanup_items.append(("LMS Batch", batch.name))
+
+	def _create_ended_today_batch(self):
+		if frappe.db.exists("LMS Batch", {"title": self.ENDED_TODAY}):
+			return
+		batch = frappe.new_doc("LMS Batch")
+		batch.update(
+			{
+				"title": self.ENDED_TODAY,
 				"start_date": getdate(),
 				"end_date": getdate(),
 				# Before any wall clock this test can run at, so the list always

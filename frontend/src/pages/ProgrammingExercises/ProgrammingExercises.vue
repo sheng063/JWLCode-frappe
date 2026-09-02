@@ -246,6 +246,7 @@ const languages = [
 	{ label: ' ', value: ' ' },
 	{ label: 'Python', value: 'Python' },
 	{ label: 'JavaScript', value: 'JavaScript' },
+	{ label: 'C++', value: 'C++' },
 ]
 
 const columns = computed(() => {

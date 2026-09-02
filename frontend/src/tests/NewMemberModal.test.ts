@@ -134,45 +134,39 @@ describe('NewMemberModal: add mode', () => {
 		expect(closeMock).not.toHaveBeenCalled()
 	})
 
-	it('inserts the user then assigns only the selected roles, emits created, closes', async () => {
+	it('creates the user and roles atomically, emits created, closes', async () => {
 		const w = mountModal()
 		await open(w)
-		callMock.mockResolvedValueOnce({ name: 'jane@doe.com' }) // insert
+		callMock.mockResolvedValueOnce({ name: 'jane@doe.com' }) // atomic create
 		await w.get('[data-testid="field-Email"]').setValue('jane@doe.com')
 		await w.get('[data-testid="role-Moderator"]').trigger('click')
 		await clickAction(w, 'Add')
 
-		expect(callMock).toHaveBeenCalledWith('frappe.client.insert', {
-			doc: {
-				doctype: 'User',
-				email: 'jane@doe.com',
-				first_name: undefined,
-				last_name: undefined,
-			},
-		})
-		const roleCalls = saveRoleCalls()
-		expect(roleCalls).toHaveLength(1)
-		expect(roleCalls[0][1]).toEqual({
-			user: 'jane@doe.com',
-			role: 'Moderator',
-			value: 1,
+		expect(callMock).toHaveBeenCalledTimes(1)
+		expect(callMock).toHaveBeenCalledWith('lms.lms.api.create_member', {
+			email: 'jane@doe.com',
+			first_name: '',
+			last_name: '',
+			roles: ['Moderator', 'LMS Student'],
 		})
 		expect(w.emitted('created')?.[0]?.[0]).toEqual({ name: 'jane@doe.com' })
 		expect(closeMock).toHaveBeenCalled()
 	})
 
-	it('assigns multiple selected roles with value 1', async () => {
+	it('passes all selected roles in the atomic create request', async () => {
 		const w = mountModal()
 		await open(w)
 		callMock.mockResolvedValueOnce({ name: 'x@y.com' })
 		await w.get('[data-testid="field-Email"]').setValue('x@y.com')
 		await w.get('[data-testid="role-Moderator"]').trigger('click')
-		await w.get('[data-testid="role-Student"]').trigger('click')
 		await clickAction(w, 'Add')
-		const roles = saveRoleCalls().map((c) => c[1].role)
-		expect(roles).toContain('Moderator')
-		expect(roles).toContain('LMS Student')
-		expect(saveRoleCalls().every((c) => c[1].value === 1)).toBe(true)
+
+		expect(callMock).toHaveBeenCalledWith('lms.lms.api.create_member', {
+			email: 'x@y.com',
+			first_name: '',
+			last_name: '',
+			roles: ['Moderator', 'LMS Student'],
+		})
 	})
 
 	it('pre-applies defaultRoles when opened', async () => {

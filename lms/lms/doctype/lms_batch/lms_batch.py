@@ -12,6 +12,11 @@ from frappe.desk.doctype.notification_log.notification_log import make_notificat
 from frappe.model.document import Document
 from frappe.utils import add_days, cint, format_datetime, get_time, nowdate
 
+from lms.lms.batch_enrollment_sync import (
+	enroll_member_in_batch_courses,
+	remove_member_from_batch_courses,
+)
+
 from lms.lms.utils import (
 	format_timezone,
 	generate_slug,
@@ -41,8 +46,32 @@ class LMSBatch(Document):
 		self.validate_conferencing_provider()
 
 	def on_update(self):
+		self.sync_course_enrollments()
 		if self.has_value_changed("published") and self.published:
 			frappe.enqueue(send_notification_for_published_batch, batch=self)
+
+	def sync_course_enrollments(self):
+		"""Mirror changes to this batch's course table to its current students."""
+		if self.is_new():
+			return
+
+		previous = self.get_doc_before_save()
+		if not previous:
+			return
+
+		previous_courses = {row.course for row in previous.courses}
+		current_courses = {row.course for row in self.courses}
+		added_courses = current_courses - previous_courses
+		removed_courses = previous_courses - current_courses
+		if not added_courses and not removed_courses:
+			return
+
+		members = frappe.get_all("LMS Batch Enrollment", {"batch": self.name}, pluck="member")
+		for member in members:
+			if added_courses:
+				enroll_member_in_batch_courses(self.name, member, list(added_courses))
+			if removed_courses:
+				remove_member_from_batch_courses(self.name, member, list(removed_courses))
 
 	def autoname(self):
 		if not self.name and self.title:

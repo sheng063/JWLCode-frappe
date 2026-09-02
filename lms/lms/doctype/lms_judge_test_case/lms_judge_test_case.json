@@ -1,0 +1,24 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["exercise", "input", "expected_output", "hidden"],
+ "fields": [
+  {"fieldname": "exercise", "fieldtype": "Link", "in_list_view": 1, "label": "Programming Exercise", "options": "LMS Programming Exercise", "reqd": 1},
+  {"fieldname": "input", "fieldtype": "Long Text", "label": "Input"},
+  {"fieldname": "expected_output", "fieldtype": "Long Text", "label": "Expected Output", "reqd": 1},
+  {"default": "1", "fieldname": "hidden", "fieldtype": "Check", "in_list_view": 1, "label": "Hidden"}
+ ],
+ "links": [],
+ "module": "LMS",
+ "name": "LMS Judge Test Case",
+ "owner": "Administrator",
+ "permissions": [
+  {"create": 1, "delete": 1, "read": 1, "report": 1, "role": "System Manager", "write": 1},
+  {"create": 1, "delete": 1, "read": 1, "report": 1, "role": "Moderator", "write": 1},
+  {"create": 1, "delete": 1, "read": 1, "report": 1, "role": "Course Creator", "write": 1}
+ ],
+ "sort_field": "creation",
+ "sort_order": "ASC"
+}

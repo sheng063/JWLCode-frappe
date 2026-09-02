@@ -22,6 +22,7 @@
 					/>
 					<FormControl
 						v-model="exercise.language"
+						data-testid="programming-exercise-language"
 						:label="__('Language')"
 						type="select"
 						:options="languageOptions"
@@ -210,7 +211,7 @@ const title = computed(() =>
 type ExerciseForm = {
 	name?: string
 	title: string
-	language: 'Python' | 'JavaScript'
+	language: 'Python' | 'JavaScript' | 'C++'
 	problem_statement: string
 	test_cases: { input: string; expected_output: string; idx: number }[]
 }
@@ -227,6 +228,7 @@ const exercise = ref<ExerciseForm>(emptyExercise())
 const languageOptions = [
 	{ label: 'Python', value: 'Python' },
 	{ label: 'JavaScript', value: 'JavaScript' },
+	{ label: 'C++', value: 'C++' },
 ]
 
 // C4 — edit mode used to be seeded from the list page's in-memory rows, which

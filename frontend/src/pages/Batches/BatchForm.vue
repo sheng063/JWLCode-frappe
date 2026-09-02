@@ -313,7 +313,11 @@ import {
 	openSettings,
 	updateMetaInfo,
 } from '@/utils'
-import { validateBatch } from '@/utils/batchForm'
+import {
+	batchSettingsPayload,
+	normalizeBatchDoc,
+	validateBatch,
+} from '@/utils/batchForm'
 import {
 	useKeyboardShortcuts,
 	saveShortcut,
@@ -368,6 +372,9 @@ const batchDetail = createDocumentResource({
 	doctype: 'LMS Batch',
 	name: props.batch.data?.name,
 	auto: true,
+	// Normalize before the resource records originalDoc, so display-only
+	// formatting cannot mark a freshly loaded/saved document dirty.
+	transform: normalizeBatchDoc,
 }) as Resource<LMSBatch | null>
 
 const openEmailTemplateForm = (): void => {
@@ -473,33 +480,11 @@ watch(
 const updateBatchData = (): void => {
 	const doc = batchDetail.doc
 	if (!doc) return
-	Object.keys(doc).forEach((key) => {
-		if (key == 'instructors') {
-			instructors.value = []
-			doc.instructors?.forEach((instructor: CourseInstructor) => {
-				if (instructor.instructor) instructors.value.push(instructor.instructor)
-			})
-		} else if (key === 'start_time' || key === 'end_time') {
-			doc[key] = formatTime(doc[key])
-		}
+	instructors.value = []
+	doc.instructors?.forEach((instructor: CourseInstructor) => {
+		if (instructor.instructor) instructors.value.push(instructor.instructor)
 	})
-	const checkboxes: (keyof LMSBatch)[] = [
-		'published',
-		'paid_batch',
-		'allow_self_enrollment',
-		'certification',
-		'evaluation',
-	]
-	for (const key of checkboxes) {
-		;(doc as Record<string, unknown>)[key] = doc[key] ? true : false
-	}
 	originalDoc.value = structuredClone(toRaw(doc))
-}
-
-const formatTime = (timeStr: string): string => {
-	const [hours, minutes] = timeStr.split(':')
-	const paddedHours = hours.length == 1 ? '0' + hours : hours
-	return `${paddedHours}:${minutes}`
 }
 
 const submitBatch = (): void => {
@@ -516,18 +501,15 @@ const submitBatch = (): void => {
 const updateBatch = (opts: { silent?: boolean } = {}): void => {
 	if (!batchDetail.doc) return
 	batchDetail.setValue.submit(
-		{
-			...batchDetail.doc,
-			instructors: instructors.value.map((instructor) => ({
-				instructor: instructor,
-			})),
-		},
+		batchSettingsPayload(batchDetail.doc, instructors.value),
 		{
 			onSuccess(data: LMSBatch) {
 				updateMetaInfo('batches', data.name, meta)
 				if (!opts.silent) toast.success(__('Batch updated successfully'))
 				nextTick(() => {
-					originalDoc.value = structuredClone(data)
+					if (batchDetail.doc) {
+						originalDoc.value = structuredClone(toRaw(batchDetail.doc))
+					}
 					isDirty.value = false
 				})
 				// Refresh the shared batch resource so the Overview tab (which reads

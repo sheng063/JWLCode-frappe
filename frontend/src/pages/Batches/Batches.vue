@@ -127,7 +127,7 @@ const title = ref('')
 const certification = ref(false)
 const filters = ref({})
 const is_student = computed(() => user.data?.is_student)
-const currentTab = ref(is_student.value ? 'all' : 'upcoming')
+const currentTab = ref(is_student.value ? 'all' : 'active')
 const orderBy = ref('start_date')
 const readOnlyMode = window.read_only_mode
 const router = useRouter()
@@ -252,21 +252,21 @@ const updateTabFilter = () => {
 	}
 	if (currentTab.value == 'enrolled' && is_student.value) {
 		filters.value['enrolled'] = 1
-		delete filters.value['start_date']
+		delete filters.value['end_date']
 		delete filters.value['published']
 		orderBy.value = 'start_date desc'
 	} else if (is_student.value) {
 		delete filters.value['enrolled']
 	} else {
-		delete filters.value['start_date']
+		delete filters.value['end_date']
 		delete filters.value['published']
 		orderBy.value = 'start_date desc'
-		if (currentTab.value == 'upcoming') {
-			filters.value['start_date'] = ['>=', dayjs().format('YYYY-MM-DD')]
+		if (currentTab.value == 'active') {
+			filters.value['end_date'] = ['>=', dayjs().format('YYYY-MM-DD')]
 			filters.value['published'] = 1
 			orderBy.value = 'start_date'
 		} else if (currentTab.value == 'archived') {
-			filters.value['start_date'] = ['<=', dayjs().format('YYYY-MM-DD')]
+			filters.value['end_date'] = ['<=', dayjs().format('YYYY-MM-DD')]
 		} else if (currentTab.value == 'unpublished') {
 			filters.value['published'] = 0
 		}
@@ -275,7 +275,7 @@ const updateTabFilter = () => {
 
 const updateStudentFilter = () => {
 	if (!user.data || (is_student.value && currentTab.value != 'enrolled')) {
-		filters.value['start_date'] = ['>=', dayjs().format('YYYY-MM-DD')]
+		filters.value['end_date'] = ['>=', dayjs().format('YYYY-MM-DD')]
 		filters.value['published'] = 1
 	}
 }
@@ -333,7 +333,7 @@ const batchTabs = computed(() => {
 		user.data?.is_instructor ||
 		user.data?.is_evaluator
 	) {
-		tabs.push({ label: __('Upcoming'), value: 'upcoming' })
+		tabs.push({ label: __('Active'), value: 'active' })
 		tabs.push({ label: __('Archived'), value: 'archived' })
 		tabs.push({ label: __('Unpublished'), value: 'unpublished' })
 	} else if (user.data) {
