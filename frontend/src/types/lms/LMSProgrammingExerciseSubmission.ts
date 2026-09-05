@@ -21,6 +21,8 @@ export interface LMSProgrammingExerciseSubmission {
 	status?: '' | 'Passed' | 'Failed'
 	/**	Test Cases : Table - LMS Test Case Submission	*/
 	test_cases?: LMSTestCaseSubmission[]
+	/**	Language : Select	*/
+	language?: 'Python' | 'C++'
 	/**	Code : Code	*/
 	code: string
 	/**	Exercise Title : Data	*/

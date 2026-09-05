@@ -8054,6 +8054,14 @@ msgstr "临时禁用"
 msgid "Test Cases"
 msgstr "测试用例"
 
+#: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmission.vue:117
+msgid "Test Results"
+msgstr "测试结果"
+
+#: frontend/src/pages/ProgrammingExercises/ProgrammingExerciseSubmission.vue:218
+msgid "Run or submit your code to view the test results."
+msgstr "运行或提交代码以查看测试结果。"
+
 #: frontend/src/pages/QuizForm.vue:23 frontend/src/pages/QuizPage.vue:66
 msgid "Test Quiz"
 msgstr "测试测验"

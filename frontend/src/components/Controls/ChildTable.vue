@@ -1,5 +1,5 @@
 <template>
-	<div class="space-y-1.5">
+	<div ref="tableRef" class="space-y-1.5">
 		<InputLabel
 			v-if="label"
 			:id="labelId"
@@ -28,8 +28,16 @@
 					:style="{ gridTemplateColumns: getGridTemplateColumns() }"
 				>
 					<template v-for="key in Object.keys(row)" :key="key">
+						<textarea
+							v-if="showKey(key) && multiline"
+							v-model="row[key]"
+							:aria-label="columnLabel(key)"
+							rows="4"
+							:spellcheck="false"
+							class="py-1.5 px-2 w-full min-w-0 resize-y border-none bg-transparent text-ink-gray-8 focus:ring-0 focus:bg-surface-gray-2 rounded-md text-sm font-mono whitespace-pre focus:outline-none"
+						/>
 						<input
-							v-if="showKey(key)"
+							v-else-if="showKey(key)"
 							v-model="row[key]"
 							:aria-label="columnLabel(key)"
 							class="py-1.5 px-2 w-full border-none bg-transparent text-ink-gray-8 focus:ring-0 focus:border focus:border-outline-gray-3 focus:bg-surface-gray-2 rounded-md text-sm focus:outline-none"
@@ -104,6 +112,7 @@ import {
 } from '@/components/Form/labeling'
 
 const rows = defineModel<Record<string, string>[]>()
+const tableRef = ref<HTMLElement | null>(null)
 const menuRef = ref(null)
 const menuOpenIndex = ref<number | null>(null)
 const menuTopPosition = ref<string>('')
@@ -122,6 +131,7 @@ const props = withDefaults(
 	defineProps<{
 		modelValue?: Record<string, string>[]
 		columns?: string[]
+		multiline?: boolean
 		label?: string
 		description?: string
 		error?: string
@@ -163,12 +173,12 @@ const addRow = () => {
 
 const focusNewRowInput = () => {
 	nextTick(() => {
-		const rowElements = document.querySelectorAll('.overflow-x-auto .grid')[
+		const rowElements = tableRef.value?.querySelectorAll('.overflow-x-auto .grid')[
 			rows.value!.length
 		]
-		const firstInput = rowElements.querySelector('input')
+		const firstInput = rowElements?.querySelector('input, textarea')
 		if (firstInput) {
-			;(firstInput as HTMLInputElement).focus()
+			;(firstInput as HTMLInputElement | HTMLTextAreaElement).focus()
 		}
 	})
 }

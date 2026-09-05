@@ -30,6 +30,8 @@ const RICH_SURVIVES: Record<string, string> = {
 		'<p>x<sub>1</sub><sup>2</sup><mark>m</mark><del>d</del></p>',
 	'definition list': '<dl><dt>t</dt><dd>d</dd></dl>',
 	'katex output': '<span class="katex" aria-hidden="true">x²</span>',
+	'native math fraction':
+		'<math><mfrac><mrow><mn>10</mn><mo>×</mo><mo>(</mo><mn>1</mn><mo>+</mo><mn>10</mn><mo>)</mo></mrow><mn>2</mn></mfrac><mo>=</mo><mn>55</mn></math>',
 	'editorjs checklist item':
 		'<div class="cdx-checklist__item"><span>done</span></div>',
 }

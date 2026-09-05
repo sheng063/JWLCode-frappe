@@ -20,24 +20,33 @@
 						:label="__('Title')"
 						:required="true"
 					/>
-					<FormControl
-						v-model="exercise.language"
-						data-testid="programming-exercise-language"
-						:label="__('Language')"
-						type="select"
-						:options="languageOptions"
-						:required="true"
-					/>
 					<ChildTable
 						v-model="testCases.data"
 						:label="__('Test Cases')"
 						:columns="testCaseColumns"
+						:multiline="true"
 						:required="true"
 						:addable="true"
 						:deletable="true"
 						:editable="true"
 						:placeholder="__('Add Test Case')"
 					/>
+					<ChildTable
+						v-if="exerciseID != 'new'"
+						v-model="hiddenTestCases.data"
+						data-testid="hidden-test-cases"
+						:label="__('Hidden Test Cases')"
+						:description="__('Only the first failed hidden test is shown to a learner after submission.')"
+						:columns="testCaseColumns"
+						:multiline="true"
+						:addable="true"
+						:deletable="true"
+						:editable="true"
+						:placeholder="__('Add Hidden Test Case')"
+					/>
+					<p v-else class="text-sm text-ink-gray-6">
+						{{ __('Save the exercise first to add hidden test cases.') }}
+					</p>
 				</div>
 				<div>
 					<div class="space-y-1.5">
@@ -119,6 +128,7 @@ import {
 	Badge,
 	createDocumentResource,
 	createListResource,
+	call,
 	createResource,
 	FormControl,
 	toast,
@@ -135,6 +145,7 @@ const user = inject<any>('$user')
 const problemStatementLabelId = useId()
 const isDirty = ref(false)
 const originalTestCaseCount = ref(0)
+const originalHiddenTestCaseNames = ref<string[]>([])
 
 const props = withDefaults(
 	defineProps<{
@@ -163,7 +174,7 @@ const { close, saveAndReplace } = useFormRoute({ name: 'ProgrammingExercises' })
 const exercises = createListResource({
 	doctype: 'LMS Programming Exercise',
 	cache: ['programmingExercises'],
-	fields: ['name', 'title', 'language', 'problem_statement', 'modified'],
+	fields: ['name', 'title', 'problem_statement', 'modified'],
 	auto: true,
 	orderBy: 'modified desc',
 	pageLength: 24,
@@ -224,12 +235,6 @@ const emptyExercise = (): ExerciseForm => ({
 })
 
 const exercise = ref<ExerciseForm>(emptyExercise())
-
-const languageOptions = [
-	{ label: 'Python', value: 'Python' },
-	{ label: 'JavaScript', value: 'JavaScript' },
-	{ label: 'C++', value: 'C++' },
-]
 
 // C4 — edit mode used to be seeded from the list page's in-memory rows, which
 // are empty when this route is opened cold. Fetch the record instead, following
@@ -294,6 +299,54 @@ const fetchTestCases = () => {
 	testCases.reload()
 }
 
+type HiddenTestCase = {
+	name?: string
+	input: string
+	expected_output: string
+}
+
+const hiddenTestCases = createListResource({
+	doctype: 'LMS Judge Test Case',
+	fields: ['name', 'input', 'expected_output'],
+	orderBy: 'creation asc',
+	onSuccess(data: HiddenTestCase[]) {
+		originalHiddenTestCaseNames.value = data.map((testCase) => testCase.name).filter(Boolean) as string[]
+	},
+	onError(err: any) {
+		toast.error(__(err.messages?.[0] || err))
+		console.error('Error loading hidden test cases:', err)
+	},
+})
+
+const fetchHiddenTestCases = () => {
+	hiddenTestCases.update({ filters: { exercise: props.exerciseID } })
+	hiddenTestCases.reload()
+}
+
+const saveHiddenTestCases = () => {
+	const current = (hiddenTestCases.data || []) as HiddenTestCase[]
+	const currentNames = new Set(current.map((testCase) => testCase.name).filter(Boolean))
+	const deletions = originalHiddenTestCaseNames.value.filter((name) => !currentNames.has(name))
+	const writes = current.map((testCase) => {
+		const fields = {
+			input: testCase.input || '',
+			expected_output: testCase.expected_output,
+			hidden: 1,
+		}
+		return testCase.name
+			? call('frappe.client.set_value', {
+				doctype: 'LMS Judge Test Case', name: testCase.name, fieldname: fields,
+			})
+			: call('frappe.client.insert', {
+				doc: { doctype: 'LMS Judge Test Case', exercise: props.exerciseID, ...fields },
+			})
+	})
+	return Promise.all([
+		...writes,
+		...deletions.map((name) => call('frappe.client.delete', { doctype: 'LMS Judge Test Case', name })),
+	])
+}
+
 // C3 — this watch had no `immediate`, so the test cases were fetched only when
 // the id CHANGED under an already-mounted parent. Mounted straight from a URL
 // the exercise rendered with an empty Test Cases table, and saving it would
@@ -304,11 +357,14 @@ watch(
 		if (id === 'new') {
 			exercise.value = emptyExercise()
 			testCases.data = []
+			hiddenTestCases.data = []
 			originalTestCaseCount.value = 0
+			originalHiddenTestCaseNames.value = []
 			isDirty.value = false
 			return
 		}
 		fetchTestCases()
+		fetchHiddenTestCases()
 	},
 	{ immediate: true }
 )
@@ -382,12 +438,21 @@ const updateExercise = () => {
 		},
 		{
 			onSuccess() {
-				isDirty.value = false
-				// setValue patches the row in place, which cannot reorder a list
-				// sorted by `modified desc` — so this one does need a refetch.
-				exercises.reload()
-				toast.success(__('Programming Exercise updated successfully'))
-				saveAndReplace({ name: 'ProgrammingExercises' })
+				const finish = () => {
+					isDirty.value = false
+					// setValue patches the row in place, which cannot reorder a list
+					// sorted by `modified desc` — so this one does need a refetch.
+					exercises.reload()
+					toast.success(__('Programming Exercise updated successfully'))
+					saveAndReplace({ name: 'ProgrammingExercises' })
+				}
+				if (!hiddenTestCases.data?.length && !originalHiddenTestCaseNames.value.length) {
+					finish()
+					return
+				}
+				saveHiddenTestCases()
+					.then(finish)
+					.catch((err: any) => toast.warning(__(err.messages?.[0] || err)))
 			},
 			onError(err: any) {
 				toast.warning(__(err.messages?.[0] || err))

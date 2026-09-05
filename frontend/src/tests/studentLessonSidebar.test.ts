@@ -64,6 +64,20 @@ const mountSidebar = () =>
 	})
 
 describe('StudentLessonSidebar locked lesson', () => {
+	it('collapses into an icon-free rail that expands on click', async () => {
+		const wrapper = mountSidebar()
+
+		await wrapper.find('[data-testid="collapse-chapters"]').trigger('click')
+		expect(wrapper.emitted('toggle-collapse')).toHaveLength(1)
+
+		await wrapper.setProps({ collapsed: true })
+		expect(wrapper.text()).not.toContain('Course 1')
+		expect(wrapper.find('[data-testid="expand-chapters"]').exists()).toBe(true)
+
+		await wrapper.find('[data-testid="expand-chapters"]').trigger('click')
+		expect(wrapper.emitted('toggle-collapse')).toHaveLength(2)
+	})
+
 	it('renders a lock for a locked lesson and no link', () => {
 		const wrapper = mountSidebar()
 		const rows = wrapper.findAll('li li')

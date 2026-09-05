@@ -23,7 +23,7 @@ window.matchMedia ??= (() => ({
 vi.mock('frappe-ui', () => ({
 	call: (method: string, args: any) => {
 		calls.value.push({ method, args })
-		return Promise.resolve({ name: 'SUB-0001' })
+		return Promise.resolve('SUB-0001')
 	},
 	toast: {},
 }))
@@ -81,6 +81,16 @@ describe('programming-exercise iframe URL', () => {
 
 	it('omits the flag when no config is passed at all', async () => {
 		expect(await iframeSrc(undefined)).not.toContain('studentView')
+	})
+
+	it('opens the latest submission selected for this exercise', async () => {
+		const src = await iframeSrc(undefined)
+
+		expect(calls.value).toContainEqual({
+			method: 'lms.lms.api.get_latest_programming_exercise_submission',
+			args: { exercise: 'EX-1' },
+		})
+		expect(src).toContain('/submission/SUB-0001')
 	})
 })
 

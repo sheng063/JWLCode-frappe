@@ -4,7 +4,7 @@
 		:title="__('{0} Exercises').format(totalExercises.data || 0)"
 		layout="list"
 		:columns="columns"
-		:rows="exercises.data || []"
+		:rows="tableRows"
 		:list-options="listOptions"
 		:total-count="totalExercises.data ?? 0"
 		:loading="exercises.list.loading"
@@ -52,12 +52,6 @@
 					<span class="lucide-search size-4 text-ink-gray-5" />
 				</template>
 			</FormControl>
-			<Select
-				v-model="languageFilter"
-				:options="languages"
-				:placeholder="__('Type')"
-				@update:modelValue="updateList"
-			/>
 		</template>
 
 		<template #cell="{ column, value }">
@@ -95,7 +89,6 @@ import {
 	usePageMeta,
 } from 'frappe-ui'
 import ListPage from '@/components/Layouts/ListPage.vue'
-import Select from '@/components/Controls/Select.vue'
 import type { ListRow } from '@/types'
 
 import { sessionStore } from '@/stores/session'
@@ -107,7 +100,6 @@ const { brand } = sessionStore()
 const user = inject<any>('$user')
 const dayjs = inject<typeof dayjsType>('$dayjs')!
 const titleFilter = ref<string>('')
-const languageFilter = ref<string>('')
 const router = useRouter()
 const app = getCurrentInstance()
 const { $dialog } = app?.appContext.config.globalProperties
@@ -131,7 +123,7 @@ const validatePermissions = () => {
 const exercises = createListResource({
 	doctype: 'LMS Programming Exercise',
 	cache: ['programmingExercises'],
-	fields: ['name', 'title', 'language', 'problem_statement', 'modified'],
+	fields: ['name', 'title', 'problem_statement', 'modified'],
 	auto: true,
 	orderBy: 'modified desc',
 	pageLength: 24,
@@ -171,9 +163,6 @@ const getFilters = () => {
 	let filters: any = {}
 	if (titleFilter.value) {
 		filters['title'] = ['like', `%${titleFilter.value}%`]
-	}
-	if (languageFilter.value && languageFilter.value.trim() !== '') {
-		filters['language'] = languageFilter.value
 	}
 	return filters
 }
@@ -242,27 +231,26 @@ const totalExercises = createResource({
 	},
 })
 
-const languages = [
-	{ label: ' ', value: ' ' },
-	{ label: 'Python', value: 'Python' },
-	{ label: 'JavaScript', value: 'JavaScript' },
-	{ label: 'C++', value: 'C++' },
-]
+const tableRows = computed(() =>
+	(exercises.data || []).map((exercise, index) => ({
+		...exercise,
+		serial_number: index + 1,
+	}))
+)
 
 const columns = computed(() => {
 	return [
+		{
+			label: __('No.'),
+			key: 'serial_number',
+			width: 0.25,
+			align: 'left',
+		},
 		{
 			label: __('Title'),
 			key: 'title',
 			width: 1,
 			icon: 'lucide-file-text',
-		},
-		{
-			label: __('Language'),
-			key: 'language',
-			width: 1,
-			align: 'left',
-			icon: 'lucide-code',
 		},
 		{
 			label: __('Updated On'),

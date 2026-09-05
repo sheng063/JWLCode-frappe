@@ -18,6 +18,8 @@ const deleteSubmit = vi.fn()
 const exercisesReload = vi.fn()
 const testCasesUpdate = vi.fn()
 const testCasesReload = vi.fn()
+const hiddenTestCasesUpdate = vi.fn()
+const hiddenTestCasesReload = vi.fn()
 const countReload = vi.fn()
 
 // vi.hoisted because vi.mock's factory is hoisted above every top-level const,
@@ -65,10 +67,18 @@ const testCasesResource = {
 	reload: testCasesReload,
 	data: [] as Row[],
 }
+const hiddenTestCasesResource = {
+	doctype: 'LMS Judge Test Case',
+	update: hiddenTestCasesUpdate,
+	reload: hiddenTestCasesReload,
+	data: [] as Row[],
+}
 
-createListResourceMock.mockImplementation((options: { doctype: string }) =>
-	options.doctype === 'LMS Test Case' ? testCasesResource : exercisesResource
-)
+createListResourceMock.mockImplementation((options: { doctype: string }) => {
+	if (options.doctype === 'LMS Test Case') return testCasesResource
+	if (options.doctype === 'LMS Judge Test Case') return hiddenTestCasesResource
+	return exercisesResource
+})
 createResourceMock.mockReturnValue({ reload: countReload, data: 0 })
 // Faithful to documentResource.js:15 — no doctype+name, no resource at all.
 const documentResourceStub = (doc: unknown) => (options: { name?: string }) =>
@@ -206,7 +216,7 @@ const student = {
 
 // Every field the exercise form is meant to collect. Pin the set: a field lost
 // in the modal→route move is otherwise invisible to the rest of the suite.
-const FIELD_LABELS = ['Title', 'Language', 'Test Cases', 'Problem Statement']
+const FIELD_LABELS = ['Title', 'Test Cases', 'Problem Statement']
 
 describe('ProgrammingExerciseForm as a route', () => {
 	beforeEach(() => {
@@ -217,11 +227,14 @@ describe('ProgrammingExerciseForm as a route', () => {
 		countReload.mockReset()
 		testCasesUpdate.mockReset()
 		testCasesReload.mockReset()
+		hiddenTestCasesUpdate.mockReset()
+		hiddenTestCasesReload.mockReset()
 		createListResourceMock.mockClear()
 		createResourceMock.mockClear()
 		createDocumentResourceMock.mockClear()
 		createDocumentResourceMock.mockImplementation(documentResourceStub(null))
 		testCasesResource.data = []
+		hiddenTestCasesResource.data = []
 		Object.defineProperty(window, 'innerWidth', {
 			value: 1024,
 			writable: true,
@@ -239,18 +252,12 @@ describe('ProgrammingExerciseForm as a route', () => {
 		).toBe(true)
 	})
 
-	it('offers C++ when creating a programming exercise', async () => {
+	it('does not constrain a new exercise to an author-selected language', async () => {
 		const router = makeRouter()
 		await router.push('/programming-exercises/edit/new')
 		const wrapper = await mountForm(router, moderator)
-		const language = wrapper
-			.findAllComponents({ name: 'FormControl' })
-			.find((component) => component.props('label') === 'Language')
 
-		expect(language).toBeDefined()
-		expect(language?.props('options')).toContainEqual(
-			{ label: 'C++', value: 'C++' }
-		)
+		expect(wrapper.find('[data-testid="programming-exercise-language"]').exists()).toBe(false)
 	})
 
 	it('refuses to render the form for a user who cannot manage exercises', async () => {
@@ -365,6 +372,18 @@ describe('ProgrammingExerciseForm as a route', () => {
 		await router.push('/programming-exercises/edit/new')
 		await mountForm(router, moderator)
 		expect(testCasesReload).not.toHaveBeenCalled()
+	})
+
+	it('loads editable hidden test cases only after the exercise exists', async () => {
+		const router = makeRouter()
+		await router.push('/programming-exercises/edit/EX-0001')
+		const wrapper = await mountForm(router, moderator)
+
+		expect(hiddenTestCasesUpdate).toHaveBeenCalledWith({
+			filters: { exercise: 'EX-0001' },
+		})
+		expect(hiddenTestCasesReload).toHaveBeenCalledTimes(1)
+		expect(wrapper.find('[data-testid="hidden-test-cases"]').exists()).toBe(true)
 	})
 
 	it('scopes its list resource to the SAME cache key ProgrammingExercises.vue uses', async () => {

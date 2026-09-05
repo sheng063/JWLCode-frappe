@@ -18,6 +18,7 @@
   "member_name",
   "member_image",
   "section_break_onmz",
+  "language",
   "code",
   "time_ms",
   "memory_kb",
@@ -77,6 +78,14 @@
   {
    "fieldname": "section_break_onmz",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "Python",
+   "fieldname": "language",
+   "fieldtype": "Select",
+   "label": "Language",
+   "options": "Python\nC++",
+   "read_only": 1
   },
   {
    "fieldname": "code",

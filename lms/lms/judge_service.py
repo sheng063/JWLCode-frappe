@@ -14,6 +14,8 @@ TERMINAL_STATUSES = {
 	"ACCEPTED", "WRONG_ANSWER", "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED",
 	"COMPILE_ERROR", "RUNTIME_ERROR", "SYSTEM_ERROR", "CANCELED",
 }
+SUPPORTED_LANGUAGES = {"Python", "C++"}
+
 STATUS_LABELS = {
 	"QUEUED": "Queued", "COMPILING": "Compiling", "RUNNING": "Running",
 	"ACCEPTED": "Passed", "WRONG_ANSWER": "Failed",
@@ -34,11 +36,13 @@ def _get_settings():
 	return settings
 
 
-def _validate_submission_access(exercise: str, code: str):
+def _validate_submission_access(exercise: str, code: str, language: str):
 	if frappe.session.user == "Guest":
 		frappe.throw(_("Please log in to submit code."), frappe.PermissionError)
 	if not frappe.has_permission("LMS Programming Exercise", "read", exercise):
 		frappe.throw(_("You do not have permission to access this exercise."), frappe.PermissionError)
+	if language not in SUPPORTED_LANGUAGES:
+		frappe.throw(_("Unsupported programming language."), frappe.ValidationError)
 	if not isinstance(code, str) or not code.strip():
 		frappe.throw(_("Source code is required."), frappe.ValidationError)
 	if len(code.encode()) > 256_000:
@@ -46,8 +50,10 @@ def _validate_submission_access(exercise: str, code: str):
 
 
 @frappe.whitelist()
-def submit_programming_exercise(exercise: str, code: str, client_request_id: str, submission: str = "new"):
-	_validate_submission_access(exercise, code)
+def submit_programming_exercise(
+	exercise: str, code: str, client_request_id: str, language: str = "Python", submission: str = "new"
+):
+	_validate_submission_access(exercise, code, language)
 	if not isinstance(client_request_id, str) or not 8 <= len(client_request_id) <= 140:
 		frappe.throw(_("A valid client request ID is required."), frappe.ValidationError)
 	existing = frappe.db.get_value(
@@ -69,6 +75,7 @@ def submit_programming_exercise(exercise: str, code: str, client_request_id: str
 			frappe.throw(_("You cannot update this submission."), frappe.PermissionError)
 
 	doc.code = code
+	doc.language = language
 	doc.status = "Queued"
 	doc.score = 0
 	doc.client_request_id = client_request_id
@@ -86,9 +93,9 @@ def submit_programming_exercise(exercise: str, code: str, client_request_id: str
 
 
 @frappe.whitelist()
-def run_programming_exercise(exercise: str, code: str):
+def run_programming_exercise(exercise: str, code: str, language: str = "Python"):
 	"""Run public examples without creating or updating a submission document."""
-	_validate_submission_access(exercise, code)
+	_validate_submission_access(exercise, code, language)
 	settings = _get_settings()
 	exercise_doc = frappe.get_doc("LMS Programming Exercise", exercise)
 	test_cases = [
@@ -98,7 +105,7 @@ def run_programming_exercise(exercise: str, code: str):
 	if not test_cases:
 		frappe.throw(_("At least one visible test case is required."), frappe.ValidationError)
 	payload = {
-		"language": exercise_doc.language,
+		"language": language,
 		"source_code": code,
 		"time_limit_seconds": flt(exercise_doc.time_limit_seconds or 2),
 		"memory_limit_kb": cint(exercise_doc.memory_limit_kb or 128000),
@@ -143,7 +150,7 @@ def dispatch_submission(submission_name: str):
 	payload = {
 		"submission_id": doc.name,
 		"idempotency_key": f"{doc.name}:{doc.client_request_id}",
-		"language": exercise.language,
+		"language": doc.language or "Python",
 		"source_code": doc.code,
 		"time_limit_seconds": flt(exercise.time_limit_seconds or 2),
 		"memory_limit_kb": cint(exercise.memory_limit_kb or 128000),
@@ -216,7 +223,41 @@ def _apply_result(doc, payload: dict):
 	doc.time_ms = cint(payload.get("time_ms"))
 	doc.memory_kb = cint(payload.get("memory_kb"))
 	doc.compiler_message = payload.get("compiler_message")
+	_record_first_failed_hidden_case(doc, payload)
 	doc.save(ignore_permissions=True)
+
+
+def _record_first_failed_hidden_case(doc, payload: dict):
+	"""Persist only one failed hidden case as feedback for its submitter.
+
+	The complete hidden suite stays in ``LMS Judge Test Case``. Submission
+	children are readable by their owner, so retaining every failed case here
+	would disclose the suite over repeated submissions.
+	"""
+	doc.set("test_cases", [])
+	if payload.get("status") == "ACCEPTED":
+		return
+
+	exercise = frappe.get_doc("LMS Programming Exercise", doc.exercise)
+	all_cases = _test_cases(exercise)
+	for result in payload.get("cases") or []:
+		index = cint(result.get("index")) - 1
+		if not 0 <= index < len(all_cases):
+			continue
+		case = all_cases[index]
+		if not case["hidden"] or result.get("status") == "Accepted":
+			continue
+		doc.append(
+			"test_cases",
+			{
+				"input": case["input"],
+				"expected_output": case["expected_output"],
+				"output": result.get("stdout") or "",
+				"status": "Failed",
+				"hidden": 1,
+			},
+		)
+		return
 
 
 def _refresh_from_judge_service(doc):

@@ -1,9 +1,35 @@
 <template>
-	<div class="flex flex-col h-full">
-		<div class="bg-surface-gray-1 px-5 py-5 border-b">
+	<div
+		v-if="collapsed"
+		class="group flex h-full items-center justify-center border-s bg-surface-base"
+	>
+		<button
+			type="button"
+			class="flex h-full w-full items-center justify-center text-ink-gray-6 outline-none transition-colors hover:bg-surface-gray-2 focus-visible:bg-surface-gray-2"
+			:aria-label="__('Expand chapters')"
+			data-testid="expand-chapters"
+			@click="emit('toggle-collapse')"
+		>
+			<ChevronLeft
+				class="size-5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+			/>
+			<span class="sr-only">{{ __('Expand chapters') }}</span>
+		</button>
+	</div>
+	<div v-else class="flex flex-col h-full">
+		<div class="relative bg-surface-gray-1 px-5 py-5 border-b">
+			<button
+				type="button"
+				class="absolute end-3 top-3 rounded p-1 text-ink-gray-6 transition-colors hover:bg-surface-gray-2 focus-visible:bg-surface-gray-2 focus-visible:outline-none"
+				:aria-label="__('Collapse chapters')"
+				data-testid="collapse-chapters"
+				@click="emit('toggle-collapse')"
+			>
+				<ChevronRight class="size-4" />
+			</button>
 			<div
 				v-if="!hideHeader"
-				class="text-lg-semibold text-ink-gray-9 leading-snug"
+				class="pe-7 text-lg-semibold text-ink-gray-9 leading-snug"
 			>
 				{{ courseTitle }}
 			</div>
@@ -127,6 +153,8 @@ import {
 	Circle,
 	CircleCheck,
 	Cloud,
+	ChevronLeft,
+	ChevronRight,
 	FileText,
 	HelpCircle,
 	LockKeyhole,
@@ -144,9 +172,10 @@ const props = defineProps({
 	inlineSelect: { type: Boolean, default: false },
 	withProgress: { type: Boolean, default: true },
 	hideHeader: { type: Boolean, default: false },
+	collapsed: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['select-lesson'])
+const emit = defineEmits(['select-lesson', 'toggle-collapse'])
 
 // Keep ?studentView=1 across lesson hops, or a moderator previewing the course
 // silently reverts to their own identity on the first sidebar click.

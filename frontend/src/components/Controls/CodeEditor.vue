@@ -1,9 +1,8 @@
 <template>
 	<div
 		class="editor flex flex-col gap-1.5"
-		:style="{
-			height: height,
-		}"
+		:class="{ 'editor-grow': fill }"
+		:style="fill ? null : { height: height }"
 	>
 		<InputLabel
 			v-if="label"
@@ -37,7 +36,7 @@ import ace from 'ace-builds'
 import 'ace-builds/src-min-noconflict/ext-searchbox'
 import 'ace-builds/src-min-noconflict/theme-chrome'
 import 'ace-builds/src-min-noconflict/theme-twilight'
-import { PropType, onMounted, ref, watch } from 'vue'
+import { PropType, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Button } from 'frappe-ui'
 import {
 	InputDescription,
@@ -69,6 +68,10 @@ const props = defineProps({
 	height: {
 		type: String,
 		default: '250px',
+	},
+	fill: {
+		type: Boolean,
+		default: false,
 	},
 	showLineNumbers: {
 		type: Boolean,
@@ -109,10 +112,25 @@ const {
 const emit = defineEmits(['save', 'update:modelValue'])
 const editor = ref<HTMLElement | null>(null)
 let aceEditor = null as ace.Ace.Editor | null
+let resizeObserver: ResizeObserver | null = null
 
 onMounted(() => {
 	isDark.value = localStorage.getItem('theme') === 'dark'
 	setupEditor()
+	// ACE only reflows on window resize by default. When the editor container's
+	// size changes without a window resize (e.g. a resizable pane, or a collapsed
+	// panel that frees space), the editor must be told to re-measure or it keeps
+	// its previous dimensions and leaves a gap. Observe the container and resize.
+	if (editor.value && typeof ResizeObserver !== 'undefined') {
+		resizeObserver = new ResizeObserver(() => {
+			aceEditor?.resize()
+		})
+		resizeObserver.observe(editor.value)
+	}
+})
+
+onBeforeUnmount(() => {
+	resizeObserver?.disconnect()
 })
 
 const setupEditor = () => {
@@ -210,3 +228,12 @@ watch(
 
 defineExpose({ resetEditor })
 </script>
+
+<style>
+/* When `fill` is set the editor grows to fill its flex parent instead of using a
+   fixed height. The parent must be a flex container with a definite height. */
+.editor-grow {
+	flex: 1 1 auto;
+	min-height: 0;
+}
+</style>

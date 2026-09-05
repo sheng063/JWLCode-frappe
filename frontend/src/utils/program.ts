@@ -4,7 +4,6 @@ import { Code } from 'lucide-vue-next'
 import translationPlugin from '@/translation'
 import ProgrammingExerciseModal from '@/components/Modals/ProgrammingExerciseModal.vue'
 import { call } from 'frappe-ui'
-import { usersStore } from '@/stores/user'
 import { getLmsRoute } from '@/utils/basePath'
 import { blockNotice, embedFrame } from '@/utils/blockDom'
 
@@ -82,19 +81,12 @@ export class Program {
 
 	renderExercise(exercise: string) {
 		if (this.readOnly) {
-			const { userResource } = usersStore()
-			call('frappe.client.get_value', {
-				doctype: 'LMS Programming Exercise Submission',
-				filters: {
-					exercise: exercise,
-					member: userResource.data?.name,
-				},
-				fieldname: ['name'],
-			}).then((data: { name: string }) => {
-				let submission = data.name || 'new'
+			call('lms.lms.api.get_latest_programming_exercise_submission', {
+				exercise,
+			}).then((submission: string) => {
 				const studentView = this.studentView ? '&studentView=1' : ''
 				const submissionPath = getLmsRoute(
-					`programming-exercises/${exercise}/submission/${submission}?fromLesson=1${studentView}`
+					`programming-exercises/${exercise}/submission/${submission || 'new'}?fromLesson=1${studentView}`
 				)
 				const frame = embedFrame(submissionPath, {
 					class: 'w-full h-[900px] border rounded-md',

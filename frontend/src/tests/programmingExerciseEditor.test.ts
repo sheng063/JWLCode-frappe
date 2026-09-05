@@ -28,8 +28,21 @@ describe('programming exercise answer editor', () => {
 		expect(appSource).toContain("route.name === 'ProgrammingExerciseSubmission'")
 	})
 
-	it('initializes code from starter code and the current submission only', () => {
-		expect(submissionSource).toContain('`${boilerplate.value}${submissionCode}`')
-		expect(submissionSource).not.toContain('`${boilerplate.value}${code.value}`')
+	it('offers Python and C++ templates and restores saved code', () => {
+		expect(submissionSource).toContain('#include <bits/stdc++.h>')
+		expect(submissionSource).toContain('using namespace std;')
+		expect(submissionSource).toContain('def solve() -> None:')
+		expect(submissionSource).toContain('data-testid="submission-language"')
+		expect(submissionSource).toContain('language: selectedLanguage.value')
+		expect(submissionSource).toContain('code.value = loadedSubmissionCode.value || starterCode.value')
+		expect(submissionSource).not.toContain('cout')
+	})
+
+	it('persists code after both run actions', () => {
+		expect(submissionSource).toContain('await createSubmission()')
+		expect(submissionSource).toContain('await saveJudgeRunCode()')
+		expect(submissionSource).toContain('save_programming_exercise_code')
+		expect(submissionSource).toContain('msg.file || msg.stream || msg.channel')
+		expect(submissionSource).toContain("testCase.output || '—'")
 	})
 })

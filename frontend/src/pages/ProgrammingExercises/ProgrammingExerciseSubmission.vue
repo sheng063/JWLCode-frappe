@@ -14,15 +14,22 @@
 			{{ __('Settings') }}
 		</Button>
 	</div>
-	<div class="programming-workspace grid grid-cols-1 lg:grid-cols-2 h-[calc(100vh_-_3rem)] bg-surface-gray-1">
-		<div class="border-e py-5 px-8 h-full overflow-y-auto bg-surface-white">
+	<div
+		ref="workspace"
+		class="programming-workspace flex flex-col lg:flex-row h-[calc(100vh_-_3rem)] bg-surface-gray-1"
+		:class="{ resizing: horizontalDragging || verticalDragging }"
+	>
+		<div
+			class="border-b lg:border-b-0 lg:border-e py-5 px-8 bg-surface-white shrink-0 lg:h-full lg:overflow-y-auto"
+			:style="isDesktop ? { width: leftPanelWidth + 'px' } : null"
+		>
 			<h2 class="font-semibold mb-2 text-ink-gray-9">
 				{{ __('Problem Statement') }}
 			</h2>
-			<div
-				v-safe-html:rich="exercise.doc?.problem_statement"
+			<MathContent
+				:html="exercise.doc?.problem_statement"
 				class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal"
-			></div>
+			/>
 			<section v-if="exercise.doc?.test_cases?.length" class="mt-8 pt-6 border-t">
 				<h2 class="font-semibold text-ink-gray-9">{{ __('Test Cases') }}</h2>
 				<div class="mt-3 space-y-3">
@@ -36,11 +43,28 @@
 				</div>
 			</section>
 		</div>
-		<div class="flex min-h-0 flex-col">
-			<div class="flex items-center justify-between p-3 bg-surface-white border-b">
-				<div class="font-semibold text-ink-gray-9">
-					{{ exercise.doc?.language }}
-				</div>
+
+		<!-- Resizable divider between the problem-statement pane and the editor pane -->
+		<div
+			v-if="isDesktop"
+			class="programming-resizer resizer-vertical"
+			:class="{ dragging: horizontalDragging }"
+			@mousedown.prevent="startHorizontalResize"
+			role="separator"
+			aria-orientation="vertical"
+			aria-label="Resize panes"
+		></div>
+
+		<div ref="rightColumn" class="flex min-h-0 flex-col flex-1">
+			<div ref="rightHeader" class="flex items-center justify-between p-3 bg-surface-white border-b shrink-0">
+				<FormControl
+					v-model="selectedLanguage"
+					data-testid="submission-language"
+					type="select"
+					:options="codeLanguageOptions"
+					:disabled="running || submitting"
+					class="w-32"
+				/>
 				<div class="flex items-center gap-x-2">
 					<Badge
 						v-if="submission.doc?.status"
@@ -48,6 +72,17 @@
 					>
 						{{ submission.doc.status }}
 					</Badge>
+					<Button
+						v-if="submissionID == 'new' || user.data?.name == submission.doc?.owner"
+						@click="resetCode"
+						:disabled="running || submitting"
+						class="text-ink-gray-9"
+					>
+						<template #prefix>
+							<span class="lucide-rotate-ccw size-3" />
+						</template>
+						{{ __('Reset') }}
+					</Button>
 					<Button
 						v-if="
 							(exercise.doc?.evaluation_mode === 'Judge Service' || !falconError) &&
@@ -82,26 +117,67 @@
 					</Button>
 				</div>
 			</div>
-			<div class="flex flex-col p-4 bg-surface-white border-b">
-				<CodeEditor
-					v-model="code"
-					:type="editorLanguage"
-					height="400px"
-					:show-line-numbers="true"
-				/>
-
+			<div
+				ref="editorPane"
+				:class="[
+					'flex flex-col overflow-hidden bg-surface-white',
+					testPanelCollapsed ? 'flex-1 min-h-0' : 'shrink-0',
+				]"
+				:style="testPanelCollapsed ? null : { height: editorPaneHeight + 'px' }"
+			>
+				<div class="flex-1 min-h-0 p-4 editor-fill">
+					<CodeEditor
+						v-model="code"
+						:type="editorLanguage"
+						:show-line-numbers="true"
+						fill
+					/>
+				</div>
 			</div>
 
-			<div ref="testCaseSection" class="min-h-0 flex-1 overflow-y-auto bg-surface-white">
+			<!-- Resizable divider between the editor pane and the test-results pane -->
+			<div
+				v-if="!testPanelCollapsed"
+				class="programming-resizer resizer-horizontal"
+				:class="{ dragging: verticalDragging }"
+				@mousedown.prevent="startVerticalResize"
+				role="separator"
+				aria-orientation="horizontal"
+				aria-label="Resize editor and test results"
+			></div>
+
+			<div
+				ref="testCaseSection"
+				:class="[
+					'bg-surface-white',
+					testPanelCollapsed ? 'shrink-0' : 'min-h-0 flex-1 overflow-y-auto',
+				]"
+			>
 				<div class="flex items-center gap-6 border-b px-5">
 					<button class="test-panel-tab" :class="{ 'test-panel-tab-active': activeTestPanel === 'cases' }" @click="activeTestPanel = 'cases'"><span class="lucide-list-checks size-4" />{{ __('Test Cases') }}</button>
-					<button class="test-panel-tab" :class="{ 'test-panel-tab-active': activeTestPanel === 'results' }" @click="activeTestPanel = 'results'"><span class="lucide-terminal size-4" />{{ __('Test Results') }}</button>
+					<button class="test-panel-tab" :class="{ 'test-panel-tab-active': activeTestPanel === 'results' }" @click="activeTestPanel = 'results'"><span class="lucide-terminal size-4" />{{ __('测试结果') }}</button>
+					<button
+						class="test-panel-collapse ms-auto"
+						:class="{ 'test-panel-collapse-active': testPanelCollapsed }"
+						:aria-expanded="!testPanelCollapsed"
+						:aria-label="testPanelCollapsed ? __('展开测试结果') : __('折叠测试结果')"
+						:title="testPanelCollapsed ? __('展开测试结果') : __('折叠测试结果')"
+						@click="toggleTestPanel"
+					>
+						<span
+							:class="[
+								testPanelCollapsed ? 'lucide-chevrons-up' : 'lucide-chevrons-down',
+								'size-4',
+							]"
+						/>
+					</button>
 				</div>
-				<div v-if="activeTestPanel === 'cases'" class="p-5">
+				<template v-if="!testPanelCollapsed">
+					<div v-if="activeTestPanel === 'cases'" class="p-5">
 					<div v-if="exercise.doc?.test_cases?.length" class="divide-y">
 						<div v-for="(testCase, index) in exercise.doc.test_cases" :key="testCase.name || index" class="py-3 first:pt-0">
 							<div class="font-medium text-ink-gray-9">{{ __('Test {0}').format(index + 1) }}</div>
-							<div class="mt-2 grid gap-3 sm:grid-cols-2 text-sm"><div><span class="text-ink-gray-6">{{ __('Input') }}:</span> {{ testCase.input || '—' }}</div><div><span class="text-ink-gray-6">{{ __('Expected Output') }}:</span> {{ testCase.expected_output }}</div></div>
+							<div class="mt-2 grid gap-3 sm:grid-cols-2 text-sm"><div><span class="text-ink-gray-6">{{ __('Input') }}:</span><pre class="test-case-value">{{ testCase.input || '—' }}</pre></div><div><span class="text-ink-gray-6">{{ __('Expected Output') }}:</span><pre class="test-case-value">{{ testCase.expected_output }}</pre></div></div>
 						</div>
 					</div>
 					<div v-else class="text-sm text-ink-gray-6">{{ __('No test cases available.') }}</div>
@@ -116,7 +192,7 @@
 					>
 						<div class="flex items-center mb-3">
 							<span class="text-ink-gray-9">
-								{{ __('Test {0}').format(index + 1) }} -
+								{{ testCase.hidden ? __('Failed hidden test') : __('Test {0}').format(index + 1) }} -
 							</span>
 							<span
 								class="font-semibold ms-2 me-1"
@@ -134,23 +210,21 @@
 								<div class="text-xs text-ink-gray-7">
 									{{ __('Input') }}
 								</div>
-								<div class="text-ink-gray-9">{{ testCase.input }}</div>
+								<pre class="test-case-value">{{ testCase.input }}</pre>
 							</div>
 							<div class="space-y-2">
 								<div class="text-xs text-ink-gray-7">
 									{{ __('Your Output') }}
 								</div>
-								<div class="text-ink-gray-9">
-									{{ testCase.output }}
+								<div class="text-ink-gray-9 whitespace-pre-wrap">
+									{{ testCase.output || '—' }}
 								</div>
 							</div>
 							<div class="space-y-2">
 								<div class="text-xs text-ink-gray-7">
 									{{ __('Expected Output') }}
 								</div>
-								<div class="text-ink-gray-9">
-									{{ testCase.expected_output }}
-								</div>
+								<pre class="test-case-value">{{ testCase.expected_output }}</pre>
 							</div>
 						</div>
 					</div>
@@ -158,16 +232,19 @@
 				<div v-else class="text-sm text-ink-gray-6 mt-4">
 					{{ __('Run or submit your code to view the test results.') }}
 				</div>
+				</div>
+				</template>
 			</div>
 		</div>
 	</div>
-	</div>
 </template>
 <script setup lang="ts">
+import MathContent from '@/components/MathContent.vue'
 import {
 	Badge,
 	Button,
 	call,
+	FormControl,
 	createDocumentResource,
 	toast,
 	usePageMeta,
@@ -181,6 +258,7 @@ import { openSettings } from '@/utils'
 import { useSettings } from '@/stores/settings'
 import { getLmsRoute } from '@/utils/basePath'
 import { provideStudentView } from '@/composables/useStudentView'
+import { useScreenSize } from '@/utils/composables'
 
 const realUser = inject<any>('$user')
 
@@ -198,14 +276,19 @@ const { mockedUser: user } = provideStudentView(
 	() => studentView.value
 )
 const code = ref<string | null>('')
+const selectedLanguage = ref<'Python' | 'C++'>('Python')
+const codeLanguageOptions = [
+	{ label: 'Python', value: 'Python' },
+	{ label: 'C++', value: 'C++' },
+]
 const output = ref<string | null>(null)
 const error = ref<boolean | null>(null)
 const errorMessage = ref<string | null>(null)
 const testCaseSection = ref<HTMLElement | null>(null)
 const testCases = ref<TestCase[]>([])
 const activeTestPanel = ref<'cases' | 'results'>('cases')
+const testPanelCollapsed = ref(false)
 const resultMessage = ref<{ tone: 'success' | 'error' | 'info'; title: string; detail?: string | null } | null>(null)
-const boilerplate = ref<string>('')
 const { brand } = sessionStore()
 const { settings } = useSettings()
 const router = useRouter()
@@ -215,6 +298,134 @@ const falconError = ref<string | null>(null)
 const running = ref<boolean>(false)
 const submitting = ref<boolean>(false)
 let statusTimer: ReturnType<typeof setTimeout> | null = null
+
+// Resizable panes: the divider between the problem-statement pane and the
+// editor pane (horizontal split), and the divider between the editor pane and
+// the test-results pane (vertical split). Both share the same drag mechanics —
+// a flagged state that tracks the drag, plus a mousemove/mouseup pair bound to
+// the document so the drag keeps tracking even when the pointer leaves the thin
+// divider. Sizes are clamped so no pane collapses below a usable minimum.
+const { size } = useScreenSize()
+const isDesktop = computed(() => size.width >= 1024)
+
+const workspace = ref<HTMLElement | null>(null)
+const rightColumn = ref<HTMLElement | null>(null)
+const rightHeader = ref<HTMLElement | null>(null)
+const editorPane = ref<HTMLElement | null>(null)
+
+const leftPanelWidth = ref(480)
+const editorPaneHeight = ref(420)
+const horizontalDragging = ref(false)
+const verticalDragging = ref(false)
+
+const LEFT_PANE_MIN = 320
+const RIGHT_PANE_MIN = 480
+const EDITOR_PANE_MIN = 120
+const TEST_RESULTS_PANE_MIN = 160
+const RESIZER_THICKNESS = 6
+
+const clamp = (value: number, min: number, max: number) =>
+	Math.min(Math.max(value, min), max)
+
+const headerHeight = () => rightHeader.value?.offsetHeight || 0
+
+const maxEditorHeight = () => {
+	if (!rightColumn.value) return EDITOR_PANE_MIN
+	return Math.max(
+		EDITOR_PANE_MIN,
+		rightColumn.value.clientHeight -
+			headerHeight() -
+			TEST_RESULTS_PANE_MIN -
+			RESIZER_THICKNESS
+	)
+}
+
+const setInitialLayout = () => {
+	if (workspace.value) {
+		const maxLeft = workspace.value.clientWidth - RIGHT_PANE_MIN
+		leftPanelWidth.value = clamp(
+			Math.round(workspace.value.clientWidth * 0.42),
+			LEFT_PANE_MIN,
+			Math.max(LEFT_PANE_MIN, maxLeft)
+		)
+	}
+	if (rightColumn.value) {
+		const computed = Math.round(maxEditorHeight() * 0.55)
+		editorPaneHeight.value = clamp(computed, EDITOR_PANE_MIN, maxEditorHeight())
+	}
+}
+
+const reflowPanes = () => {
+	if (!isDesktop.value) return
+	if (workspace.value) {
+		const maxLeft = workspace.value.clientWidth - RIGHT_PANE_MIN
+		leftPanelWidth.value = clamp(
+			leftPanelWidth.value,
+			LEFT_PANE_MIN,
+			Math.max(LEFT_PANE_MIN, maxLeft)
+		)
+	}
+	if (rightColumn.value) {
+		editorPaneHeight.value = clamp(
+			editorPaneHeight.value,
+			EDITOR_PANE_MIN,
+			maxEditorHeight()
+		)
+	}
+}
+
+const startHorizontalResize = (event: MouseEvent) => {
+	if (!workspace.value || !isDesktop.value) return
+	horizontalDragging.value = true
+	const startX = event.clientX
+	const startWidth = leftPanelWidth.value
+	const maxLeft = workspace.value.clientWidth - RIGHT_PANE_MIN
+
+	const onMove = (e: MouseEvent) => {
+		leftPanelWidth.value = clamp(
+			startWidth + (e.clientX - startX),
+			LEFT_PANE_MIN,
+			Math.max(LEFT_PANE_MIN, maxLeft)
+		)
+	}
+	const onUp = () => {
+		horizontalDragging.value = false
+		document.removeEventListener('mousemove', onMove)
+		document.removeEventListener('mouseup', onUp)
+	}
+	document.addEventListener('mousemove', onMove)
+	document.addEventListener('mouseup', onUp)
+}
+
+const startVerticalResize = (event: MouseEvent) => {
+	if (!rightColumn.value) return
+	verticalDragging.value = true
+	const startY = event.clientY
+	const startHeight = editorPaneHeight.value
+	const maxHeight = maxEditorHeight()
+
+	const onMove = (e: MouseEvent) => {
+		editorPaneHeight.value = clamp(
+			startHeight + (e.clientY - startY),
+			EDITOR_PANE_MIN,
+			maxHeight
+		)
+	}
+	const onUp = () => {
+		verticalDragging.value = false
+		document.removeEventListener('mousemove', onMove)
+		document.removeEventListener('mouseup', onUp)
+	}
+	document.addEventListener('mousemove', onMove)
+	document.addEventListener('mouseup', onUp)
+}
+
+// Collapse/expand the test-results pane. When collapsed it becomes a thin bar
+// (the tab header) at the bottom of the editor column and the code editor fills
+// the freed space; clicking the toggle again expands it back.
+const toggleTestPanel = () => {
+	testPanelCollapsed.value = !testPanelCollapsed.value
+}
 
 const props = withDefaults(
 	defineProps<{
@@ -231,10 +442,13 @@ onMounted(() => {
 	checkIfUserIsPermitted()
 	checkIfInLesson()
 	fetchSubmission()
+	setInitialLayout()
+	window.addEventListener('resize', reflowPanes)
 })
 
 onBeforeUnmount(() => {
 	if (statusTimer) clearTimeout(statusTimer)
+	window.removeEventListener('resize', reflowPanes)
 })
 
 const checkIfInLesson = () => {
@@ -259,11 +473,7 @@ const exercise = createDocumentResource({
 	auto: true,
 })
 
-const editorLanguage = computed<'Python' | 'JavaScript' | 'C++'>(() => {
-	if (exercise.doc?.language === 'JavaScript') return 'JavaScript'
-	if (exercise.doc?.language === 'C++') return 'C++'
-	return 'Python'
-})
+const editorLanguage = computed<'Python' | 'C++'>(() => selectedLanguage.value)
 
 const submission = createDocumentResource({
 	doctype: 'LMS Programming Exercise Submission',
@@ -283,29 +493,54 @@ const submission = createDocumentResource({
 
 const loadedSubmissionCode = ref('')
 
+const starterCode = computed(() => {
+	if (selectedLanguage.value === 'C++') {
+		return `#include <bits/stdc++.h>
+using namespace std;
+int main() {
+
+
+	return 0;
+}`
+	}
+	return `import sys
+
+
+def solve() -> None:
+	data = sys.stdin.read().strip()
+	# Write your solution here.
+
+
+if __name__ == "__main__":
+	solve()
+`
+})
+
 const updateCode = () => {
-	if (!exercise.doc) return
-	updateBoilerPlate()
-	const submissionCode = loadedSubmissionCode.value
-	code.value =
-		exercise.doc.evaluation_mode === 'Judge Service' && submissionCode
-			? submissionCode
-			: `${boilerplate.value}${submissionCode}`
+	// A new C++ exercise starts from the minimal template. Once a member has
+	// run or submitted code, load that saved source instead.
+	code.value = loadedSubmissionCode.value || starterCode.value
 }
 
 watch(() => exercise.doc, updateCode)
 
-const updateBoilerPlate = () => {
-	if (exercise.doc?.language == 'Python') {
-		boilerplate.value = exercise.doc?.evaluation_mode === 'Judge Service'
-			? `import sys\n\ndata = sys.stdin.read()\ninputs = data.split() if len(data) else []\n\n# inputs is a list of strings\n# write your code below\n\n`
-			: `with open("stdin", "r") as f:\n    data = f.read()\n\ninputs = data.split() if len(data) else []\n\n# inputs is a list of strings\n# write your code below\n\n`
-	} else if (exercise.doc?.language == 'JavaScript') {
-		const inputPath = exercise.doc?.evaluation_mode === 'Judge Service' ? '0' : "'/app/stdin'"
-		boilerplate.value = `const fs = require('fs');\n\nlet input = fs.readFileSync(${inputPath}, 'utf8').trim();\nconst inputs = input.split("\\n");\n// inputs is an array of strings\n// write your code below\n`
-	} else if (exercise.doc?.language == 'C++') {
-		boilerplate.value = `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    // write your code below\n\n    return 0;\n}\n`
-	}
+// For an unanswered exercise, changing the language must start from that
+// language's template instead of retaining source written for another runtime.
+// Saved submissions remain authoritative and are restored unchanged.
+watch(selectedLanguage, () => {
+	if (!loadedSubmissionCode.value) code.value = starterCode.value
+})
+
+// Reset the editor to its language starter template and clear any run output.
+const resetCode = () => {
+	loadedSubmissionCode.value = ''
+	code.value = starterCode.value
+	output.value = null
+	error.value = null
+	errorMessage.value = null
+	resultMessage.value = null
+	testCases.value = []
+	activeTestPanel.value = 'cases'
 }
 
 const checkIfUserIsPermitted = (doc: any = null) => {
@@ -342,6 +577,7 @@ watch(
 		if (doc) {
 			checkIfUserIsPermitted(doc)
 			updateTestCases(doc)
+			if (doc.language === 'Python' || doc.language === 'C++') selectedLanguage.value = doc.language
 			loadedSubmissionCode.value = doc.code || ''
 			updateCode()
 		}
@@ -385,8 +621,10 @@ const runCodeOnly = async () => {
 	try {
 		if (exercise.doc?.evaluation_mode === 'Judge Service') {
 			await runJudgeCode()
+			await saveJudgeRunCode()
 		} else {
 			await runCode()
+			await createSubmission()
 		}
 	} catch (e: any) {
 		error.value = true
@@ -407,6 +645,7 @@ const runJudgeCode = async () => {
 	const result = await call('lms.lms.judge_service.run_programming_exercise', {
 		exercise: props.exerciseID,
 		code: code.value || '',
+		language: selectedLanguage.value,
 	})
 	if (result.compiler_message) {
 		error.value = true
@@ -426,10 +665,14 @@ const runJudgeCode = async () => {
 }
 
 const createJudgeSubmission = async () => {
+	// A previous public run may have populated this panel. Clear it so the
+	// revealed failed hidden case from this submission can replace it.
+	testCases.value = []
 	const data = await call('lms.lms.judge_service.submit_programming_exercise', {
 		exercise: props.exerciseID,
 		submission: props.submissionID,
 		code: code.value || '',
+		language: selectedLanguage.value,
 		client_request_id: crypto.randomUUID(),
 	})
 	const submissionName = data.submission
@@ -442,6 +685,25 @@ const createJudgeSubmission = async () => {
 	fetchSubmission(submissionName)
 	pollJudgeStatus(submissionName)
 	showResult('info', __('Submission queued'), __('Your code is being evaluated.'))
+}
+
+// A public Judge Service run is not sent to the judge queue, but it should
+// still retain the member's source just like the local runner does.
+const saveJudgeRunCode = async () => {
+	const data = await call('lms.lms.api.save_programming_exercise_code', {
+		exercise: props.exerciseID,
+		submission: props.submissionID,
+		code: code.value || '',
+		language: selectedLanguage.value,
+	})
+	const submissionName = data as string
+	if (props.submissionID === 'new') {
+		await router.push({
+			name: 'ProgrammingExerciseSubmission',
+			params: { exerciseID: props.exerciseID, submissionID: submissionName },
+		})
+	}
+	fetchSubmission(submissionName)
 }
 
 const pollJudgeStatus = (submissionName: string) => {
@@ -508,65 +770,66 @@ const showResult = (tone: 'success' | 'error' | 'info', title: string, detail: s
 	resultMessage.value = { tone, title, detail }
 }
 
-const createSubmission = () => {
+const createSubmission = async () => {
 	if (!testCases.value.length) return
-	let codeToSave = code.value?.replace(boilerplate.value, '') || ''
-
-	return call('lms.lms.api.create_programming_exercise_submission', {
-		exercise: props.exerciseID,
-		submission: props.submissionID,
-		code: codeToSave,
-		test_cases: testCases.value,
-	})
-		.then((data: any) => {
-			if (props.submissionID == 'new') {
-				router.push({
-					name: 'ProgrammingExerciseSubmission',
-					params: { exerciseID: props.exerciseID, submissionID: data },
-				})
-				fetchSubmission(data)
-			} else {
-				fetchSubmission(props.submissionID)
-			}
-			showTestCaseSummary()
+	try {
+		const data = await call('lms.lms.api.create_programming_exercise_submission', {
+			exercise: props.exerciseID,
+			submission: props.submissionID,
+			code: code.value || '',
+			language: selectedLanguage.value,
+			test_cases: testCases.value,
 		})
-		.catch((error: any) => {
-			console.error('Error creating submission:', error)
-			showResult('error', __('Unable to submit code'), String(error))
-		})
+		if (props.submissionID == 'new') {
+			await router.push({
+				name: 'ProgrammingExerciseSubmission',
+				params: { exerciseID: props.exerciseID, submissionID: data },
+			})
+			fetchSubmission(data)
+		} else {
+			fetchSubmission(props.submissionID)
+		}
+		showTestCaseSummary()
+	} catch (error: any) {
+		console.error('Error creating submission:', error)
+		showResult('error', __('Unable to submit code'), String(error))
+		throw error
+	}
 }
-
 const execute = (stdin = ''): Promise<string> => {
 	return new Promise((resolve, reject) => {
 		let outputChunks: string[] = []
+		let finalOutput: string | null = null
 		let hasExited = false
-		let hasError = false
+
+		const messageText = (value: unknown): string => {
+			if (typeof value === 'string') return value
+			if (value && typeof value === 'object' && 'text' in value) {
+				return String((value as { text: unknown }).text ?? '')
+			}
+			return value == null ? '' : String(value)
+		}
 
 		let session = new LiveCodeSession({
 			base_url: falconURL.value,
-			runtime: exercise.doc?.language.toLowerCase() || 'python',
+			runtime: selectedLanguage.value.toLowerCase(),
 			code: code.value,
 			files: [{ filename: 'stdin', contents: stdin }],
 			onMessage: (msg: any) => {
-				console.log('msg', msg)
-
-				if (msg.msgtype === 'write' && msg.file === 'stdout') {
-					outputChunks.push(msg.data)
+				const stream = msg.file || msg.stream || msg.channel
+				if (msg.msgtype === 'stdout' || (msg.msgtype === 'write' && stream === 'stdout')) {
+					outputChunks.push(messageText(msg.data ?? msg.output))
 				}
+				if (typeof msg.stdout !== 'undefined') finalOutput = messageText(msg.stdout)
 
-				if (msg.msgtype === 'write' && msg.file === 'stderr') {
-					hasError = true
-					errorMessage.value = msg.data
+				if (msg.msgtype === 'stderr' || (msg.msgtype === 'write' && stream === 'stderr')) {
+					errorMessage.value = messageText(msg.data ?? msg.output)
 				}
 
 				if (msg.msgtype === 'exitstatus') {
 					hasExited = true
-					if (msg.exitstatus !== 0) {
-						error.value = true
-					} else {
-						error.value = false
-					}
-					resolve(outputChunks.join('').trim())
+					error.value = msg.exitstatus !== 0
+					resolve((finalOutput ?? outputChunks.join('')).trim())
 				}
 			},
 		})
@@ -612,4 +875,93 @@ usePageMeta(() => {
 .result-notice-success { background: theme('colors.green.100'); color: theme('colors.green.800'); }
 .result-notice-error { background: theme('colors.red.100'); color: theme('colors.red.700'); }
 .result-notice-info { background: theme('colors.blue.100'); color: theme('colors.blue.800'); }
+
+/* Resizable panes. A thin divider sits between the panes; hovering or dragging
+   it reveals a blue indicator (a full-length line plus a light blue tint) so the
+   user knows the boundary can be dragged to resize each region. */
+.programming-workspace.resizing {
+	user-select: none;
+}
+.programming-resizer {
+	position: relative;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: theme('colors.gray.200');
+	z-index: 20;
+	user-select: none;
+	touch-action: none;
+	transition: background 0.15s ease;
+}
+.programming-resizer:hover,
+.programming-resizer.dragging {
+	background: theme('colors.blue.100');
+}
+.resizer-vertical {
+	width: 6px;
+	cursor: col-resize;
+}
+.resizer-horizontal {
+	height: 6px;
+	cursor: row-resize;
+}
+.resizer-vertical::before,
+.resizer-horizontal::before {
+	content: '';
+	position: absolute;
+	background: transparent;
+	transition: background 0.15s ease;
+}
+.resizer-vertical::before {
+	top: 0;
+	bottom: 0;
+	left: 50%;
+	width: 2px;
+	transform: translateX(-50%);
+}
+.resizer-horizontal::before {
+	left: 0;
+	right: 0;
+	top: 50%;
+	height: 2px;
+	transform: translateY(-50%);
+}
+.programming-resizer:hover::before,
+.programming-resizer.dragging::before {
+	background: theme('colors.blue.500');
+}
+
+/* Make the code editor fill the resizable editor pane so the divider drag
+   genuinely changes how much vertical space the editor (and the test-results
+   pane below it) gets. The pane's height changes when the splitter is dragged
+   or the test-results panel is collapsed, and the editor must track it —
+   without this the editor keeps its own height and leaves a gap under it.
+   The wrapper is a flex column; the CodeEditor is given `fill` so it grows to
+   fill it, and the CodeEditor observes its container and reflows on resize. */
+.editor-fill {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+/* Collapse/expand toggle for the test-results panel, sitting at the right end
+   of the tab header. When the panel is collapsed it keeps just this header as a
+   thin bar at the bottom; the chevron flips to signal the next action. */
+.test-panel-collapse {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.375rem 0.5rem;
+	border-radius: 0.375rem;
+	color: theme('colors.gray.600');
+	transition: color 0.15s ease, background 0.15s ease;
+}
+.test-panel-collapse:hover {
+	color: theme('colors.gray.900');
+	background: theme('colors.gray.100');
+}
+.test-panel-collapse-active {
+	color: theme('colors.gray.900');
+}
 </style>

@@ -13,6 +13,7 @@ export interface TestCase {
     expected_output: string;
     output: string;
     status: 'Passed' | 'Failed';
+    hidden?: 0 | 1;
 }
 
 type Filters = {

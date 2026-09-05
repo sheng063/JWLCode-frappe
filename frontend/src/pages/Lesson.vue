@@ -50,7 +50,14 @@
 			</Button>
 		</div>
 
-		<div class="grid md:grid-cols-[70%,30%] sm:h-[94vh]">
+		<div
+			class="grid sm:h-[94vh]"
+			:class="
+				isLessonSidebarCollapsed
+					? 'md:grid-cols-[minmax(0,1fr),2.5rem]'
+					: 'md:grid-cols-[70%,30%]'
+			"
+		>
 			<div v-if="lesson.data.no_preview" class="sm:border-e">
 				<div class="shadow rounded-md w-3/4 mt-10 mx-auto text-center p-4">
 					<div class="flex items-center justify-center mt-4 gap-x-2">
@@ -318,13 +325,15 @@
 					</div>
 				</div>
 			</div>
-			<aside v-if="!isMobile" class="sticky top-10 h-[94vh]">
+			<aside v-if="!isMobile" class="sticky top-10 h-[94vh] min-w-0">
 				<StudentLessonSidebar
 					:courseName="courseName"
 					:courseTitle="lesson.data.course_title"
 					:progress="lessonProgress"
 					:selectedLessonNumber="`${chapterNumber}-${lessonNumber}`"
 					:completedLesson="completedLesson"
+					:collapsed="isLessonSidebarCollapsed"
+					@toggle-collapse="isLessonSidebarCollapsed = !isLessonSidebarCollapsed"
 				/>
 			</aside>
 		</div>
@@ -456,6 +465,7 @@ const completedLesson = ref(null)
 const settingsStore = useSettings()
 const { isMobile } = useScreenSize()
 const showChapters = ref(false)
+const isLessonSidebarCollapsed = ref(false)
 let timerInterval = null
 
 const tabs = ref([])

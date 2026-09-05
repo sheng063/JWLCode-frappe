@@ -17,4 +17,6 @@ export interface LMSTestCaseSubmission {
 	output: string
 	/**	Status : Select	*/
 	status: 'Passed' | 'Failed'
+	/**	Hidden Test Case : Check	*/
+	hidden?: 0 | 1
 }

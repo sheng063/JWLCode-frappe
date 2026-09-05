@@ -2296,24 +2296,84 @@ def validate_meta_data_permissions(meta_type: str):
 
 
 @frappe.whitelist()
-def create_programming_exercise_submission(exercise: str, submission: str, code: str, test_cases: list):
+def get_latest_programming_exercise_submission(exercise: str):
+	"""Return the current member's newest submission for an exercise.
+
+	The lesson programming block uses this to decide whether the editor should
+	open a saved answer or its language starter template. ``get_value`` without
+	an order is not sufficient here: an exercise can have several submissions,
+	and it may select an older one.
+	"""
+	if frappe.session.user == "Guest":
+		frappe.throw(_("You must be logged in to view programming exercises."), frappe.PermissionError)
+
+	submissions = frappe.get_all(
+		"LMS Programming Exercise Submission",
+		filters={"exercise": exercise, "member": frappe.session.user},
+		pluck="name",
+		order_by="modified desc, creation desc, name desc",
+		limit_page_length=1,
+	)
+	return submissions[0] if submissions else "new"
+
+
+@frappe.whitelist()
+def create_programming_exercise_submission(
+	exercise: str, submission: str, code: str, test_cases: list, language: str = "Python"
+):
 	frappe.only_for(["Moderator", "Course Creator", "Batch Evaluator"])
 	if frappe.db.get_value("LMS Programming Exercise", exercise, "evaluation_mode") == "Judge Service":
 		frappe.throw(
 			_("This exercise must be evaluated by Judge Service."),
 			frappe.PermissionError,
 		)
+	if language not in {"Python", "C++"}:
+		frappe.throw(_("Unsupported programming language."), frappe.ValidationError)
 	if submission == "new":
-		return make_new_exercise_submission(exercise, code, test_cases)
+		return make_new_exercise_submission(exercise, code, test_cases, language)
 	else:
-		update_exercise_submission(submission, code, test_cases)
+		update_exercise_submission(submission, code, test_cases, language)
 
 
-def make_new_exercise_submission(exercise: str, code: str, test_cases: list):
+@frappe.whitelist()
+def save_programming_exercise_code(
+	exercise: str, submission: str, code: str, language: str = "Python"
+):
+	"""Persist source produced by a non-submitting Judge Service run."""
+	frappe.only_for(["Moderator", "Course Creator", "Batch Evaluator"])
+	if not isinstance(code, str) or not code.strip():
+		frappe.throw(_("Source code is required."), frappe.ValidationError)
+	if language not in {"Python", "C++"}:
+		frappe.throw(_("Unsupported programming language."), frappe.ValidationError)
+
+	if submission == "new":
+		doc = frappe.new_doc("LMS Programming Exercise Submission")
+		doc.exercise = exercise
+		doc.member = frappe.session.user
+		doc.code = code
+		doc.language = language
+		doc.insert()
+		return doc.name
+
+	member = frappe.db.get_value(
+		"LMS Programming Exercise Submission",
+		{"name": submission, "exercise": exercise},
+		"member",
+	)
+	if member != frappe.session.user:
+		frappe.throw(_("You do not have permission to update this submission."), frappe.PermissionError)
+	frappe.db.set_value(
+		"LMS Programming Exercise Submission", submission, {"code": code, "language": language}
+	)
+	return submission
+
+
+def make_new_exercise_submission(exercise: str, code: str, test_cases: list, language: str):
 	submission = frappe.new_doc("LMS Programming Exercise Submission")
 	submission.exercise = exercise
 	submission.member = frappe.session.user
 	submission.code = code
+	submission.language = language
 
 	for test_case in test_cases:
 		submission.append(
@@ -2331,14 +2391,16 @@ def make_new_exercise_submission(exercise: str, code: str, test_cases: list):
 	return submission.name
 
 
-def update_exercise_submission(submission: str, code: str, test_cases: list):
+def update_exercise_submission(submission: str, code: str, test_cases: list, language: str):
 	member = frappe.db.get_value("LMS Programming Exercise Submission", submission, "member")
 	if member != frappe.session.user:
 		frappe.throw(_("You do not have permission to update this submission."), frappe.PermissionError)
 
 	update_test_cases(test_cases, submission)
 	status = get_exercise_status(test_cases)
-	frappe.db.set_value("LMS Programming Exercise Submission", submission, {"status": status, "code": code})
+	frappe.db.set_value(
+		"LMS Programming Exercise Submission", submission, {"status": status, "code": code, "language": language}
+	)
 
 
 def get_exercise_status(test_cases: list):

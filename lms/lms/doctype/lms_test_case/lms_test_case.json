@@ -12,7 +12,7 @@
  "fields": [
   {
    "fieldname": "input",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "in_list_view": 1,
    "label": "Input"
   },
@@ -22,7 +22,7 @@
   },
   {
    "fieldname": "expected_output",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "in_list_view": 1,
    "label": "Expected Output",
    "reqd": 1
