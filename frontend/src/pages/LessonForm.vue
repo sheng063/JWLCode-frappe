@@ -97,7 +97,40 @@
 				/>
 			</details>
 
+			<p class="text-sm text-ink-gray-6">
+				{{
+					programmingLesson
+						? __('编程题目课时：仅可添加编程题目。')
+						: __('文本课时：不能插入编程题目。')
+				}}
+			</p>
+			<p
+				v-if="hasMixedLessonContent(lesson)"
+				role="alert"
+				class="text-sm text-ink-red-6"
+			>
+				{{ __('此课时混用了编程题目和其他内容，请拆分为独立课时后保存。') }}
+			</p>
+			<div v-if="programmingLesson" class="space-y-4">
+				<div
+					v-for="(block, index) in programBlocks"
+					:key="index"
+					class="flex items-end gap-2"
+				>
+					<Link
+						class="flex-1"
+						:modelValue="block.data?.exercise"
+						doctype="LMS Programming Exercise"
+						:label="__('编程题目')"
+						@update:modelValue="setExercise(index, $event)"
+					/>
+					<Button @click="removeExercise(index)">{{ __('Remove') }}</Button>
+				</div>
+				<Button @click="addExercise">{{ __('添加编程题目') }}</Button>
+			</div>
 			<BlockEditor
+				v-else
+				:allowProgramming="false"
 				ref="editor"
 				:uploadContext="contentUploadContext"
 				@change="markDirty"
@@ -139,6 +172,12 @@ import { convertBodyToBlocks as convertToJSON } from '@/utils/lessonMacros'
 import { resourceErrorMessage, submitResource } from '@/utils/resource'
 import { hasVideoContent } from '@/utils/video'
 import BlockEditor from '@/components/BlockEditor.vue'
+import Link from '@/components/Controls/Link.vue'
+import {
+	isProgrammingLesson,
+	hasMixedLessonContent,
+	lessonBlocks,
+} from '@/utils/lessonType'
 import BottomSheet from '@/components/BottomSheet.vue'
 import { useScreenSize } from '@/utils/composables'
 import { useOnboarding, useTelemetry } from 'frappe-ui/frappe'
@@ -223,6 +262,11 @@ function markDeleted() {
 
 const autoSave = useDebounceFn(() => {
 	if (lessonDeleted) return
+	if (
+		programmingLesson.value &&
+		programBlocks.value.some((block) => !block.data?.exercise)
+	)
+		return
 	if (isDirty.value && lessonDetails.data?.lesson) saveLesson()
 }, 800)
 
@@ -271,7 +315,28 @@ const lesson = reactive({
 	body: '',
 	instructor_notes: '',
 	content: '',
+	lesson_type: '',
 })
+
+const programmingLesson = computed(() => isProgrammingLesson(lesson))
+const programBlocks = computed(() =>
+	lessonBlocks(lesson.content).filter((block) => block.type === 'program')
+)
+function updatePrograms(blocks) {
+	lesson.content = JSON.stringify({ blocks })
+	markDirty()
+}
+function setExercise(index, exercise) {
+	const blocks = programBlocks.value
+	blocks[index] = { type: 'program', data: { exercise } }
+	updatePrograms(blocks)
+}
+function addExercise() {
+	updatePrograms([...programBlocks.value, { type: 'program', data: {} }])
+}
+function removeExercise(index) {
+	updatePrograms(programBlocks.value.filter((_, i) => i !== index))
+}
 
 const lessonHasVideo = computed(() => hasVideoContent(lesson))
 
@@ -283,11 +348,14 @@ const lessonDetails = createResource({
 		lesson: props.lessonNumber,
 	},
 	auto: true,
-	onSuccess(data) {
+	async onSuccess(data) {
 		if (data.lesson) {
 			Object.keys(data.lesson).forEach((key) => {
 				lesson[key] = data.lesson[key]
 			})
+			if (!lesson.lesson_type && isProgrammingLesson(lesson))
+				lesson.lesson_type = 'Programming'
+			await nextTick()
 			// Titles saved before Enter was refused still hold breaks.
 			lesson.title = toSingleLineTitle(lesson.title)
 			lesson.include_in_preview = data?.lesson?.include_in_preview
@@ -593,6 +661,13 @@ const resolveLessonName = () =>
 		.catch(() => null)
 
 const validateLesson = () => {
+	if (hasMixedLessonContent(lesson))
+		return __('编程题目不能与其他课时内容混用，请拆分为独立课时。')
+	if (
+		programmingLesson.value &&
+		programBlocks.value.some((block) => !block.data?.exercise)
+	)
+		return __('请选择编程题目，或移除未选择的题目。')
 	if (!lesson.title) {
 		return 'Title is required'
 	}

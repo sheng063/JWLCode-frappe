@@ -24,8 +24,7 @@
    "fieldname": "expected_output",
    "fieldtype": "Long Text",
    "in_list_view": 1,
-   "label": "Expected Output",
-   "reqd": 1
+   "label": "Expected Output"
   }
  ],
  "grid_page_length": 50,

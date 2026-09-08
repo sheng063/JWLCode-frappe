@@ -81,7 +81,7 @@ vi.mock('@/components/BlockEditor.vue', async () => {
 						if (field === 'instructor_content' && editorState.rejectNotesSave) {
 							throw new Error('editor torn down mid-save')
 						}
-						return alive ? editorState.saveData[field] ?? null : null
+						return alive ? (editorState.saveData[field] ?? null) : null
 					},
 				})
 				return () => h('div', { class: 'block-editor-stub' })
@@ -111,6 +111,16 @@ vi.mock('@/utils', () => ({
 }))
 
 vi.mock('@/utils/video', () => ({ hasVideoContent: () => false }))
+
+vi.mock('@/components/Controls/Link.vue', () => ({
+	default: {
+		name: 'ExerciseLink',
+		props: ['modelValue'],
+		emits: ['update:modelValue'],
+		template:
+			'<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+	},
+}))
 
 import LessonForm from '@/pages/LessonForm.vue'
 import BlockEditorStub from '@/components/BlockEditor.vue'
@@ -201,6 +211,32 @@ describe('LessonForm teardown autosave', () => {
 			// already unmounted by the test
 		}
 		document.body.innerHTML = ''
+	})
+
+	it('edits programming exercises without a text editor and flushes the selected exercise', async () => {
+		wrapper = await mountLoaded({
+			lesson_type: 'Programming',
+			content: JSON.stringify({
+				blocks: [{ type: 'program', data: { exercise: 'old-exercise' } }],
+			}),
+		})
+		expect(
+			wrapper
+				.findAllComponents(BlockEditorStub)
+				.filter(
+					(c) => (c.props('uploadContext') as any)?.fieldname === 'content'
+				)
+		).toHaveLength(0)
+		const link = wrapper.findComponent({ name: 'ExerciseLink' })
+		link.vm.$emit('update:modelValue', 'new-exercise')
+		await flushPromises()
+		wrapper.unmount()
+		await flushPromises()
+		const saved = findResource('frappe.client.set_value').lastParams.fieldname
+		expect(saved.lesson_type).toBe('Programming')
+		expect(JSON.parse(saved.content).blocks).toEqual([
+			{ type: 'program', data: { exercise: 'new-exercise' } },
+		])
 	})
 
 	it('folds in instructor-note edits even when unmount flushes during the body save', async () => {

@@ -12,6 +12,7 @@ import DragDrop from 'editorjs-drag-drop'
 import { enablePlyr, getEditorTools, getEditorTunes } from '@/utils'
 
 const props = defineProps({
+	allowProgramming: { type: Boolean, default: true },
 	uploadContext: {
 		type: Object,
 		default: () => ({}),
@@ -74,9 +75,11 @@ function ensureTrailingBlock() {
 }
 
 onMounted(() => {
+	const tools = getEditorTools(false, props.uploadContext)
+	if (!props.allowProgramming) tools.program.toolbox = false
 	editor = new EditorJS({
 		holder: holderRef.value,
-		tools: getEditorTools(false, props.uploadContext),
+		tools,
 		tunes: getEditorTunes(),
 		defaultBlock: 'markdown',
 		i18n: {

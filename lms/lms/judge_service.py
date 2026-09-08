@@ -2,17 +2,19 @@ import hashlib
 import hmac
 import json
 import time
+import uuid
 from urllib.parse import urlparse
 
 import frappe
 import requests
 from frappe import _
 from frappe.utils import cint, flt, get_url
+from lms.lms.problem_package.permissions import INTERNAL_WRITE
 
 
 TERMINAL_STATUSES = {
 	"ACCEPTED", "WRONG_ANSWER", "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED",
-	"COMPILE_ERROR", "RUNTIME_ERROR", "SYSTEM_ERROR", "CANCELED",
+	"COMPILE_ERROR", "RUNTIME_ERROR", "SYSTEM_ERROR", "CANCELED", "OUTPUT_LIMIT_EXCEEDED", "CONNECTION_TIMEOUT",
 }
 SUPPORTED_LANGUAGES = {"Python", "C++"}
 
@@ -23,6 +25,7 @@ STATUS_LABELS = {
 	"MEMORY_LIMIT_EXCEEDED": "Memory Limit Exceeded",
 	"COMPILE_ERROR": "Compilation Error", "RUNTIME_ERROR": "Runtime Error",
 	"SYSTEM_ERROR": "System Error", "CANCELED": "Canceled",
+	"OUTPUT_LIMIT_EXCEEDED": "Output Limit Exceeded", "CONNECTION_TIMEOUT": "Connection Timeout",
 }
 
 
@@ -74,6 +77,20 @@ def submit_programming_exercise(
 		if doc.member != frappe.session.user or doc.exercise != exercise:
 			frappe.throw(_("You cannot update this submission."), frappe.PermissionError)
 
+	exercise_doc = frappe.get_doc("LMS Programming Exercise", exercise)
+	package_version = exercise_doc.get("active_package_version")
+	if package_version and submission != "new":
+		frappe.throw("Create a new submission attempt for package exercises.")
+	doc.package_version = package_version
+	doc.attempt_id = str(uuid.uuid4())
+	if package_version:
+		version = frappe.get_doc("LMS Problem Package Version", package_version)
+		config = json.loads(version.judge_config)
+		if language != config["language"]:
+			frappe.throw("Use the published exercise language.")
+		doc.config_digest = version.config_digest
+	doc.passed_tests = 0
+	doc.total_tests = len(json.loads(version.cases)) if package_version else len(_test_cases(exercise_doc))
 	doc.code = code
 	doc.language = language
 	doc.status = "Queued"
@@ -82,6 +99,8 @@ def submit_programming_exercise(
 	doc.judge_request_id = None
 	doc.compiler_message = None
 	doc.status_version = 0
+	if package_version:
+		doc.flags.package_service = INTERNAL_WRITE
 	doc.save()
 	frappe.enqueue(
 		"lms.lms.judge_service.dispatch_submission",
@@ -111,6 +130,13 @@ def run_programming_exercise(exercise: str, code: str, language: str = "Python")
 		"memory_limit_kb": cint(exercise_doc.memory_limit_kb or 128000),
 		"test_cases": test_cases,
 	}
+	if getattr(exercise_doc, "active_package_version", None):
+		version = frappe.get_doc("LMS Problem Package Version", exercise_doc.active_package_version)
+		from lms.lms.problem_package.api import require_capability
+		require_capability()
+		payload.update(_package_payload(version, public_only=True))
+		if language != payload["language"]:
+			frappe.throw("Use the published exercise language.")
 	response = requests.post(
 		f"{settings.service_url.rstrip('/')}/internal/v1/runs",
 		json=payload,
@@ -119,6 +145,17 @@ def run_programming_exercise(exercise: str, code: str, language: str = "Python")
 	)
 	response.raise_for_status()
 	return response.json()
+
+
+def _package_payload(version, public_only=False):
+	config = json.loads(version.judge_config)
+	cases = json.loads(version.cases)
+	return {key: config[key] for key in (
+		"protocol_version", "comparison_mode", "validator_flags", "scoring_mode",
+		"language", "time_limit_seconds", "memory_limit_kb"
+	)} | {"output_limit_bytes": config.get("output_limit_bytes", 256000), "package_version": version.name, "config_digest": version.config_digest,
+		"test_cases": [{key: c[key] for key in ("case_id", "input", "expected_output", "hidden")}
+			for c in cases if not public_only or not c["hidden"]]}
 
 
 def _test_cases(exercise):
@@ -144,7 +181,7 @@ def dispatch_submission(submission_name: str):
 		return
 	settings = _get_settings()
 	exercise = frappe.get_doc("LMS Programming Exercise", doc.exercise)
-	test_cases = _test_cases(exercise)
+	test_cases = _test_cases(exercise) if not doc.get("package_version") else [True]
 	if not test_cases:
 		frappe.throw(_("At least one judge test case is required."), frappe.ValidationError)
 	payload = {
@@ -157,7 +194,14 @@ def dispatch_submission(submission_name: str):
 		"test_cases": test_cases,
 		"callback_url": settings.callback_url or get_url("/api/method/lms.lms.judge_service.judge_callback"),
 	}
+	if doc.get("package_version"):
+		version = frappe.get_doc("LMS Problem Package Version", doc.package_version)
+		payload.update(_package_payload(version))
+		payload["attempt_id"] = doc.attempt_id
 	try:
+		if doc.get("package_version"):
+			from lms.lms.problem_package.api import require_capability
+			require_capability()
 		response = requests.post(
 			f"{settings.service_url.rstrip('/')}/internal/v1/judge-requests",
 			json=payload,
@@ -173,7 +217,7 @@ def dispatch_submission(submission_name: str):
 	except Exception as exc:
 		frappe.db.set_value(
 			"LMS Programming Exercise Submission", doc.name,
-			{"status": "System Error", "compiler_message": str(exc)[:2000]},
+			{"status": "System Error", "compiler_message": None if doc.get("package_version") else str(exc)[:2000]},
 		)
 		frappe.log_error(title="Judge Service dispatch failed", message=frappe.get_traceback())
 
@@ -215,15 +259,47 @@ def judge_callback():
 
 
 def _apply_result(doc, payload: dict):
+	if getattr(doc, "package_version", None):
+		frappe.db.get_value("LMS Programming Exercise Submission", doc.name, "name", for_update=True)
+		doc.reload()
+		version = frappe.get_doc("LMS Problem Package Version", doc.package_version)
+		if (payload.get("package_version") != doc.package_version
+			or payload.get("config_digest") != doc.config_digest
+			or payload.get("attempt_id") != doc.attempt_id
+			or payload.get("judge_request_id") != doc.judge_request_id):
+			frappe.throw("Package result does not match this attempt.", frappe.PermissionError)
+		known = {c["case_id"] for c in json.loads(version.cases)}
+		returned = [c.get("case_id") for c in payload.get("cases", [])]
+		if len(returned) != len(set(returned)) or not set(returned) <= known:
+			frappe.throw("Unknown or duplicate case IDs in result.")
+		if payload["status"] == "ACCEPTED" and (set(returned) != known or any(
+			c.get("status") != "Accepted" for c in payload.get("cases", [])
+		)):
+			frappe.throw("Accepted result must include every accepted test case.")
+		if cint(payload.get("status_version")) <= cint(doc.status_version):
+			return
+		if getattr(doc, "status", None) in {STATUS_LABELS[status] for status in TERMINAL_STATUSES}:
+			return
 	doc.judge_request_id = doc.judge_request_id or payload.get("judge_request_id")
 	doc.status = STATUS_LABELS[payload["status"]]
 	doc.status_version = cint(payload.get("status_version"))
 	doc.event_id = payload.get("event_id")
+	doc.passed_tests = sum(1 for case in payload.get("cases") or [] if case.get("status") == "Accepted")
+	if getattr(doc, "package_version", None):
+		doc.total_tests = len(known)
+	elif payload.get("cases"):
+		doc.total_tests = len(_test_cases(frappe.get_doc("LMS Programming Exercise", doc.exercise)))
 	doc.score = flt(payload.get("score"))
 	doc.time_ms = cint(payload.get("time_ms"))
 	doc.memory_kb = cint(payload.get("memory_kb"))
 	doc.compiler_message = payload.get("compiler_message")
+	if getattr(doc, "package_version", None):
+		doc.score = 100 if payload["status"] == "ACCEPTED" else 0
+		# Never copy service diagnostics into student-readable package submissions.
+		doc.compiler_message = None
 	_record_first_failed_hidden_case(doc, payload)
+	if getattr(doc, "package_version", None):
+		doc.flags.package_service = INTERNAL_WRITE
 	doc.save(ignore_permissions=True)
 
 
@@ -235,7 +311,7 @@ def _record_first_failed_hidden_case(doc, payload: dict):
 	would disclose the suite over repeated submissions.
 	"""
 	doc.set("test_cases", [])
-	if payload.get("status") == "ACCEPTED":
+	if getattr(doc, "package_version", None) or payload.get("status") == "ACCEPTED":
 		return
 
 	exercise = frappe.get_doc("LMS Programming Exercise", doc.exercise)

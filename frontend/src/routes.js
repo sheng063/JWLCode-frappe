@@ -101,12 +101,15 @@ export const routes = [
 					import('@/pages/Forms/BulkCertificatesForm.vue'),
 				props: true,
 			},
-			// `new` is hard-coded rather than a :param (design doc Q3): neither
-			// form has an edit mode, so `new` is the only value the param could
-			// ever take.
 			{
 				path: 'live-class/new',
 				name: 'NewLiveClass',
+				component: () => import('@/pages/Forms/LiveClassForm.vue'),
+				props: true,
+			},
+			{
+				path: 'live-class/:liveClassName/edit',
+				name: 'EditLiveClass',
 				component: () => import('@/pages/Forms/LiveClassForm.vue'),
 				props: true,
 			},
@@ -349,18 +352,14 @@ export const routes = [
 		path: '/programming-exercises/submissions',
 		name: 'ProgrammingExerciseSubmissions',
 		component: () =>
-			import(
-				'@/pages/ProgrammingExercises/ProgrammingExerciseSubmissions.vue'
-			),
+			import('@/pages/ProgrammingExercises/ProgrammingExerciseSubmissions.vue'),
 		props: true,
 	},
 	{
 		path: '/programming-exercises/:exerciseID/submission/:submissionID',
 		name: 'ProgrammingExerciseSubmission',
 		component: () =>
-			import(
-				'@/pages/ProgrammingExercises/ProgrammingExerciseSubmission.vue'
-			),
+			import('@/pages/ProgrammingExercises/ProgrammingExerciseSubmission.vue'),
 		props: true,
 	},
 	{

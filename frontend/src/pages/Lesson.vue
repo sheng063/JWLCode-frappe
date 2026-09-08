@@ -1,377 +1,432 @@
 <template>
-	<div v-if="lesson.data" class="">
-		<PageHeader :breadcrumbs="breadcrumbs">
-			<template #actions>
-				<CertificationLinks :courseName="courseName" />
+	<div
+		v-if="lesson.data"
+		:class="{ 'programming-lesson-page': programmingLesson }"
+	>
+		<template v-if="programmingLesson">
+			<nav
+				class="programming-lesson-nav"
+				:aria-label="__('课时导航')"
+			>
+				<router-link :to="{ name: 'CourseDetail', params: { courseName } }"
+					><Button>{{ __('Back to Course') }}</Button></router-link
+				>
 				<router-link
 					v-if="canEditLesson"
 					:to="{
 						name: 'CourseDetail',
-						params: { courseName: courseName },
+						params: { courseName },
 						hash: '#editor',
 						query: { editLesson: `${chapterNumber}-${lessonNumber}` },
 					}"
+					><Button>{{ __('Editor View') }}</Button></router-link
 				>
-					<HeaderButton :label="__('Editor View')" icon="lucide-pencil" />
-				</router-link>
-			</template>
-		</PageHeader>
-
-		<div
-			v-if="isMobile && lessonTotal"
-			class="flex items-center gap-2 border-b bg-surface-base px-5 py-2.5"
-		>
-			<Button
-				variant="subtle"
-				class="!size-9"
-				:label="__('Previous lesson')"
-				:disabled="!hasPrev"
-				@click="goPrev()"
-			>
-				<template #icon>
-					<span class="lucide-chevron-left size-4" />
-				</template>
-			</Button>
-			<div
-				class="min-w-0 flex-1 text-center text-p-xs font-medium tabular-nums text-ink-gray-5"
-			>
-				{{ lessonIndex }} / {{ lessonTotal }}
-			</div>
-			<Button
-				v-if="canGoNext"
-				variant="subtle"
-				class="!size-9"
-				:label="__('Next lesson')"
-				@click="goNext()"
-			>
-				<template #icon>
-					<span class="lucide-chevron-right size-4" />
-				</template>
-			</Button>
-		</div>
-
-		<div
-			class="grid sm:h-[94vh]"
-			:class="
-				isLessonSidebarCollapsed
-					? 'md:grid-cols-[minmax(0,1fr),2.5rem]'
-					: 'md:grid-cols-[70%,30%]'
-			"
-		>
-			<div v-if="lesson.data.no_preview" class="sm:border-e">
-				<div class="shadow rounded-md w-3/4 mt-10 mx-auto text-center p-4">
-					<div class="flex items-center justify-center mt-4 gap-x-2">
-						<span class="lucide-lock-keyhole size-4 text-ink-gray-5" />
-						<div class="text-lg-semibold text-ink-gray-7">
-							{{ __('This lesson is locked') }}
-						</div>
+				<div class="programming-lesson-heading">
+					<h1 class="text-4xl-semibold text-ink-gray-9">{{ lesson.data.title }}</h1>
+					<div class="programming-lesson-author">
+						<span class="h-6 me-1" :class="{ 'avatar-group overlap': lesson.data.instructors?.length > 1 }">
+							<UserAvatar v-for="instructor in lesson.data.instructors" :key="instructor.name ?? instructor" :user="instructor" />
+						</span>
+						<CourseInstructors v-if="lesson.data.instructors" :instructors="lesson.data.instructors" />
 					</div>
-					<div class="mt-1 mb-4 text-ink-gray-7">
-						{{
-							__(
-								'This lesson is not available for preview. Please enroll in the course to access it.'
-							)
-						}}
-					</div>
-					<Button
-						v-if="user.data && !lesson.data.disable_self_learning"
-						@click="enrollStudent()"
-						variant="solid"
-					>
-						{{ __('Start Learning') }}
-					</Button>
-					<Badge
-						theme="blue"
-						size="lg"
-						v-else-if="lesson.data.disable_self_learning"
-						class="mt-2"
-					>
-						{{ __('Contact the Administrator to enroll for this course.') }}
-					</Badge>
-					<Button v-else @click="redirectToLogin()">
-						<template #prefix>
-							<span class="lucide-log-in size-4" />
-						</template>
-						{{ __('Login') }}
-					</Button>
 				</div>
+				<Button :aria-expanded="showChapters" @click="showChapters = !showChapters">{{ __('Chapters') }}</Button>
+				<Button v-if="lesson.data.prev" @click="switchLesson('prev')">{{
+					__('Previous')
+				}}</Button>
+				<Button
+					v-if="lesson.data.next && canGoNext"
+					@click="switchLesson('next')"
+					>{{ __('Next') }}</Button
+				>
+			</nav>
+			<div class="programming-lesson-body">
+				<div id="editor" class="programming-lesson-content"></div>
+				<aside v-if="showChapters" class="programming-lesson-chapters">
+					<StudentLessonSidebar :courseName="courseName" :courseTitle="lesson.data.course_title" :progress="lessonProgress" :selectedLessonNumber="`${chapterNumber}-${lessonNumber}`" :completedLesson="completedLesson" :collapsed="false" @toggle-collapse="showChapters = false" @select-lesson="showChapters = false" />
+				</aside>
 			</div>
-			<div v-else-if="lesson.data.locked" class="sm:border-e">
-				<LockedLessonNotice
-					:redirect="!!lesson.data.redirect_to"
-					:notFound="!!lesson.data.not_found"
-					@done="goToCurrentLesson()"
-				/>
-			</div>
+		</template>
+		<template v-else>
+			<PageHeader :breadcrumbs="breadcrumbs">
+				<template #actions>
+					<CertificationLinks :courseName="courseName" />
+					<router-link
+						v-if="canEditLesson"
+						:to="{
+							name: 'CourseDetail',
+							params: { courseName: courseName },
+							hash: '#editor',
+							query: { editLesson: `${chapterNumber}-${lessonNumber}` },
+						}"
+					>
+						<HeaderButton :label="__('Editor View')" icon="lucide-pencil" />
+					</router-link>
+				</template>
+			</PageHeader>
+
 			<div
-				v-else
-				ref="lessonContainer"
-				class="bg-surface-base min-w-0"
-				:class="{
-					'overflow-y-auto': zenModeEnabled,
-				}"
+				v-if="isMobile && lessonTotal"
+				class="flex items-center gap-2 border-b bg-surface-base px-5 py-2.5"
 			>
+				<Button
+					variant="subtle"
+					class="!size-9"
+					:label="__('Previous lesson')"
+					:disabled="!hasPrev"
+					@click="goPrev()"
+				>
+					<template #icon>
+						<span class="lucide-chevron-left size-4" />
+					</template>
+				</Button>
 				<div
-					class="sm:border-e pt-8 sm:pt-5 pb-10 h-full"
+					class="min-w-0 flex-1 text-center text-p-xs font-medium tabular-nums text-ink-gray-5"
+				>
+					{{ lessonIndex }} / {{ lessonTotal }}
+				</div>
+				<Button
+					v-if="canGoNext"
+					variant="subtle"
+					class="!size-9"
+					:label="__('Next lesson')"
+					@click="goNext()"
+				>
+					<template #icon>
+						<span class="lucide-chevron-right size-4" />
+					</template>
+				</Button>
+			</div>
+
+			<div
+				class="grid min-h-[calc(100dvh-var(--header-frame-h,3rem))] items-start"
+				:class="
+					isLessonSidebarCollapsed
+						? 'md:grid-cols-[minmax(0,1fr),2.5rem]'
+						: 'md:grid-cols-[70%,30%]'
+				"
+			>
+				<div v-if="lesson.data.no_preview" class="sm:border-e">
+					<div class="shadow rounded-md w-3/4 mt-10 mx-auto text-center p-4">
+						<div class="flex items-center justify-center mt-4 gap-x-2">
+							<span class="lucide-lock-keyhole size-4 text-ink-gray-5" />
+							<div class="text-lg-semibold text-ink-gray-7">
+								{{ __('This lesson is locked') }}
+							</div>
+						</div>
+						<div class="mt-1 mb-4 text-ink-gray-7">
+							{{
+								__(
+									'This lesson is not available for preview. Please enroll in the course to access it.'
+								)
+							}}
+						</div>
+						<Button
+							v-if="user.data && !lesson.data.disable_self_learning"
+							@click="enrollStudent()"
+							variant="solid"
+						>
+							{{ __('Start Learning') }}
+						</Button>
+						<Badge
+							theme="blue"
+							size="lg"
+							v-else-if="lesson.data.disable_self_learning"
+							class="mt-2"
+						>
+							{{ __('Contact the Administrator to enroll for this course.') }}
+						</Badge>
+						<Button v-else @click="redirectToLogin()">
+							<template #prefix>
+								<span class="lucide-log-in size-4" />
+							</template>
+							{{ __('Login') }}
+						</Button>
+					</div>
+				</div>
+				<div v-else-if="lesson.data.locked" class="sm:border-e">
+					<LockedLessonNotice
+						:redirect="!!lesson.data.redirect_to"
+						:notFound="!!lesson.data.not_found"
+						@done="goToCurrentLesson()"
+					/>
+				</div>
+				<div
+					v-else
+					ref="lessonContainer"
+					class="bg-surface-base min-w-0"
 					:class="{
-						'w-full md:w-3/5 mx-auto border-none !pt-10': zenModeEnabled,
+						'overflow-y-auto': zenModeEnabled,
 					}"
 				>
-					<div class="px-5">
-						<div
-							class="flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center justify-between"
-						>
-							<div class="flex flex-col">
-								<h1 class="text-4xl-semibold text-ink-gray-9">
-									{{ lesson.data.title }}
-								</h1>
+					<div
+						class="sm:border-e pt-8 sm:pt-5 pb-10 h-full"
+						:class="{
+							'w-full md:w-3/5 mx-auto border-none !pt-10': zenModeEnabled,
+						}"
+					>
+						<div class="px-5">
+							<div
+								class="flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center justify-between"
+							>
+								<div class="flex flex-col">
+									<h1 class="text-4xl-semibold text-ink-gray-9">
+										{{ lesson.data.title }}
+									</h1>
+
+									<div
+										v-if="zenModeEnabled"
+										class="relative flex items-center gap-x-2 text-sm text-ink-gray-7 group w-fit mt-2"
+									>
+										<span>
+											{{ lesson.data.chapter_title }} -
+											{{ lesson.data.course_title }}
+										</span>
+										<span class="lucide-info size-3" />
+										<div
+											class="hidden group-hover:block rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl absolute start-0 top-full mt-2"
+										>
+											{{ Math.ceil(lesson.data.membership.progress) }}%
+											{{ __('completed') }}
+										</div>
+									</div>
+								</div>
+
+								<div
+									v-if="!zenModeEnabled && !isMobile"
+									class="flex items-center gap-x-2 mt-2 md:mt-0"
+								>
+									<Tooltip v-if="canGoZen()" :text="__('Zen Mode')">
+										<Button @click="goFullScreen()" :label="__('Zen Mode')">
+											<template #icon>
+												<span class="lucide-focus size-4" />
+											</template>
+										</Button>
+									</Tooltip>
+									<Button v-if="lesson.data.prev" @click="switchLesson('prev')">
+										<template #prefix>
+											<span class="lucide-chevron-left size-4" />
+										</template>
+										<span>{{ __('Previous') }}</span>
+									</Button>
+									<Button
+										v-if="lesson.data.next && canGoNext"
+										@click="switchLesson('next')"
+									>
+										<template #suffix>
+											<span class="lucide-chevron-right size-4" />
+										</template>
+										<span>{{ __('Next') }}</span>
+									</Button>
+									<router-link
+										v-else
+										:to="{
+											name: 'CourseDetail',
+											params: { courseName: courseName },
+										}"
+									>
+										<Button class="text-p-base-medium">{{
+											__('Back to Course')
+										}}</Button>
+									</router-link>
+								</div>
 
 								<div
 									v-if="zenModeEnabled"
-									class="relative flex items-center gap-x-2 text-sm text-ink-gray-7 group w-fit mt-2"
+									class="flex items-center gap-x-2 mt-2 md:mt-0"
 								>
-									<span>
-										{{ lesson.data.chapter_title }} -
-										{{ lesson.data.course_title }}
-									</span>
-									<span class="lucide-info size-3" />
-									<div
-										class="hidden group-hover:block rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl absolute start-0 top-full mt-2"
+									<Button
+										@click="showDiscussionsInZenMode()"
+										:label="__('Toggle discussions')"
 									>
-										{{ Math.ceil(lesson.data.membership.progress) }}%
-										{{ __('completed') }}
-									</div>
+										<template #icon>
+											<span class="lucide-message-circle-question size-4" />
+										</template>
+									</Button>
+									<Button v-if="lesson.data.prev" @click="switchLesson('prev')">
+										<template #prefix>
+											<span class="lucide-chevron-left size-4" />
+										</template>
+										<span>
+											{{ __('Previous') }}
+										</span>
+									</Button>
+
+									<Button
+										v-if="lesson.data.next && canGoNext"
+										@click="switchLesson('next')"
+									>
+										<template #suffix>
+											<span class="lucide-chevron-right size-4" />
+										</template>
+										<span>
+											{{ __('Next') }}
+										</span>
+									</Button>
+
+									<router-link
+										v-else
+										:to="{
+											name: 'CourseDetail',
+											params: { courseName: courseName },
+										}"
+									>
+										<Button class="text-p-base-medium">
+											{{ __('Back to Course') }}
+										</Button>
+									</router-link>
 								</div>
 							</div>
 
 							<div
-								v-if="!zenModeEnabled && !isMobile"
-								class="flex items-center gap-x-2 mt-2 md:mt-0"
+								v-if="!zenModeEnabled"
+								class="flex items-center mt-4 md:mt-2"
 							>
-								<Tooltip v-if="canGoZen()" :text="__('Zen Mode')">
-									<Button @click="goFullScreen()" :label="__('Zen Mode')">
-										<template #icon>
-											<span class="lucide-focus size-4" />
-										</template>
-									</Button>
-								</Tooltip>
-								<Button v-if="lesson.data.prev" @click="switchLesson('prev')">
-									<template #prefix>
-										<span class="lucide-chevron-left size-4" />
-									</template>
-									<span>{{ __('Previous') }}</span>
-								</Button>
-								<Button
-									v-if="lesson.data.next && canGoNext"
-									@click="switchLesson('next')"
-								>
-									<template #suffix>
-										<span class="lucide-chevron-right size-4" />
-									</template>
-									<span>{{ __('Next') }}</span>
-								</Button>
-								<router-link
-									v-else
-									:to="{
-										name: 'CourseDetail',
-										params: { courseName: courseName },
+								<span
+									class="h-6 me-1"
+									:class="{
+										'avatar-group overlap': lesson.data.instructors?.length > 1,
 									}"
 								>
-									<Button class="text-p-base-medium">{{
-										__('Back to Course')
-									}}</Button>
-								</router-link>
-							</div>
-
-							<div
-								v-if="zenModeEnabled"
-								class="flex items-center gap-x-2 mt-2 md:mt-0"
-							>
-								<Button
-									@click="showDiscussionsInZenMode()"
-									:label="__('Toggle discussions')"
-								>
-									<template #icon>
-										<span class="lucide-message-circle-question size-4" />
-									</template>
-								</Button>
-								<Button v-if="lesson.data.prev" @click="switchLesson('prev')">
-									<template #prefix>
-										<span class="lucide-chevron-left size-4" />
-									</template>
-									<span>
-										{{ __('Previous') }}
-									</span>
-								</Button>
-
-								<Button
-									v-if="lesson.data.next && canGoNext"
-									@click="switchLesson('next')"
-								>
-									<template #suffix>
-										<span class="lucide-chevron-right size-4" />
-									</template>
-									<span>
-										{{ __('Next') }}
-									</span>
-								</Button>
-
-								<router-link
-									v-else
-									:to="{
-										name: 'CourseDetail',
-										params: { courseName: courseName },
-									}"
-								>
-									<Button class="text-p-base-medium">
-										{{ __('Back to Course') }}
-									</Button>
-								</router-link>
-							</div>
-						</div>
-
-						<div v-if="!zenModeEnabled" class="flex items-center mt-4 md:mt-2">
-							<span
-								class="h-6 me-1"
-								:class="{
-									'avatar-group overlap': lesson.data.instructors?.length > 1,
-								}"
-							>
-								<UserAvatar
-									v-for="instructor in lesson.data.instructors"
-									:key="instructor.name ?? instructor"
-									:user="instructor"
+									<UserAvatar
+										v-for="instructor in lesson.data.instructors"
+										:key="instructor.name ?? instructor"
+										:user="instructor"
+									/>
+								</span>
+								<CourseInstructors
+									v-if="lesson.data?.instructors"
+									:instructors="lesson.data.instructors"
 								/>
-							</span>
-							<CourseInstructors
-								v-if="lesson.data?.instructors"
-								:instructors="lesson.data.instructors"
-							/>
-						</div>
+							</div>
 
-						<div
-							v-if="
-								lesson.data.instructor_content &&
-								JSON.parse(lesson.data.instructor_content)?.blocks?.length >
-									1 &&
-								allowInstructorContent()
-							"
-							class="bg-surface-gray-2 p-3 rounded-md mt-6"
-						>
-							<h2 class="text-ink-gray-5 font-medium">
-								{{ __('Instructor Notes') }}
-							</h2>
 							<div
-								id="instructor-content"
-								class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal"
-							></div>
+								v-if="
+									lesson.data.instructor_content &&
+									JSON.parse(lesson.data.instructor_content)?.blocks?.length >
+										1 &&
+									allowInstructorContent()
+								"
+								class="bg-surface-gray-2 p-3 rounded-md mt-6"
+							>
+								<h2 class="text-ink-gray-5 font-medium">
+									{{ __('Instructor Notes') }}
+								</h2>
+								<div
+									id="instructor-content"
+									class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal"
+								></div>
+							</div>
+							<div
+								v-else-if="lesson.data.instructor_notes"
+								class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-8"
+							>
+								<LessonContent
+									:key="lesson.data.name"
+									:content="lesson.data.instructor_notes"
+								/>
+							</div>
+							<div
+								v-if="lesson.data.content"
+								@mouseup="toggleInlineMenu"
+								class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-8"
+							>
+								<div id="editor"></div>
+							</div>
+							<div
+								v-else
+								class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-8"
+							>
+								<LessonContent
+									v-if="lesson.data?.body"
+									:key="lesson.data.name"
+									:content="lesson.data.body"
+									:youtube="lesson.data.youtube"
+									:quizId="lesson.data.quiz_id"
+								/>
+							</div>
 						</div>
+						<div ref="readingEnd" class="h-px" aria-hidden="true"></div>
 						<div
-							v-else-if="lesson.data.instructor_notes"
-							class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-8"
+							v-if="lesson.data && (allowDiscussions || tabs.length > 1)"
+							class="mt-10 pb-20 pt-5 border-t px-5"
+							ref="discussionsContainer"
 						>
-							<LessonContent
+							<TabButtons
+								v-if="tabs.length > 1"
+								:options="tabs"
+								v-model="currentTab"
+								class="w-fit mb-10"
+							/>
+							<Notes
+								v-if="currentTab === 'Notes'"
+								:lesson="lesson.data?.name"
+								v-model:notes="notes"
+								@updateNotes="updateNotes"
+							/>
+							<Discussions
+								v-else-if="allowDiscussions"
+								:title="'Questions'"
+								:doctype="'Course Lesson'"
+								:docname="lesson.data.name"
 								:key="lesson.data.name"
-								:content="lesson.data.instructor_notes"
+								:emptyStateText="
+									__('Ask a question to get help from the community.')
+								"
 							/>
 						</div>
-						<div
-							v-if="lesson.data.content"
-							@mouseup="toggleInlineMenu"
-							class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-8"
-						>
-							<div id="editor"></div>
-						</div>
-						<div
-							v-else
-							class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-8"
-						>
-							<LessonContent
-								v-if="lesson.data?.body"
-								:key="lesson.data.name"
-								:content="lesson.data.body"
-								:youtube="lesson.data.youtube"
-								:quizId="lesson.data.quiz_id"
-							/>
-						</div>
-					</div>
-					<div
-						v-if="lesson.data && (allowDiscussions || tabs.length > 1)"
-						class="mt-10 pb-20 pt-5 border-t px-5"
-						ref="discussionsContainer"
-					>
-						<TabButtons
-							v-if="tabs.length > 1"
-							:options="tabs"
-							v-model="currentTab"
-							class="w-fit mb-10"
-						/>
-						<Notes
-							v-if="currentTab === 'Notes'"
-							:lesson="lesson.data?.name"
-							v-model:notes="notes"
-							@updateNotes="updateNotes"
-						/>
-						<Discussions
-							v-else-if="allowDiscussions"
-							:title="'Questions'"
-							:doctype="'Course Lesson'"
-							:docname="lesson.data.name"
-							:key="lesson.data.name"
-							:emptyStateText="
-								__('Ask a question to get help from the community.')
-							"
-						/>
 					</div>
 				</div>
+				<aside v-if="!isMobile" class="sticky top-[var(--header-frame-h,3rem)] h-[calc(100dvh-var(--header-frame-h,3rem))] min-w-0">
+					<StudentLessonSidebar
+						:courseName="courseName"
+						:courseTitle="lesson.data.course_title"
+						:progress="lessonProgress"
+						:selectedLessonNumber="`${chapterNumber}-${lessonNumber}`"
+						:completedLesson="completedLesson"
+						:collapsed="isLessonSidebarCollapsed"
+						@toggle-collapse="
+							isLessonSidebarCollapsed = !isLessonSidebarCollapsed
+						"
+					/>
+				</aside>
 			</div>
-			<aside v-if="!isMobile" class="sticky top-10 h-[94vh] min-w-0">
+
+			<div
+				v-if="isMobile"
+				class="pointer-events-none sticky bottom-4 z-10 flex justify-end px-4"
+			>
+				<Button
+					variant="outline"
+					class="pointer-events-auto !h-11 !rounded-full !px-4 !shadow-lg"
+					@click="showChapters = true"
+				>
+					<template #prefix>
+						<span class="lucide-layers size-4" />
+					</template>
+					{{ __('Chapters') }}
+				</Button>
+			</div>
+
+			<BottomSheet v-if="isMobile" v-model="showChapters">
+				<template #header>
+					<div class="min-w-0 truncate text-p-lg-semibold text-ink-gray-9">
+						{{ lesson.data.course_title }}
+					</div>
+				</template>
 				<StudentLessonSidebar
 					:courseName="courseName"
-					:courseTitle="lesson.data.course_title"
 					:progress="lessonProgress"
 					:selectedLessonNumber="`${chapterNumber}-${lessonNumber}`"
 					:completedLesson="completedLesson"
-					:collapsed="isLessonSidebarCollapsed"
-					@toggle-collapse="isLessonSidebarCollapsed = !isLessonSidebarCollapsed"
+					:hideHeader="true"
+					@select-lesson="showChapters = false"
 				/>
-			</aside>
-		</div>
-
-		<div
-			v-if="isMobile"
-			class="pointer-events-none sticky bottom-4 z-10 flex justify-end px-4"
-		>
-			<Button
-				variant="outline"
-				class="pointer-events-auto !h-11 !rounded-full !px-4 !shadow-lg"
-				@click="showChapters = true"
-			>
-				<template #prefix>
-					<span class="lucide-layers size-4" />
-				</template>
-				{{ __('Chapters') }}
-			</Button>
-		</div>
-
-		<BottomSheet v-if="isMobile" v-model="showChapters">
-			<template #header>
-				<div class="min-w-0 truncate text-p-lg-semibold text-ink-gray-9">
-					{{ lesson.data.course_title }}
-				</div>
-			</template>
-			<StudentLessonSidebar
-				:courseName="courseName"
-				:progress="lessonProgress"
-				:selectedLessonNumber="`${chapterNumber}-${lessonNumber}`"
-				:completedLesson="completedLesson"
-				:hideHeader="true"
-				@select-lesson="showChapters = false"
-			/>
-		</BottomSheet>
+			</BottomSheet>
+		</template>
 	</div>
 	<InlineLessonMenu
-		v-if="lesson.data?.name"
+		v-if="lesson.data?.name && !programmingLesson"
 		v-model="showInlineMenu"
 		:lesson="lesson.data?.name"
 		v-model:notes="notes"
@@ -379,6 +434,7 @@
 	/>
 </template>
 <script setup>
+import { isProgrammingLesson, meaningfulBlocks, lessonBlocks } from '@/utils/lessonType'
 import {
 	Badge,
 	Button,
@@ -485,6 +541,34 @@ const props = defineProps({
 	},
 })
 
+const readingEnd = ref(null)
+let readingObserver
+let readingGeneration = 0
+const isReadingLesson = computed(() => {
+	const data = lesson.data
+	if (!data || data.locked || data.no_preview || data.is_scorm_package ||
+		data.lesson_type === 'Programming' || data.quiz_id || data.youtube || data.question) return false
+	if (/\{\{\s*(Quiz|Assignment|Video|YouTube|Program)/i.test(data.body || '')) return false
+	return !lessonBlocks(data.content).some((block) =>
+		['quiz', 'program', 'assignment', 'upload', 'embed', 'video'].includes(block.type))
+})
+const observeReadingEnd = async (data) => {
+	const generation = ++readingGeneration
+	readingObserver?.disconnect()
+	await nextTick()
+	try {
+		await editor.value?.isReady
+	} catch {
+		return
+	}
+	if (generation !== readingGeneration || data !== lesson.data || !isReadingLesson.value || !readingEnd.value ||
+		!data.membership || isStudentView.value || typeof IntersectionObserver === 'undefined') return
+	readingObserver = new IntersectionObserver((entries) => {
+		if (generation === readingGeneration && data === lesson.data && entries.some((entry) => entry.isIntersecting)) markProgress()
+	}, { threshold: 1 })
+	readingObserver.observe(readingEnd.value)
+}
+
 let collapsedByLesson = false
 const isCourseAdmin = () =>
 	Boolean(user.data?.is_moderator || user.data?.is_instructor)
@@ -499,7 +583,16 @@ onMounted(() => {
 	}
 	document.addEventListener('fullscreenchange', attachFullscreenEvent)
 	socket.on('update_lesson_progress', onLessonProgress)
+	window.addEventListener('message', onProgrammingPassed)
+	window.addEventListener('lms-quiz-submitted', onQuizSubmitted)
 })
+
+const onProgrammingPassed = (event) => {
+	if (event.origin !== window.location.origin || event.data?.type !== 'lms-programming-passed') return
+	const frames = document.querySelectorAll('#editor iframe')
+	if ([...frames].some((frame) => frame.contentWindow === event.source)) markProgress()
+}
+const onQuizSubmitted = () => markProgress()
 
 const onLessonProgress = (data) => {
 	if (data.course !== props.courseName) return
@@ -510,6 +603,7 @@ const onLessonProgress = (data) => {
 	// lesson. The server now addresses it to the completing member alone.
 	// Skip the ones the progress resource already reloaded for.
 	if (data.lesson !== completedLesson.value) outline.reload()
+	if (data.completed) completedLesson.value = data.lesson
 }
 
 const attachFullscreenEvent = () => {
@@ -525,12 +619,18 @@ const attachFullscreenEvent = () => {
 }
 
 onBeforeUnmount(() => {
+	trackVideoWatchDuration()
+	readingGeneration++
+	readingObserver?.disconnect()
+	editor.value?.destroy?.()
+	instructorEditor.value?.destroy?.()
 	document.removeEventListener('fullscreenchange', attachFullscreenEvent)
 	// Without this the handler outlives the page, and every revisit adds another
 	// one — so a single progress event fires one outline reload per past visit.
 	socket.off('update_lesson_progress', onLessonProgress)
+	window.removeEventListener('message', onProgrammingPassed)
+	window.removeEventListener('lms-quiz-submitted', onQuizSubmitted)
 	if (collapsedByLesson) sidebarStore.isSidebarCollapsed = false
-	trackVideoWatchDuration()
 })
 
 const lesson = createResource({
@@ -545,7 +645,15 @@ const lesson = createResource({
 	auto: true,
 })
 
+const programmingLesson = computed(
+	() =>
+		!lesson.data?.locked &&
+		!lesson.data?.no_preview &&
+		isProgrammingLesson(lesson.data)
+)
+
 const setupLesson = (data) => {
+	showChapters.value = false
 	if (Object.keys(data).length === 0) {
 		router.push({
 			name: 'CourseDetail',
@@ -566,8 +674,14 @@ const setupLesson = (data) => {
 		})
 	}
 	lessonProgress.value = data.membership?.progress
-	if (data.content) editor.value = renderEditor('editor', data.content)
+	if (data.content) {
+		const content = programmingLesson.value
+			? JSON.stringify({ ...JSON.parse(data.content), blocks: meaningfulBlocks(data.content) })
+			: data.content
+		editor.value = renderEditor('editor', content)
+	}
 	if (
+		!programmingLesson.value &&
 		data.instructor_content &&
 		JSON.parse(data.instructor_content)?.blocks?.length > 1
 	)
@@ -621,6 +735,7 @@ const renderEditor = (holder, content) => {
 // again. Without an in-flight guard the two save_progress requests race
 // and the second one fails with TimestampMismatchError on LMS Enrollment.
 let progressSubmitting = false
+let progressLessonName = null
 const markProgress = () => {
 	if (progressSubmitting) return
 	// Only enrolled students record progress; a moderator previewing has no
@@ -631,15 +746,19 @@ const markProgress = () => {
 		!user.data ||
 		!lesson.data ||
 		!lesson.data.membership ||
-		lesson.data.progress
+		lesson.data.progress ||
+		isStudentView.value ||
+		completedLesson.value === lesson.data.name
 	)
 		return
 	progressSubmitting = true
+	progressLessonName = lesson.data.name
 	progress.submit(
 		{},
 		{
 			onSuccess() {
 				progressSubmitting = false
+				if (progressLessonName !== lesson.data?.name) observeReadingEnd(lesson.data)
 			},
 			onError(err) {
 				progressSubmitting = false
@@ -658,8 +777,14 @@ const progress = createResource({
 		}
 	},
 	onSuccess(data) {
+		if (lesson.data?.name !== progressLessonName) {
+			outline.reload()
+			return
+		}
+		if (Number(data) > Number(lessonProgress.value ?? 0)) {
+			completedLesson.value = lesson.data?.name
+		}
 		lessonProgress.value = data
-		completedLesson.value = lesson.data?.name
 		// Reload here rather than waiting on the socket, so this page's own
 		// completion unlocks the next lesson even where realtime is unavailable.
 		outline.reload()
@@ -822,6 +947,11 @@ watch(
 )
 
 const resetLessonState = (newChapterNumber, newLessonNumber) => {
+	readingGeneration++
+	editor.value?.destroy?.()
+	instructorEditor.value?.destroy?.()
+	readingObserver?.disconnect()
+	completedLesson.value = null
 	editor.value = null
 	instructorEditor.value = null
 	allowDiscussions.value = false
@@ -883,7 +1013,10 @@ const cleanYouTubeUrl = (url) => {
 watch(
 	() => lesson.data,
 	async (data) => {
+		await nextTick()
+		if (data !== lesson.data) return
 		setupLesson(data)
+		observeReadingEnd(data)
 		// Settings drive dwell + enforcement; if they haven't resolved yet
 		// the timer reads undefined and falls back to 30s. Await the
 		// resource so the admin-configured dwell time wins from the first
@@ -1056,7 +1189,8 @@ const fallbackToDwellTimer = (reason) => {
 }
 
 const startTimer = () => {
-	if (!lesson.data?.membership) return
+	clearInterval(timerInterval)
+	if (!lesson.data?.membership || isReadingLesson.value || programmingLesson.value || hasQuiz.value) return
 	const dwell = resolveDwellSeconds(
 		settingsStore.settings?.data?.lesson_dwell_time
 	)
@@ -1434,5 +1568,33 @@ usePageMeta(() => {
 :root {
 	--plyr-range-fill-background: white;
 	--plyr-video-control-background-hover: transparent;
+}
+</style>
+
+<style>
+.programming-lesson-page { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; overflow: hidden; background: var(--surface-base, white); }
+.programming-lesson-nav { display: flex; align-items: center; flex-shrink: 0; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--outline-gray-2, #eee); }
+.programming-lesson-heading { display: flex; align-items: flex-end; gap: 20px; flex: 1; min-width: 0; }
+.programming-lesson-heading h1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.programming-lesson-author { display: flex; align-items: center; flex-shrink: 0; padding-bottom: 2px; }
+.programming-lesson-body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+.programming-lesson-content { flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
+.programming-lesson-content .codex-editor,
+.programming-lesson-content .codex-editor__redactor,
+.programming-lesson-content .ce-block,
+.programming-lesson-content .ce-block__content,
+.programming-lesson-content .ce-block__content > div { height: 100%; min-height: 0; }
+.programming-lesson-content .codex-editor__redactor { padding: 0 !important; display: flex; flex-direction: column; }
+/* EditorJS can insert an empty default block while the async program loads. */
+.programming-lesson-content .ce-block:not(:has(.programming-exercise-block)) { display: none; }
+.programming-lesson-content .ce-block:has(.programming-exercise-block) { flex: 1; height: auto; min-height: 0; }
+.programming-lesson-content .ce-block__content { max-width: none; margin: 0; }
+.programming-lesson-content .ce-block { margin: 0; }
+.programming-lesson-content iframe { display: block; width: 100%; height: 100%; border: 0; border-radius: 0; }
+.programming-lesson-chapters { width: 300px; flex-shrink: 0; overflow-y: auto; border-left: 1px solid var(--outline-gray-2, #eee); }
+@media (max-width: 767px) {
+	.programming-lesson-nav { gap: 8px; padding: 10px; flex-wrap: wrap; }
+	.programming-lesson-heading { order: -1; flex-basis: 100%; gap: 12px; }
+	.programming-lesson-chapters { position: absolute; right: 0; top: 110px; bottom: 0; background: var(--surface-base, white); z-index: 2; max-width: 85vw; }
 }
 </style>

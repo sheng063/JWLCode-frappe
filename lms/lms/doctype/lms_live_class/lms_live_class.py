@@ -25,6 +25,8 @@ class LMSLiveClass(Document):
 			and not self.has_value_changed("time")
 			and not self.has_value_changed("duration")
 			and not self.has_value_changed("title")
+			and not self.has_value_changed("description")
+			and not self.has_value_changed("timezone")
 		):
 			return
 
@@ -285,3 +287,61 @@ def get_permission_query_conditions(user=None):
 	return f"""(`tabLMS Live Class`.batch_name in (
 		select batch from `tabLMS Batch Enrollment` where member = {escaped}
 	))"""
+
+
+@frappe.whitelist()
+def update_live_class(name: str, values: str | dict, modified: str):
+	"""Update editable fields, the provider meeting, and the linked calendar event."""
+	from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+	from frappe.utils import get_time
+
+	from lms.lms.utils import can_modify_batch
+
+	doc = frappe.get_doc("LMS Live Class", name)
+	if not can_modify_batch(doc.batch_name):
+		frappe.throw(_("You do not have permission to edit this live class."), frappe.PermissionError)
+	# Serialize edits and reject a stale form before touching the provider.
+	doc = frappe.get_doc("LMS Live Class", name, for_update=True)
+	if not modified or get_datetime(modified) != get_datetime(doc.modified):
+		frappe.throw(
+			_("This live class has changed. Reload it before saving."), frappe.TimestampMismatchError
+		)
+	values = frappe.parse_json(values) if isinstance(values, str) else values
+	if not isinstance(values, dict):
+		frappe.throw(_("Invalid live class details."))
+	for field in ("title", "description", "date", "time", "duration", "timezone", "auto_recording"):
+		if field in values:
+			doc.set(field, values[field])
+	if not doc.title or not doc.date or not doc.time or not doc.timezone or cint(doc.duration) <= 0:
+		frappe.throw(_("Enter a title, date, time, timezone and a positive duration."))
+	try:
+		ZoneInfo(doc.timezone)
+		get_time(doc.time)
+		get_datetime(f"{doc.date} {doc.time}")
+	except (ValueError, TypeError, ZoneInfoNotFoundError):
+		frappe.throw(_("Enter a valid date, time and timezone."))
+	if doc.auto_recording not in ("No Recording", "Local", "Cloud"):
+		frappe.throw(_("Invalid recording setting."))
+	if doc.meeting_id and doc.zoom_account:
+		response = requests.patch(
+			f"https://api.zoom.us/v2/meetings/{requests.utils.quote(str(doc.meeting_id), safe='')}",
+			headers={"Authorization": "Bearer " + authenticate(doc.zoom_account)},
+			json={
+				"topic": doc.title,
+				"agenda": doc.description or "",
+				"start_time": get_datetime(f"{doc.date} {doc.time}").strftime("%Y-%m-%dT%H:%M:%S"),
+				"timezone": doc.timezone,
+				"duration": cint(doc.duration),
+				"settings": {
+					"auto_recording": "none"
+					if doc.auto_recording == "No Recording"
+					else doc.auto_recording.lower()
+				},
+			},
+			timeout=30,
+		)
+		if response.status_code != 204:
+			frappe.throw(_("Unable to update the conferencing provider. Please try again."))
+	doc.save(ignore_permissions=True)
+	return doc.name

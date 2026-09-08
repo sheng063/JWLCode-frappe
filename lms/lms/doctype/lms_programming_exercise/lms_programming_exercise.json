@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "exercise_number",
   "title",
   "column_break_jlzi",
   "language",
@@ -15,9 +16,23 @@
   "section_break_tjwv",
   "problem_statement",
   "section_break_ftkh",
-  "test_cases"
+  "test_cases",
+  "source_type",
+  "active_package_version",
+  "scoring_mode",
+  "feedback_policy"
  ],
  "fields": [
+  {
+   "fieldname": "exercise_number",
+   "fieldtype": "Data",
+   "label": "Exercise Number",
+   "read_only": 1,
+   "unique": 1,
+   "no_copy": 1,
+   "in_list_view": 1,
+   "search_index": 1
+  },
   {
    "fieldname": "title",
    "fieldtype": "Data",
@@ -79,6 +94,37 @@
    "fieldtype": "Table",
    "label": "Test Cases",
    "options": "LMS Test Case"
+  },
+  {
+   "fieldname": "source_type",
+   "fieldtype": "Select",
+   "label": "Source Type",
+   "options": "manual\nicpc",
+   "default": "manual",
+   "read_only": 1
+  },
+  {
+   "fieldname": "active_package_version",
+   "fieldtype": "Link",
+   "label": "Active Package Version",
+   "options": "LMS Problem Package Version",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scoring_mode",
+   "fieldtype": "Select",
+   "label": "Scoring Mode",
+   "options": "partial\nicpc",
+   "default": "partial",
+   "read_only": 1
+  },
+  {
+   "fieldname": "feedback_policy",
+   "fieldtype": "Select",
+   "label": "Feedback Policy",
+   "options": "teaching\nstrict",
+   "default": "teaching",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -162,5 +208,6 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "title_field": "title"
+ "title_field": "title",
+ "search_fields": "exercise_number,title"
 }

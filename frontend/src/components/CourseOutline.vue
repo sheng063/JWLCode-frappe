@@ -196,7 +196,7 @@ const deleteLesson = createResource({
 	},
 	onError(err: { messages?: string[] } | string) {
 		toast.error(
-			typeof err === 'string' ? err : err.messages?.[0] ?? __('Error')
+			typeof err === 'string' ? err : (err.messages?.[0] ?? __('Error'))
 		)
 	},
 })
@@ -239,7 +239,7 @@ const deleteChapter = createResource({
 	},
 	onError(err: { messages?: string[] } | string) {
 		toast.error(
-			typeof err === 'string' ? err : err.messages?.[0] ?? __('Error')
+			typeof err === 'string' ? err : (err.messages?.[0] ?? __('Error'))
 		)
 	},
 })
@@ -261,7 +261,7 @@ const renameChapterResource = createResource({
 	},
 	onError(err: { messages?: string[] } | string) {
 		outline.reload()
-		toast.error(typeof err === 'string' ? err : err.messages?.[0] ?? 'Error')
+		toast.error(typeof err === 'string' ? err : (err.messages?.[0] ?? 'Error'))
 	},
 })
 
@@ -270,15 +270,15 @@ function renameChapter(payload: { chapter: OutlineChapter; title: string }) {
 }
 
 const errorMessage = (err: { messages?: string[] } | string): string =>
-	typeof err === 'string' ? err : err.messages?.[0] ?? 'Error'
+	typeof err === 'string' ? err : (err.messages?.[0] ?? 'Error')
 
 // Inserts the Course Lesson and its chapter reference in one request, so a
 // failure on either rolls back atomically: no orphaned lesson. Returns the
 // new lesson's docname.
 const addLesson = createResource({
 	url: 'lms.lms.api.create_lesson',
-	makeParams(values: { chapter: string }) {
-		return { chapter: values.chapter }
+	makeParams(values: { chapter: string; lesson_type: string }) {
+		return { chapter: values.chapter, lesson_type: values.lesson_type }
 	},
 })
 
@@ -287,10 +287,11 @@ const addLesson = createResource({
 function createLessonInline(payload: {
 	chapter: OutlineChapter
 	lessonIdx: number
+	lessonType: 'Text' | 'Programming'
 }) {
 	creatingLessonChapter.value = payload.chapter.name
 	addLesson.submit(
-		{ chapter: payload.chapter.name },
+		{ chapter: payload.chapter.name, lesson_type: payload.lessonType },
 		{
 			onSuccess(lessonName: string) {
 				creatingLessonChapter.value = ''

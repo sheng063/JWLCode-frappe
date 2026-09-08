@@ -19,6 +19,7 @@
   "card_gradient",
   "section_break_7",
   "published",
+  "is_public",
   "published_on",
   "column_break_10",
   "upcoming",
@@ -304,6 +305,13 @@
    "fieldtype": "Check",
    "label": "Notification Sent",
    "read_only": 1
+  },
+  {
+   "fieldname": "is_public",
+   "fieldtype": "Check",
+   "label": "Public",
+   "default": "1",
+   "description": "Visible to all students. Private courses are visible only to enrolled students."
   }
  ],
  "is_published_field": "published",

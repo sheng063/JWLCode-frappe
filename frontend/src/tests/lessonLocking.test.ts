@@ -197,6 +197,7 @@ const baseLesson = {
 let wrapper: VueWrapper
 
 beforeEach(() => {
+	vi.stubGlobal('__', translateStub)
 	created.list.length = 0
 	pushMock.mockReset()
 	replaceMock.mockReset()
@@ -206,6 +207,7 @@ beforeEach(() => {
 
 afterEach(() => {
 	wrapper?.unmount()
+	vi.unstubAllGlobals()
 })
 
 describe('Lesson.vue Next affordance follows canGoNext', () => {
@@ -508,6 +510,7 @@ describe('Lesson.vue unlocks the next lesson without a reload', () => {
 			membership: { progress: 0 },
 		}
 		await flushPromises()
+		findResource('lms.lms.doctype.course_lesson.course_lesson.save_progress').data = 40
 		;(wrapper.vm as any).markProgress()
 		await flushPromises()
 		outline.reload.mockClear()
@@ -566,5 +569,60 @@ describe('Lesson.vue Next survives an outline that never resolves', () => {
 		;(wrapper.vm as any).goNext()
 
 		expect(pushMock).not.toHaveBeenCalled()
+	})
+})
+
+
+describe('reading completion', () => {
+	it('completes only when the content end is visible and disconnects on leave', async () => {
+		let notify: any
+		const disconnect = vi.fn()
+		vi.stubGlobal('IntersectionObserver', class {
+			constructor(callback: any) { notify = callback }
+			observe() {}
+			disconnect = disconnect
+		})
+		wrapper = await mountLesson()
+		findResource('lms.lms.utils.get_lesson').data = { ...baseLesson, body: 'Read me', membership: { progress: 0 } }
+		await flushPromises()
+		const progress = findResource('lms.lms.doctype.course_lesson.course_lesson.save_progress')
+		expect(progress.submit).not.toHaveBeenCalled()
+		notify([{ isIntersecting: false }])
+		expect(progress.submit).not.toHaveBeenCalled()
+		progress.data = 40
+		notify([{ isIntersecting: true }])
+		await flushPromises()
+		expect(progress.submit).toHaveBeenCalledTimes(1)
+		notify([{ isIntersecting: true }])
+		expect(progress.submit).toHaveBeenCalledTimes(1)
+		wrapper.unmount()
+		expect(disconnect).toHaveBeenCalled()
+	})
+
+	it('does not observe the bottom of a quiz lesson', async () => {
+		const observe = vi.fn()
+		vi.stubGlobal('IntersectionObserver', class { observe = observe; disconnect() {} })
+		wrapper = await mountLesson()
+		findResource('lms.lms.utils.get_lesson').data = { ...baseLesson, quiz_id: 'QUIZ-1', membership: { progress: 0 } }
+		await flushPromises()
+		expect(observe).not.toHaveBeenCalled()
+	})
+
+	it('ignores an old reading observer after switching lessons', async () => {
+		let notify: any
+		vi.stubGlobal('IntersectionObserver', class {
+			constructor(callback: any) { notify = callback }
+			observe() {}
+			disconnect() {}
+		})
+		wrapper = await mountLesson()
+		const lesson = findResource('lms.lms.utils.get_lesson')
+		lesson.data = { ...baseLesson, body: 'Text', membership: { progress: 0 } }
+		await flushPromises()
+		const oldNotify = notify
+		lesson.data = { ...baseLesson, name: 'L2', quiz_id: 'QUIZ-2', membership: { progress: 0 } }
+		await flushPromises()
+		oldNotify([{ isIntersecting: true }])
+		expect(findResource('lms.lms.doctype.course_lesson.course_lesson.save_progress').submit).not.toHaveBeenCalled()
 	})
 })

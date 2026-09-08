@@ -34,6 +34,7 @@ from frappe.utils.html_utils import sanitize_html
 from pypika import Case
 from pypika import functions as fn
 
+from lms.lms.course_access import can_view_course, get_visible_courses
 from lms.lms.doctype.lms_enrollment.lms_enrollment import (
 	update_enrollment,
 	update_program_progress,
@@ -911,8 +912,7 @@ def get_courses(filters: dict = None, start: int = 0, limit_page_length: int | s
 	remaining = page_length - len(courses)
 
 	if remaining > 0:
-		courses = courses + frappe.get_all(
-			"LMS Course",
+		courses = courses + get_visible_courses(
 			filters=filters,
 			fields=fields,
 			or_filters=or_filters,
@@ -953,7 +953,10 @@ def get_course_count(filters: dict = None) -> int:
 
 def count_matching(doctype: str, filters: dict | list, or_filters: dict = None) -> int:
 	"""Row count for filters that include or_filters, which db.count cannot take."""
-	rows = frappe.get_all(doctype, filters=filters, or_filters=or_filters, fields=[{"COUNT": "*"}])
+	if doctype == "LMS Course":
+		rows = get_visible_courses(filters=filters, or_filters=or_filters, fields=[{"COUNT": "*"}])
+	else:
+		rows = frappe.get_all(doctype, filters=filters, or_filters=or_filters, fields=[{"COUNT": "*"}])
 	return cint(next(iter(rows[0].values()))) if rows else 0
 
 
@@ -979,13 +982,12 @@ def get_course_categories() -> list:
 	# Distinct category strings are inherently bounded (one per category, not per
 	# course), so the full set is intended; limit_page_length=0 makes the
 	# "no page cap" explicit rather than relying on get_all's default.
-	rows = frappe.get_all(
-		"LMS Course",
+	rows = get_visible_courses(
 		filters={"published": 1, "category": ["is", "set"]},
 		pluck="category",
 		distinct=True,
 		order_by="category asc",
-		limit_page_length=0,
+		page_length=0,
 	)
 
 	options = [{"label": "", "value": None}]
@@ -1068,8 +1070,7 @@ def get_enrollment_details(courses: list) -> list:
 
 def get_featured_courses(filters: dict, or_filters: dict, fields: list, page_length: int) -> list:
 	filters.update({"featured": 1})
-	featured_courses = frappe.get_all(
-		"LMS Course",
+	featured_courses = get_visible_courses(
 		filters=filters,
 		fields=fields,
 		or_filters=or_filters,
@@ -1105,6 +1106,7 @@ def get_course_fields():
 		"short_introduction",
 		"description",
 		"published",
+		"is_public",
 		"upcoming",
 		"featured",
 		"disable_self_learning",
@@ -1126,6 +1128,9 @@ def get_course_fields():
 @frappe.whitelist(allow_guest=True)  # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 @rate_limit(limit=500, seconds=60 * 60)
 def get_course_details(course: str):
+	if not can_view_course(course):
+		return {}
+
 	if not guest_access_allowed():
 		return {}
 
@@ -1210,6 +1215,8 @@ def get_categorized_courses(courses: list) -> dict:
 @frappe.whitelist(allow_guest=True)  # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
 def get_course_outline(course: str, progress: bool = False) -> list:
 	"""Returns the course outline."""
+	if not can_view_course(course):
+		return []
 
 	if not guest_access_allowed():
 		return []
@@ -1492,6 +1499,7 @@ def get_lesson(course: str, chapter: int, lesson: int) -> dict:
 			"name",
 			"title",
 			"include_in_preview",
+			"lesson_type",
 			"is_scorm_package",
 			"body",
 			"creation",
@@ -1684,6 +1692,8 @@ def get_batch_details(batch: str):
 	batch_details.courses = frappe.get_all(
 		"Batch Course", filters={"parent": batch}, fields=["course", "title", "evaluator"]
 	)
+	if not is_batch_admin:
+		batch_details.courses = [row for row in batch_details.courses if can_view_course(row.course)]
 	batch_details.assessments = frappe.get_all(
 		"LMS Assessment", {"parent": batch}, ["assessment_name", "assessment_type"]
 	)
@@ -1788,6 +1798,47 @@ def get_quiz_with_questions(quiz: str) -> dict:
 		questions_by_name = {row["name"]: row for row in rows}
 
 	return {"quiz": quiz_doc, "questions_by_name": questions_by_name}
+
+
+@frappe.whitelist(allow_guest=True)
+def get_batch_course_rows(filters: dict | str, limit_start: int = 0, limit_page_length: int = 20):
+	"""Course rows for the batch overview, filtered before pagination.
+
+	Frappe checks a child-table list against its parent's permissions, so a
+	Batch Course permission-query hook cannot hide a private course here.
+	"""
+	if not guest_access_allowed():
+		return []
+	filters = frappe.parse_json(filters) if isinstance(filters, str) else filters
+	if not isinstance(filters, dict):
+		frappe.throw(_("Invalid batch course filters."))
+	batch = filters.get("parent")
+	name = filters.get("name")
+	if not batch and isinstance(name, str | int):
+		batch = frappe.db.get_value("Batch Course", name, "parent")
+	if not isinstance(batch, str) or not batch:
+		frappe.throw(_("Select a batch."))
+	if not (
+		can_modify_batch(batch)
+		or frappe.db.get_value("LMS Batch", batch, "published")
+		or frappe.db.exists("LMS Batch Enrollment", {"batch": batch, "member": frappe.session.user})
+	):
+		frappe.throw(_("You do not have permission to view this batch."), frappe.PermissionError)
+	row_filters = {"parent": batch, "parenttype": "LMS Batch"}
+	if name is not None:
+		if not isinstance(name, str | int):
+			frappe.throw(_("Invalid batch course filters."))
+		row_filters["name"] = name
+	rows = frappe.get_all(
+		"Batch Course", filters=row_filters, fields=["name", "course", "title", "evaluator"], order_by="idx"
+	)
+	if not can_modify_batch(batch) and rows:
+		visible = set(
+			get_visible_courses(filters={"name": ["in", [row.course for row in rows]]}, pluck="name")
+		)
+		rows = [row for row in rows if row.course in visible]
+	start = max(cint(limit_start), 0)
+	return rows[start : start + resolve_page_length(limit_page_length)]
 
 
 @frappe.whitelist(allow_guest=True)
@@ -2404,12 +2455,14 @@ def get_lesson_creation_details(course: str, chapter: int, lesson: int) -> dict:
 				"name",
 				"title",
 				"include_in_preview",
+				"lesson_type",
 				"body",
 				"content",
 				"instructor_notes",
 				"instructor_content",
 				"youtube",
 				"quiz_id",
+				"question",
 			],
 			as_dict=1,
 		)
@@ -2789,6 +2842,8 @@ def get_program_details(program_name: str) -> dict:
 	previous_progress = 0
 	for i, course in enumerate(program_courses):
 		details = get_course_details(course.course)
+		if not details:
+			continue
 		if i == 0:
 			details.eligible = True
 		elif previous_progress == 100:

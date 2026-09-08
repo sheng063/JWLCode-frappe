@@ -1,0 +1,125 @@
+{
+ "doctype": "DocType",
+ "name": "LMS Problem Package Version",
+ "module": "LMS",
+ "engine": "InnoDB",
+ "autoname": "hash",
+ "field_order": [
+  "exercise",
+  "import_record",
+  "source_uuid",
+  "format_version",
+  "revision",
+  "status",
+  "validation_status",
+  "metadata",
+  "manifest",
+  "judge_config",
+  "config_digest",
+  "statement_path",
+  "cases",
+  "expected_target_version",
+  "confirmation_key"
+ ],
+ "fields": [
+  {
+   "fieldname": "exercise",
+   "fieldtype": "Link",
+   "label": "Exercise",
+   "options": "LMS Programming Exercise"
+  },
+  {
+   "fieldname": "import_record",
+   "fieldtype": "Link",
+   "label": "Import Record",
+   "options": "LMS Problem Package Import",
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_uuid",
+   "fieldtype": "Data",
+   "label": "Source Uuid"
+  },
+  {
+   "fieldname": "format_version",
+   "fieldtype": "Data",
+   "label": "Format Version"
+  },
+  {
+   "fieldname": "revision",
+   "fieldtype": "Int",
+   "label": "Revision"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status"
+  },
+  {
+   "fieldname": "validation_status",
+   "fieldtype": "Data",
+   "label": "Validation Status"
+  },
+  {
+   "fieldname": "metadata",
+   "fieldtype": "Long Text",
+   "label": "Metadata"
+  },
+  {
+   "fieldname": "manifest",
+   "fieldtype": "Long Text",
+   "label": "Manifest"
+  },
+  {
+   "fieldname": "judge_config",
+   "fieldtype": "Long Text",
+   "label": "Judge Config"
+  },
+  {
+   "fieldname": "config_digest",
+   "fieldtype": "Data",
+   "label": "Config Digest"
+  },
+  {
+   "fieldname": "statement_path",
+   "fieldtype": "Data",
+   "label": "Statement Path"
+  },
+  {
+   "fieldname": "cases",
+   "fieldtype": "Long Text",
+   "label": "Cases"
+  },
+  {
+   "fieldname": "expected_target_version",
+   "fieldtype": "Data",
+   "label": "Expected Target Version"
+  },
+  {
+   "fieldname": "confirmation_key",
+   "fieldtype": "Data",
+   "label": "Confirmation Key",
+   "unique": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1
+  },
+  {
+   "role": "Moderator",
+   "read": 1
+  },
+  {
+   "role": "Course Creator",
+   "read": 1
+  },
+  {
+   "role": "Batch Evaluator",
+   "read": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

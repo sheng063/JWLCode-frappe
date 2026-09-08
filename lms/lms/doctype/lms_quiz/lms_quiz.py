@@ -656,9 +656,6 @@ def save_progress_after_quiz(quiz_details: dict, percentage: float):
 	if not quiz_details.lesson or not quiz_details.course:
 		return
 
-	if quiz_details.passing_percentage and percentage < quiz_details.passing_percentage:
-		return
-
 	# save_progress refuses a locked lesson by raising, which would roll back the
 	# submission create_submission() has already written. A quiz can be reached
 	# without its lesson being open — can_access_quiz also grants through an

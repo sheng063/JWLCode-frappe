@@ -13,7 +13,9 @@
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
-import { reactive } from 'vue'
+import { reactive, nextTick } from 'vue'
+
+vi.stubGlobal('__', (text: string) => text)
 
 interface FakeList {
 	doctype: string
@@ -29,6 +31,7 @@ interface FakeList {
 const h = vi.hoisted(() => ({
 	listCache: new Map<string, any>(),
 	reloads: [] as string[],
+	progressFetch: vi.fn(),
 }))
 
 // HeaderButton wraps frappe-ui's Button in a Tooltip below the mobile
@@ -72,12 +75,14 @@ vi.mock('frappe-ui', () => {
 		},
 		createResource: (options: any) =>
 			reactive({
+				fetch: h.progressFetch,
 				data: options.doctype === 'LMS Batch Enrollment' ? 4 : null,
 				loading: false,
 				reload: () => {},
 				update: () => {},
 				submit: () => {},
 			}),
+		toast: { error: vi.fn() },
 		FormControl: passthrough('FormControl'),
 		Avatar: passthrough('Avatar'),
 		Button: passthrough('Button'),
@@ -98,7 +103,11 @@ vi.mock('@/components/NumberChartGraph.vue', () => ({
 	default: { name: 'NumberChartGraph', template: '<div />' },
 }))
 vi.mock('@/components/ResponsiveListView.vue', () => ({
-	default: { name: 'ResponsiveListView', template: '<div />' },
+	default: {
+		name: 'ResponsiveListView',
+		props: ['rows', 'columns'],
+		template: `<div><div v-for="row in rows"><span v-for="column in columns"><slot name="cell" :row="row" :column="column" :value="row[column.key]" /></span></div></div>`,
+	},
 }))
 vi.mock('@/components/Layouts/EmptyStateLayout.vue', () => ({
 	default: { name: 'EmptyStateLayout', template: '<div />' },
@@ -125,6 +134,8 @@ describe('AdminBatchDashboard students filters', () => {
 	beforeEach(() => {
 		h.listCache.clear()
 		h.reloads.length = 0
+		h.progressFetch.mockReset()
+		h.progressFetch.mockResolvedValue({})
 	})
 
 	it('shares one cached resource across mounts', async () => {
@@ -163,5 +174,78 @@ describe('AdminBatchDashboard students filters', () => {
 		expect(cachedList().filters).toEqual({ batch: 'B1' })
 		expect(h.reloads).toContain(JSON.stringify({ batch: 'B1' }))
 		second.unmount()
+	})
+	it('shows both progress columns immediately after enrollment date', async () => {
+		h.progressFetch.mockResolvedValue({
+			s1: { course_progress: 75, programming_pass_rate: 33.33 },
+		})
+		const wrapper = mountDashboard()
+		cachedList().data = [
+			{
+				name: 'E1',
+				member: 's1',
+				member_name: 'Student',
+				creation: '2026-01-01',
+			},
+		]
+		await flushPromises()
+		const list = wrapper.findComponent({ name: 'ResponsiveListView' })
+		expect(list.props('columns').map((column: any) => column.key)).toEqual([
+			'member_name',
+			'creation',
+			'course_progress',
+			'programming_pass_rate',
+		])
+		expect(list.text()).toContain('75%')
+		expect(list.text()).toContain('33.33%')
+		expect(h.progressFetch).toHaveBeenCalledWith({
+			batch: 'B1',
+			members: ['s1'],
+		})
+		wrapper.unmount()
+	})
+
+	it('ignores a stale progress response after the student list changes', async () => {
+		let resolveOld!: (value: unknown) => void
+		h.progressFetch.mockImplementationOnce(
+			() =>
+				new Promise((resolve) => {
+					resolveOld = resolve
+				})
+		)
+		h.progressFetch.mockResolvedValueOnce({
+			s2: { course_progress: 80, programming_pass_rate: 50 },
+		})
+		const wrapper = mountDashboard()
+		cachedList().data = [{ name: 'E1', member: 's1' }]
+		await nextTick()
+		cachedList().data = [{ name: 'E2', member: 's2' }]
+		await flushPromises()
+		resolveOld({ s1: { course_progress: 100, programming_pass_rate: 100 } })
+		await flushPromises()
+		expect(
+			wrapper.findComponent({ name: 'ResponsiveListView' }).props('rows')
+		).toEqual([
+			{
+				name: 'E2',
+				member: 's2',
+				course_progress: 80,
+				programming_pass_rate: 50,
+			},
+		])
+		wrapper.unmount()
+	})
+
+	it('fetches large accumulated lists in bounded chunks', async () => {
+		const wrapper = mountDashboard()
+		cachedList().data = Array.from({ length: 501 }, (_, index) => ({
+			name: `E${index}`,
+			member: `s${index}`,
+		}))
+		await flushPromises()
+		expect(
+			h.progressFetch.mock.calls.map(([params]) => params.members.length)
+		).toEqual([500, 1])
+		wrapper.unmount()
 	})
 })

@@ -9,6 +9,7 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
+  "lesson_type",
   "include_in_preview",
   "is_scorm_package",
   "column_break_4",
@@ -156,6 +157,13 @@
    "fieldtype": "Check",
    "label": "Is SCORM Package",
    "read_only": 1
+  },
+  {
+   "fieldname": "lesson_type",
+   "fieldtype": "Select",
+   "label": "Lesson Type",
+   "options": "\nText\nProgramming",
+   "description": "Programming exercises cannot be combined with other lesson content."
   }
  ],
  "index_web_pages_for_search": 1,

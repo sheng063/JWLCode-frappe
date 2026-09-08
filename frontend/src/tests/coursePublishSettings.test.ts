@@ -27,6 +27,7 @@ vi.stubGlobal('__', (s: string) => s)
 
 const doc = {
 	name: 'COURSE-1',
+	is_public: 0,
 	upcoming: 0,
 	featured: 0,
 	disable_self_learning: 0,
@@ -63,34 +64,35 @@ describe('CoursePublishSettings', () => {
 		expect(toggle.exists()).toBe(true)
 	})
 
-	it('marks the form dirty when the switch is flipped', async () => {
-		const markDirty = vi.fn()
-		const wrapper = mount(CoursePublishSettings, {
-			global: {
-				mocks: { __: (s: string) => s },
-				provide: {
-					courseForm: { resource: { doc: { ...doc } }, markDirty },
-					$dayjs: (v: unknown) => ({ format: () => String(v) }),
-				},
-				stubs: {
-					CollapsibleSection: { template: '<div><slot /></div>' },
-					Link: true,
-					NewMemberModal: true,
-					BooleanSwitch: {
-						props: ['modelValue', 'label'],
-						emits: ['update:modelValue'],
-						template: `<button
+	it.each(['Enforce Lesson Completion', 'Public'])(
+		'marks the form dirty when %s is flipped',
+		async (label) => {
+			const markDirty = vi.fn()
+			const wrapper = mount(CoursePublishSettings, {
+				global: {
+					mocks: { __: (s: string) => s },
+					provide: {
+						courseForm: { resource: { doc: { ...doc } }, markDirty },
+						$dayjs: (v: unknown) => ({ format: () => String(v) }),
+					},
+					stubs: {
+						CollapsibleSection: { template: '<div><slot /></div>' },
+						Link: true,
+						NewMemberModal: true,
+						BooleanSwitch: {
+							props: ['modelValue', 'label'],
+							emits: ['update:modelValue'],
+							template: `<button
 							:data-label="label"
 							@click="$emit('update:modelValue', !modelValue)"
 						/>`,
+						},
 					},
 				},
-			},
-		})
+			})
 
-		await wrapper
-			.find('[data-label="Enforce Lesson Completion"]')
-			.trigger('click')
-		expect(markDirty).toHaveBeenCalled()
-	})
+			await wrapper.find(`[data-label="${label}"]`).trigger('click')
+			expect(markDirty).toHaveBeenCalled()
+		}
+	)
 })

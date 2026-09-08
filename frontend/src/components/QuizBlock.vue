@@ -1,5 +1,5 @@
 <template>
-	<Quiz v-if="user.data" :quizName="quiz"></Quiz>
+	<Quiz v-if="user.data" :quizName="quiz" autoStart></Quiz>
 	<div v-else class="border rounded-md text-center py-20">
 		<div>
 			{{ __('Please login to access the quiz.') }}

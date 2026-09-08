@@ -44,14 +44,17 @@ COPYFILE_DISABLE=1 tar \
 	-cf - . \
 | compose exec -T frappe tar -xf - -C "${APP_DIR}"
 
-echo "==> Installing frontend dependencies, building, migrating site, and clearing cache"
+echo "==> Installing LMS dependencies, building, migrating site, and clearing cache"
 compose exec -T -e SITE_NAME="${SITE_NAME}" frappe bash -lc '
 	chown -R frappe:frappe /home/frappe/bench-data/frappe-bench/apps/lms
 	runuser -u frappe -- bash -lc "
-		cd /home/frappe/bench-data/frappe-bench/apps/lms/frontend &&
+		cd /home/frappe/bench-data/frappe-bench &&
+		env/bin/pip install -e apps/lms &&
+		cd apps/lms/frontend &&
 		yarn install --frozen-lockfile --non-interactive &&
 		NODE_OPTIONS=--max-old-space-size=4096 yarn build &&
 		cd /home/frappe/bench-data/frappe-bench &&
+		bench compile-po-to-mo --app lms &&
 		bench --site \"\$SITE_NAME\" migrate &&
 		bench --site \"\$SITE_NAME\" clear-cache
 	"

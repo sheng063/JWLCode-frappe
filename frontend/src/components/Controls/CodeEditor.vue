@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="editor flex flex-col gap-1.5"
+		class="editor isolate flex flex-col gap-1.5"
 		:class="{ 'editor-grow': fill }"
 		:style="fill ? null : { height: height }"
 	>
@@ -14,7 +14,7 @@
 		<div
 			:id="inputId"
 			ref="editor"
-			class="h-auto flex-1 overflow-hidden overscroll-none !rounded border border-outline-gray-2 bg-surface-gray-2 transition-colors hover:border-outline-gray-3 focus-within:border-outline-gray-4 focus-within:shadow-sm dark:bg-gray-900"
+			class="h-auto flex-1 overflow-hidden overscroll-none !rounded border border-outline-gray-2 transition-colors hover:border-outline-gray-3 focus-within:border-outline-gray-4 focus-within:shadow-sm"
 		/>
 		<InputDescription
 			v-if="showDescription"
@@ -34,6 +34,10 @@
 <script setup lang="ts">
 import ace from 'ace-builds'
 import 'ace-builds/src-min-noconflict/ext-searchbox'
+import 'ace-builds/src-noconflict/ext-language_tools'
+import 'ace-builds/src-noconflict/keybinding-vim'
+import 'ace-builds/src-noconflict/keybinding-emacs'
+import type { EditorPreferences } from '@/utils/editorPreferences'
 import 'ace-builds/src-min-noconflict/theme-chrome'
 import 'ace-builds/src-min-noconflict/theme-twilight'
 import { PropType, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -68,6 +72,11 @@ const props = defineProps({
 	height: {
 		type: String,
 		default: '250px',
+	},
+	fontSize: { type: Number, default: 12 },
+	preferences: {
+		type: Object as PropType<EditorPreferences>,
+		default: undefined,
 	},
 	fill: {
 		type: Boolean,
@@ -109,10 +118,11 @@ const {
 	showDescription,
 } = useInputLabeling(props)
 
-const emit = defineEmits(['save', 'update:modelValue'])
+const emit = defineEmits(['save', 'update:modelValue', 'cursor-change'])
 const editor = ref<HTMLElement | null>(null)
 let aceEditor = null as ace.Ace.Editor | null
 let resizeObserver: ResizeObserver | null = null
+let syncingModel = false
 
 onMounted(() => {
 	isDark.value = localStorage.getItem('theme') === 'dark'
@@ -131,44 +141,30 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
 	resizeObserver?.disconnect()
+	aceEditor?.destroy()
+	aceEditor = null
 })
 
 const setupEditor = () => {
+	aceEditor?.destroy()
 	aceEditor = ace.edit(editor.value as HTMLElement)
 	resetEditor(props.modelValue as string, true)
 	aceEditor.setReadOnly(props.readonly)
 	aceEditor.setOptions({
-		fontSize: '12px',
+		fontSize: props.fontSize,
 		useWorker: false,
 		showGutter: props.showLineNumbers,
 		wrap: props.showLineNumbers,
 	})
-	if (props.type === 'CSS') {
-		import('ace-builds/src-noconflict/mode-css').then(() => {
-			aceEditor?.session.setMode('ace/mode/css')
-		})
-	} else if (props.type === 'JavaScript') {
-		import('ace-builds/src-noconflict/mode-javascript').then(() => {
-			aceEditor?.session.setMode('ace/mode/javascript')
-		})
-	} else if (props.type === 'Python') {
-		import('ace-builds/src-noconflict/mode-python').then(() => {
-			aceEditor?.session.setMode('ace/mode/python')
-		})
-	} else if (props.type === 'C++') {
-		import('ace-builds/src-noconflict/mode-c_cpp').then(() => {
-			aceEditor?.session.setMode('ace/mode/c_cpp')
-		})
-	} else if (props.type === 'JSON') {
-		import('ace-builds/src-noconflict/mode-json').then(() => {
-			aceEditor?.session.setMode('ace/mode/json')
-		})
-	} else {
-		import('ace-builds/src-noconflict/mode-html').then(() => {
-			aceEditor?.session.setMode('ace/mode/html')
-		})
-	}
-	aceEditor.on('blur', () => {
+	applyPreferences()
+	loadEditorMode()
+	aceEditor.selection.on('changeCursor', () => {
+		const cursor = aceEditor?.getCursorPosition()
+		if (cursor)
+			emit('cursor-change', { row: cursor.row + 1, column: cursor.column + 1 })
+	})
+	aceEditor.on(props.preferences ? 'change' : 'blur', () => {
+		if (syncingModel) return
 		try {
 			let value = aceEditor?.getValue() || ''
 			if (props.type === 'JSON') {
@@ -181,6 +177,27 @@ const setupEditor = () => {
 		} catch (e) {
 			// do nothing
 		}
+	})
+}
+
+function loadEditorMode() {
+	const target = aceEditor
+	const type = props.type
+	const modes = {
+		CSS: ['css', () => import('ace-builds/src-noconflict/mode-css')],
+		JavaScript: [
+			'javascript',
+			() => import('ace-builds/src-noconflict/mode-javascript'),
+		],
+		Python: ['python', () => import('ace-builds/src-noconflict/mode-python')],
+		'C++': ['c_cpp', () => import('ace-builds/src-noconflict/mode-c_cpp')],
+		JSON: ['json', () => import('ace-builds/src-noconflict/mode-json')],
+		HTML: ['html', () => import('ace-builds/src-noconflict/mode-html')],
+	} as const
+	const [mode, load] = modes[type] || modes.HTML
+	void load().then(() => {
+		if (target && aceEditor === target && props.type === type)
+			target.session.setMode(`ace/mode/${mode}`)
 	})
 }
 
@@ -198,35 +215,86 @@ const getModelValue = () => {
 
 function resetEditor(value: string, resetHistory = false) {
 	value = getModelValue()
-	aceEditor?.setValue(value)
+	// Ace setValue emits removal and insertion separately. Neither is a user edit.
+	syncingModel = true
+	try {
+		aceEditor?.setValue(value)
+	} finally {
+		syncingModel = false
+	}
 	aceEditor?.clearSelection()
-	aceEditor?.setTheme(isDark.value ? 'ace/theme/twilight' : 'ace/theme/chrome')
+	applyTheme()
 	props.autofocus && aceEditor?.focus()
 	if (resetHistory) {
 		aceEditor?.session.getUndoManager().reset()
 	}
 }
 
-watch(isDark, () => {
-	console.log(isDark.value)
-	aceEditor?.setTheme(isDark.value ? 'ace/theme/twilight' : 'ace/theme/chrome')
-})
+function applyTheme() {
+	const dark = props.preferences ? props.preferences.theme === 'dark' : isDark.value
+	aceEditor?.setTheme(dark ? 'ace/theme/twilight' : 'ace/theme/chrome')
+}
+watch(isDark, applyTheme)
 
 watch(
 	() => props.type,
 	() => {
-		setupEditor()
-	}
+		loadEditorMode()
+	},
 )
 
 watch(
 	() => props.modelValue,
 	() => {
-		resetEditor(props.modelValue as string)
-	}
+		if (getModelValue() !== aceEditor?.getValue())
+			resetEditor(props.modelValue as string)
+	},
 )
 
-defineExpose({ resetEditor })
+function applyPreferences() {
+	const p = props.preferences
+	if (!aceEditor || !p) return
+	applyTheme()
+	aceEditor.setOptions({
+		fontSize: p.fontSize,
+		fontFamily: p.fontFamily,
+		wrap: p.wrap,
+		relativeLineNumbers: p.relativeLineNumbers,
+		enableBasicAutocompletion: p.autocomplete,
+		enableLiveAutocompletion: p.autocomplete,
+		tabSize: p.tabSize,
+		useSoftTabs: true,
+	})
+	aceEditor.setKeyboardHandler(
+		p.keyboard === 'standard' ? null : `ace/keyboard/${p.keyboard}`,
+	)
+	if (editor.value)
+		editor.value.style.fontVariantLigatures = p.fontLigatures
+			? 'normal'
+			: 'none'
+	aceEditor.resize()
+}
+watch(() => props.preferences, applyPreferences, { deep: true })
+function replaceCode(value: string) {
+	if (!aceEditor || props.readonly) return
+	const cursor = aceEditor.getCursorPosition()
+	aceEditor.session.getUndoManager().startNewGroup()
+	const Range = ace.require('ace/range').Range
+	aceEditor.session.replace(
+		new Range(0, 0, aceEditor.session.getLength(), 0),
+		value,
+	)
+	aceEditor.session.getUndoManager().startNewGroup()
+	aceEditor.moveCursorToPosition(cursor)
+	aceEditor.clearSelection()
+	emit('update:modelValue', value)
+	aceEditor.focus()
+}
+defineExpose({
+	resetEditor,
+	getValue: () => aceEditor?.getValue() || '',
+	replaceCode,
+})
 </script>
 
 <style>

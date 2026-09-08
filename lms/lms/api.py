@@ -943,7 +943,7 @@ def delete_lesson(lesson: str, chapter: str):
 
 
 @frappe.whitelist()
-def create_lesson(chapter: str) -> str:
+def create_lesson(chapter: str, lesson_type: str = "Text") -> str:
 	"""Create a draft "Untitled lesson" appended to the chapter, atomically via add_lesson() (inserts the Course Lesson + its Lesson Reference in one request that rolls back together; returns the new docname)."""
 	course = frappe.db.get_value("Course Chapter", chapter, "course")
 	if not course:
@@ -951,8 +951,10 @@ def create_lesson(chapter: str) -> str:
 	if not can_modify_course(course):
 		frappe.throw(_("You do not have permission to add a lesson."), frappe.PermissionError)
 
+	if lesson_type not in ("Text", "Programming"):
+		frappe.throw(_("Invalid lesson type."))
 	idx = frappe.db.count("Lesson Reference", {"parent": chapter}) + 1
-	return add_lesson(_("Untitled lesson"), chapter, course, idx)
+	return add_lesson(_("Untitled lesson"), chapter, course, idx, lesson_type)
 
 
 @frappe.whitelist()
@@ -1555,6 +1557,9 @@ def delete_batch(batch: str):
 	if not can_modify_batch(batch):
 		frappe.throw(_("You do not have permission to delete this batch."), frappe.PermissionError)
 
+	from lms.lms.batch_enrollment_sync import remove_batch_course_enrollments
+
+	remove_batch_course_enrollments(batch)
 	frappe.db.delete("LMS Batch Enrollment", {"batch": batch})
 	frappe.db.delete("Batch Course", {"parent": batch, "parenttype": "LMS Batch"})
 	frappe.db.delete("LMS Assessment", {"parent": batch, "parenttype": "LMS Batch"})
@@ -1795,11 +1800,12 @@ def get_launch_file(extract_path: str):
 	return launch_file
 
 
-def add_lesson(title: str, chapter: str, course: str, idx: int):
+def add_lesson(title: str, chapter: str, course: str, idx: int, lesson_type: str = "Text"):
 	lesson = frappe.new_doc("Course Lesson")
 	lesson.update(
 		{
 			"title": title,
+			"lesson_type": lesson_type,
 			"chapter": chapter,
 			"course": course,
 		}
@@ -2340,6 +2346,8 @@ def save_programming_exercise_code(
 	exercise: str, submission: str, code: str, language: str = "Python"
 ):
 	"""Persist source produced by a non-submitting Judge Service run."""
+	if frappe.db.get_value("LMS Programming Exercise", exercise, "active_package_version"):
+		frappe.throw("Package source is saved when creating a new judge attempt.")
 	frappe.only_for(["Moderator", "Course Creator", "Batch Evaluator"])
 	if not isinstance(code, str) or not code.strip():
 		frappe.throw(_("Source code is required."), frappe.ValidationError)
@@ -2392,6 +2400,8 @@ def make_new_exercise_submission(exercise: str, code: str, test_cases: list, lan
 
 
 def update_exercise_submission(submission: str, code: str, test_cases: list, language: str):
+	if frappe.db.get_value("LMS Programming Exercise Submission", submission, "package_version"):
+		frappe.throw("Package attempts are immutable.")
 	member = frappe.db.get_value("LMS Programming Exercise Submission", submission, "member")
 	if member != frappe.session.user:
 		frappe.throw(_("You do not have permission to update this submission."), frappe.PermissionError)
@@ -2899,23 +2909,25 @@ def get_my_latest_courses():
 
 
 def get_featured_home_courses():
-	return frappe.get_all(
-		"LMS Course",
-		{"published": 1, "featured": 1},
+	from lms.lms.course_access import get_visible_courses
+
+	return get_visible_courses(
+		filters={"published": 1, "featured": 1},
 		order_by="published_on desc",
-		limit=3,
+		page_length=3,
 		pluck="name",
 	)
 
 
 def get_popular_courses():
-	return frappe.get_all(
-		"LMS Course",
-		{
+	from lms.lms.course_access import get_visible_courses
+
+	return get_visible_courses(
+		filters={
 			"published": 1,
 		},
 		order_by="enrollments desc",
-		limit=3,
+		page_length=3,
 		pluck="name",
 	)
 
@@ -3270,3 +3282,11 @@ def delete_category(category: str):
 
 	frappe.delete_doc("LMS Category", category)
 	return unlinked
+
+
+@frappe.whitelist()
+def get_programming_exercise_count(search: str = "") -> int:
+	search = (search or "").strip()
+	filters = {field: ["like", f"%{search}%"] for field in ("title", "exercise_number")} if search else {}
+	rows = frappe.get_list("LMS Programming Exercise", or_filters=filters, fields=[{"COUNT": "*"}])
+	return int(next(iter(rows[0].values()))) if rows else 0

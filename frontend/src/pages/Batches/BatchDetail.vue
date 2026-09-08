@@ -94,7 +94,7 @@
 		</template>
 	</TabbedDetailPage>
 
-	<router-view />
+	<router-view :key="route.path" />
 </template>
 <script setup>
 import { computed, inject, markRaw, provide, useTemplateRef, watch } from 'vue'

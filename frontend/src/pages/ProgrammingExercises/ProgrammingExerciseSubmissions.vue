@@ -87,7 +87,7 @@ import type {
 	ListRow,
 	ListViewOptions,
 } from '@/types'
-import { computed, inject, onMounted, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { sessionStore } from '@/stores/session'
 import { useRouter } from 'vue-router'
 import Link from '@/components/Controls/Link.vue'
@@ -105,29 +105,6 @@ const filters = ref<Filters>({
 const router = useRouter()
 const pageLength = ref<number>(24)
 
-onMounted(() => {
-	setFiltersFromRoute()
-	fetchBasedOnRole()
-})
-
-const setFiltersFromRoute = () => {
-	filterFields.forEach((field) => {
-		if (router.currentRoute.value.query[field]) {
-			filters.value[field as keyof Filters] = router.currentRoute.value.query[
-				field
-			] as string
-		}
-	})
-}
-
-const fetchBasedOnRole = () => {
-	if (isStudent.value) {
-		filters.value['member'] = user.data?.name
-	} else {
-		submissions.reload()
-	}
-}
-
 const submissions = createListResource({
 	doctype: 'LMS Programming Exercise Submission',
 	fields: [
@@ -141,7 +118,7 @@ const submissions = createListResource({
 	],
 	orderBy: 'modified desc',
 	pageLength: 24,
-	transform(data: ProgrammingExercise[]) {
+	transform(data: ProgrammingExerciseSubmission[]) {
 		return data.map((submission: ProgrammingExerciseSubmission) => {
 			return {
 				...submission,
@@ -149,35 +126,6 @@ const submissions = createListResource({
 			}
 		})
 	},
-})
-
-watch(filters.value, () => {
-	let filtersToApply: Record<string, any> = {}
-	filterFields.forEach((field) => {
-		if (filters.value[field as keyof Filters]) {
-			filtersToApply[field] = filters.value[field as keyof Filters]
-			router.push({
-				query: {
-					...router.currentRoute.value.query,
-					[field]: filters.value[field as keyof Filters],
-				},
-			})
-		} else {
-			delete filtersToApply[field]
-			const query = { ...router.currentRoute.value.query }
-			delete query[field]
-			router.push({
-				query,
-			})
-		}
-	})
-
-	submissions.update({
-		filters: {
-			...filtersToApply,
-		},
-	})
-	submissions.reload()
 })
 
 watch(pageLength, (value: number) => {
@@ -200,6 +148,54 @@ const isStudent = computed(() => {
 		!user.data?.is_evaluator
 	)
 })
+
+const routeFilters = () => {
+	const query = router.currentRoute.value.query
+	return Object.fromEntries(
+		filterFields.map((field) => [
+			field,
+			typeof query[field] === 'string' ? query[field] : '',
+		]),
+	)
+}
+watch(
+	[() => router.currentRoute.value.query, () => user.data?.name, isStudent],
+	() => {
+		if (!user.data?.name) return
+		const next = routeFilters()
+		if (isStudent.value) next.member = user.data.name
+		Object.assign(filters.value, next)
+		const applied = Object.fromEntries(
+			Object.entries(next).filter(([, value]) => value),
+		)
+		submissions.update({ filters: applied, start: 0 })
+		submissions.reload()
+	},
+	{ immediate: true },
+)
+watch(
+	filters,
+	(value) => {
+		if (!user.data?.name) return
+		const query = { ...router.currentRoute.value.query }
+		for (const field of filterFields) {
+			const selected =
+				field === 'member' && isStudent.value
+					? user.data.name
+					: value[field as keyof Filters]
+			if (selected) query[field] = String(selected)
+			else delete query[field]
+		}
+		if (
+			filterFields.some(
+				(field) => query[field] !== router.currentRoute.value.query[field],
+			)
+		) {
+			void router.replace({ query })
+		}
+	},
+	{ deep: true },
+)
 
 const listOptions: ListViewOptions = {
 	selectable: true,

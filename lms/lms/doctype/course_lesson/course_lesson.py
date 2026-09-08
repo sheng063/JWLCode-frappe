@@ -28,6 +28,8 @@ from lms.lms.utils import (
 	sanitize_editorjs,
 )
 
+from lms.lms.lesson_type import resolve_lesson_type
+
 from ...md import find_macros
 
 
@@ -44,6 +46,18 @@ class CourseLesson(Document):
 	def validate(self):
 		self.content = sanitize_editorjs(self.content)
 		self.instructor_content = sanitize_editorjs(self.instructor_content)
+		try:
+			self.lesson_type = resolve_lesson_type(
+				get_editorjs_blocks(self.content),
+				self.get("lesson_type"),
+				body=self.body,
+				youtube=self.youtube,
+				quiz_id=self.quiz_id,
+				question=self.question,
+				raw_content=self.content,
+			)
+		except ValueError as exc:
+			frappe.throw(_(str(exc)))
 
 	def on_update(self):
 		self.validate_quiz_id()
@@ -153,7 +167,7 @@ def get_permission_query_conditions(user=None):
 		conditions.append(
 			"""(`tabCourse Lesson`.include_in_preview = 1
 			and `tabCourse Lesson`.course in (
-				select name from `tabLMS Course` where published = 1
+				select name from `tabLMS Course` where published = 1 and is_public = 1
 			))"""
 		)
 
@@ -295,15 +309,10 @@ def _deny(file_url, reason):
 
 
 def apply_enforcement_flags(quiz_done: bool, assignment_done: bool, settings: dict) -> tuple[bool, bool]:
-	"""Return (quiz_completed, assignment_completed) accounting for enforcement toggles.
-
-	If an enforcement flag is missing from `settings`, treat it as enabled (1) so the
-	legacy always-on gating remains the safe default.
-	"""
-	enforce_quiz = settings.get("enforce_quiz_completion", 1)
+	"""Quizzes require submission; retain the separate assignment enforcement setting."""
 	enforce_assignment = settings.get("enforce_assignment_completion", 1)
 	return (
-		True if not enforce_quiz else quiz_done,
+		quiz_done,
 		True if not enforce_assignment else assignment_done,
 	)
 
@@ -363,10 +372,12 @@ def _save_progress(lesson: str, course: str, scorm_details: dict = None):
 		settings=settings,
 	)
 
+	programming_completed = get_programming_progress(lesson)
+
 	if scorm_details:
 		scorm_details = frappe._dict(**scorm_details)
 
-	if not progress_already_exists and quiz_completed and assignment_completed and not scorm_details:
+	if not progress_already_exists and quiz_completed and assignment_completed and programming_completed and not scorm_details:
 		try:
 			frappe.get_doc(
 				{
@@ -406,7 +417,7 @@ def _save_progress(lesson: str, course: str, scorm_details: dict = None):
 			},
 		)
 	next_lesson = None
-	if (not progress_already_exists and quiz_completed and assignment_completed and not scorm_details) or (
+	if (not progress_already_exists and quiz_completed and assignment_completed and programming_completed and not scorm_details) or (
 		scorm_details and scorm_details.is_complete and not lesson_already_completed
 	):
 		next_lesson = get_next_lesson(course, lesson)
@@ -428,7 +439,15 @@ def _save_progress(lesson: str, course: str, scorm_details: dict = None):
 	frappe.publish_realtime(
 		event="update_lesson_progress",
 		user=frappe.session.user,
-		message={"course": course, "lesson": lesson, "progress": progress},
+		message={
+			"course": course,
+			"lesson": lesson,
+			"progress": progress,
+			"completed": bool(frappe.db.exists(
+				"LMS Course Progress",
+				{"lesson": lesson, "member": frappe.session.user, "status": "Complete"},
+			)),
+		},
 		after_commit=True,
 	)
 
@@ -463,8 +482,8 @@ def get_next_lesson(course: str, lesson: str):
 
 
 def get_quiz_progress(lesson):
-	lesson_details = frappe.db.get_value("Course Lesson", lesson, ["body", "content"], as_dict=1)
-	quizzes = []
+	lesson_details = frappe.db.get_value("Course Lesson", lesson, ["body", "content", "quiz_id"], as_dict=1)
+	quizzes = [lesson_details.quiz_id] if lesson_details.quiz_id else []
 
 	if lesson_details.content:
 		for block in get_editorjs_blocks(lesson_details.content):
@@ -480,17 +499,29 @@ def get_quiz_progress(lesson):
 
 	elif lesson_details.body:
 		macros = find_macros(lesson_details.body)
-		quizzes = [value for name, value in macros if name == "Quiz"]
+		quizzes.extend(value for name, value in macros if name == "Quiz")
 
 	for quiz in quizzes:
-		passing_percentage = frappe.db.get_value("LMS Quiz", quiz, "passing_percentage")
 		if not frappe.db.exists(
 			"LMS Quiz Submission",
 			{
 				"quiz": quiz,
 				"member": frappe.session.user,
-				"percentage": [">=", passing_percentage],
 			},
+		):
+			return False
+	return True
+
+
+def get_programming_progress(lesson):
+	content = frappe.db.get_value("Course Lesson", lesson, "content")
+	for block in get_editorjs_blocks(content):
+		if block.get("type") != "program":
+			continue
+		exercise = (block.get("data") or {}).get("exercise")
+		if not exercise or not frappe.db.exists(
+			"LMS Programming Exercise Submission",
+			{"exercise": exercise, "member": frappe.session.user, "status": "Passed"},
 		):
 			return False
 	return True

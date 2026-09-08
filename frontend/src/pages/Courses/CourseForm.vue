@@ -184,6 +184,7 @@ const updateCourseData = (): void => {
 	})
 	const checkboxes: (keyof LMSCourse)[] = [
 		'published',
+		'is_public',
 		'upcoming',
 		'disable_self_learning',
 		'enforce_lesson_completion',
@@ -232,7 +233,8 @@ const updateCourse = (opts: { silent?: boolean } = {}): void => {
 				props.course.reload()
 			},
 			onError(err: { messages?: string[] } | string) {
-				const msg = typeof err === 'string' ? err : err.messages?.[0] ?? 'Error'
+				const msg =
+					typeof err === 'string' ? err : (err.messages?.[0] ?? 'Error')
 				// Autosave failures stay quiet; the orange "unsaved" badge remains
 				// (isDirty is untouched) so the change isn't silently lost.
 				if (!opts.silent) toast.error(msg)
@@ -254,7 +256,7 @@ const deleteCourse = createResource({
 	},
 	onError(err: { messages?: string[] } | string) {
 		toast.error(
-			typeof err === 'string' ? err : err.messages?.[0] ?? __('Error')
+			typeof err === 'string' ? err : (err.messages?.[0] ?? __('Error'))
 		)
 	},
 }) as Resource<unknown>

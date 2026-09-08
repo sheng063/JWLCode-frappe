@@ -7,6 +7,14 @@ import {
 	type Router,
 } from 'vue-router'
 import { defineComponent, h } from 'vue'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(isSameOrBefore)
 
 vi.stubGlobal('__', (text: string) => text)
 enableAutoUnmount(afterEach)
@@ -19,6 +27,8 @@ const {
 	getCachedListResourceMock,
 	zoomSubmit,
 	meetSubmit,
+	updateSubmit,
+	existing,
 } = vi.hoisted(() => {
 	// @/utils reaches plyr, which touches matchMedia at import time.
 	window.matchMedia ??= (() => ({
@@ -33,12 +43,14 @@ const {
 			fetched: true,
 			reload: () => {},
 		},
-		liveClassList: { data: [], reload: vi.fn() },
+		liveClassList: { data: [] as Record<string, unknown>[], reload: vi.fn() },
 		createResourceMock: vi.fn(),
 		createListResourceMock: vi.fn(),
 		getCachedListResourceMock: vi.fn(),
 		zoomSubmit: vi.fn(),
 		meetSubmit: vi.fn(),
+		updateSubmit: vi.fn(),
+		existing: { doc: null as Record<string, unknown> | null },
 	}
 })
 
@@ -77,8 +89,9 @@ vi.mock('frappe-ui', () => ({
 	// "every field is labelled" pass by omission.
 	Combobox: {
 		inheritAttrs: false,
-		props: ['label'],
-		template: `<div><label v-if="label">{{ label }}</label><slot /></div>`,
+		props: ['label', 'modelValue'],
+		emits: ['update:modelValue'],
+		template: `<div><label v-if="label">{{ label }}<input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" /></label><slot /></div>`,
 	},
 	Tooltip: { inheritAttrs: false, template: `<div><slot /></div>` },
 }))
@@ -95,6 +108,8 @@ import LiveClass from '@/pages/Batches/components/LiveClass.vue'
 
 const BATCH_URL = 'lms.lms.utils.get_batch_details'
 const ZOOM_URL = 'lms.lms.doctype.lms_batch.lms_batch.create_live_class'
+const UPDATE_URL =
+	'lms.lms.doctype.lms_live_class.lms_live_class.update_live_class'
 const MEET_URL =
 	'lms.lms.doctype.lms_batch.lms_batch.create_google_meet_live_class'
 
@@ -113,6 +128,12 @@ const makeRouter = (): Router =>
 				props: true,
 				children: [
 					{
+						path: 'live-class/:liveClassName/edit',
+						name: 'EditLiveClass',
+						component: LiveClassForm,
+						props: true,
+					},
+					{
 						path: 'live-class/new',
 						name: 'NewLiveClass',
 						component: LiveClassForm,
@@ -125,9 +146,7 @@ const makeRouter = (): Router =>
 
 const provide = (user: Record<string, unknown>) => ({
 	$user: { data: user },
-	$dayjs: Object.assign(() => ({ format: () => '2026-07-31' }), {
-		tz: () => ({}),
-	}),
+	$dayjs: dayjs,
 })
 
 const mountForm = async (router: Router, user: Record<string, unknown>) => {
@@ -162,18 +181,44 @@ const FIELD_LABELS = [
 	'Description',
 ]
 
+const fillValidClass = async (wrapper: ReturnType<typeof mount>) => {
+	for (const [label, value] of Object.entries({
+		Title: 'A live class',
+		Date: dayjs().add(2, 'day').format('YYYY-MM-DD'),
+		Time: '10:00',
+		'Duration (in minutes)': '60',
+		Timezone: 'Asia/Shanghai',
+	})) {
+		const field = wrapper
+			.findAll('label')
+			.find((node) => norm(node.text()) === label)!
+		await field.find('input').setValue(value)
+	}
+}
+
 describe('LiveClassForm as a route', () => {
 	beforeEach(() => {
 		zoomSubmit.mockReset()
 		meetSubmit.mockReset()
+		updateSubmit.mockReset()
+		existing.doc = null
+		liveClassList.data = []
 		liveClassList.reload.mockReset()
 		getCachedListResourceMock.mockReset()
 		getCachedListResourceMock.mockReturnValue(liveClassList)
 		createListResourceMock.mockReset()
 		createListResourceMock.mockReturnValue(liveClassList)
 		createResourceMock.mockReset()
-		createResourceMock.mockImplementation((options: { url: string }) => {
+		createResourceMock.mockImplementation((options: any) => {
 			if (options.url === BATCH_URL) return batchResource
+			if (options.url === UPDATE_URL)
+				return { submit: updateSubmit, loading: false }
+			if (options.url === 'frappe.client.get') {
+				const resource = { data: existing.doc, error: null, loading: false }
+				if (options.auto && existing.doc)
+					queueMicrotask(() => options.onSuccess(existing.doc))
+				return resource
+			}
 			if (options.url === ZOOM_URL)
 				return { submit: zoomSubmit, loading: false, data: null }
 			if (options.url === MEET_URL)
@@ -257,6 +302,7 @@ describe('LiveClassForm as a route', () => {
 		const router = makeRouter()
 		await router.push('/batches/B1/live-class/new')
 		const wrapper = await mountForm(router, moderator)
+		await fillValidClass(wrapper)
 		await wrapper.find('[data-testid="live-class-save"]').trigger('click')
 		expect(zoomSubmit).toHaveBeenCalledTimes(1)
 		expect(meetSubmit).not.toHaveBeenCalled()
@@ -269,6 +315,7 @@ describe('LiveClassForm as a route', () => {
 		const meetRouter = makeRouter()
 		await meetRouter.push('/batches/B1/live-class/new')
 		const meetWrapper = await mountForm(meetRouter, moderator)
+		await fillValidClass(meetWrapper)
 		await meetWrapper.find('[data-testid="live-class-save"]').trigger('click')
 		expect(meetSubmit).toHaveBeenCalledTimes(1)
 	})
@@ -282,6 +329,7 @@ describe('LiveClassForm as a route', () => {
 		zoomSubmit.mockImplementation(
 			(_doc: unknown, options: { onSuccess: () => void }) => options.onSuccess()
 		)
+		await fillValidClass(wrapper)
 		await wrapper.find('[data-testid="live-class-save"]').trigger('click')
 		await flushPromises()
 		expect(getCachedListResourceMock).toHaveBeenCalledWith([
@@ -328,6 +376,74 @@ describe('LiveClassForm as a route', () => {
 		expect(router.currentRoute.value.name).toBe('BatchDetail')
 	})
 
+	it('does not submit an empty form', async () => {
+		const router = makeRouter()
+		await router.push('/batches/B1/live-class/new')
+		const wrapper = await mountForm(router, moderator)
+		await wrapper.find('[data-testid="live-class-save"]').trigger('click')
+		expect(zoomSubmit).not.toHaveBeenCalled()
+	})
+
+	it('loads an existing class and saves edits without creating a new meeting', async () => {
+		existing.doc = {
+			name: 'LC1',
+			batch_name: 'B1',
+			title: 'Original class',
+			description: 'Original notes',
+			date: '2020-01-01',
+			time: '9:30:00',
+			duration: 60,
+			timezone: 'Asia/Tokyo',
+			auto_recording: 'No Recording',
+			conferencing_provider: 'Zoom',
+			modified: '2026-01-01 09:00:00',
+		}
+		const router = makeRouter()
+		await router.push('/batches/B1/live-class/LC1/edit#classes')
+		const wrapper = await mountForm(router, moderator)
+		const description = wrapper
+			.findAll('label')
+			.find((node) => norm(node.text()) === 'Description')!
+		await description.find('input').setValue('Updated notes')
+		updateSubmit.mockImplementation((_values, options) => options.onSuccess())
+		await wrapper.find('[data-testid="live-class-save"]').trigger('click')
+		await flushPromises()
+		expect(updateSubmit).toHaveBeenCalledWith(
+			expect.objectContaining({
+				title: 'Original class',
+				description: 'Updated notes',
+				time: '09:30',
+				timezone: 'Asia/Tokyo',
+			}),
+			expect.anything()
+		)
+		expect(zoomSubmit).not.toHaveBeenCalled()
+		expect(meetSubmit).not.toHaveBeenCalled()
+		expect(getCachedListResourceMock).toHaveBeenCalledWith([
+			'liveClasses',
+			'B1',
+		])
+		expect(router.currentRoute.value.fullPath).toBe('/batches/B1#classes')
+		const options = createResourceMock.mock.calls.find(
+			([opts]) => opts.url === UPDATE_URL
+		)![0]
+		expect(options.makeParams({ title: 'Updated' })).toMatchObject({
+			name: 'LC1',
+			modified: existing.doc.modified,
+		})
+	})
+
+	it('refuses a class belonging to a different batch', async () => {
+		existing.doc = { name: 'LC1', batch_name: 'B2', time: '09:00:00' }
+		const router = makeRouter()
+		await router.push('/batches/B1/live-class/LC1/edit')
+		const wrapper = await mountForm(router, moderator)
+		expect(wrapper.text()).toContain(
+			'This live class does not belong to this batch.'
+		)
+		expect(wrapper.find('[data-testid="live-class-save"]').exists()).toBe(false)
+	})
+
 	it('closing a DEEP-LINKED form keeps the tab hash (C2)', async () => {
 		const router = makeRouter()
 		await router.push('/batches/B1/live-class/new#classes')
@@ -343,6 +459,7 @@ describe('LiveClassForm as a route', () => {
 describe('the Classes tab opener', () => {
 	beforeEach(() => {
 		createListResourceMock.mockReset()
+		liveClassList.data = []
 		createListResourceMock.mockReturnValue(liveClassList)
 		Object.defineProperty(window, 'innerWidth', {
 			value: 1024,
@@ -386,6 +503,29 @@ describe('the Classes tab opener', () => {
 		await flushPromises()
 		expect(router.currentRoute.value.fullPath).toBe(
 			'/batches/B1/live-class/new#classes'
+		)
+	})
+	it('opens the edit route for an existing class', async () => {
+		liveClassList.data = [
+			{
+				name: 'LC1',
+				title: 'Edit me',
+				date: '2020-01-01',
+				time: '10:00:00',
+				duration: 60,
+				attendees: 0,
+			},
+		]
+		const router = makeRouter()
+		await router.push('/batches/B1#classes')
+		const wrapper = await mountTab(router)
+		await wrapper
+			.findAll('button')
+			.find((button) => button.text() === 'Edit')!
+			.trigger('click')
+		await flushPromises()
+		expect(router.currentRoute.value.fullPath).toBe(
+			'/batches/B1/live-class/LC1/edit#classes'
 		)
 	})
 })

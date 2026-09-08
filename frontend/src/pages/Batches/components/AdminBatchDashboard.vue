@@ -58,11 +58,12 @@
 						</FormControl>
 					</div>
 				</div>
-				<div class="sm:max-h-[63vh] sm:overflow-y-auto">
+				<div class="sm:max-h-[63vh] overflow-x-auto sm:overflow-y-auto">
 					<ResponsiveListView
 						v-if="students.loading || students.data?.length"
+						class="sm:min-w-[640px]"
 						:columns="studentColumns"
-						:rows="students.data || []"
+						:rows="studentRows"
 						row-key="name"
 						:options="studentListOptions"
 					>
@@ -80,6 +81,14 @@
 							</span>
 							<span v-else-if="column.key === 'creation'">
 								{{ dayjs(value as string).format('DD MMM YYYY') }}
+							</span>
+							<span
+								v-else-if="
+									column.key === 'course_progress' ||
+									column.key === 'programming_pass_rate'
+								"
+							>
+								{{ value == null ? '—' : `${value}%` }}
 							</span>
 							<span v-else>{{ value }}</span>
 						</template>
@@ -160,10 +169,12 @@ import {
 	FormControl,
 	Avatar,
 	Button,
+	toast,
 } from 'frappe-ui'
 import { computed, inject, onMounted, ref, watch } from 'vue'
 import type dayjsType from 'dayjs'
 import { formatAmount } from '@/utils'
+import { resourceErrorMessage } from '@/utils/resource'
 import BatchFeedback from '@/pages/Batches/components/BatchFeedback.vue'
 import BatchStudentProgress from '@/pages/Batches/components/BatchStudentProgress.vue'
 import NumberChartGraph from '@/components/NumberChartGraph.vue'
@@ -234,6 +245,46 @@ const students = createListResource({
 	cache: ['batchStudents', props.batch?.data?.name],
 })
 
+const progress = createResource({
+	url: 'lms.lms.batch_progress.get_student_progress',
+})
+const progressByMember = ref<
+	Record<string, { course_progress: number; programming_pass_rate: number }>
+>({})
+watch(
+	[() => students.data, () => props.batch?.data?.courses],
+	async ([rows], _previous, onCleanup) => {
+		let active = true
+		onCleanup(() => {
+			active = false
+		})
+		progressByMember.value = {}
+		const members = (rows || []).map((row: any) => row.member)
+		try {
+			for (let offset = 0; offset < members.length; offset += 500) {
+				const data = await progress.fetch({
+					batch: props.batch?.data?.name,
+					members: members.slice(offset, offset + 500),
+				})
+				if (!active) return
+				Object.assign(progressByMember.value, data)
+			}
+		} catch (error) {
+			if (active)
+				toast.error(
+					resourceErrorMessage(error, __('Unable to load student progress.'))
+				)
+		}
+	},
+	{ immediate: true }
+)
+const studentRows = computed(() =>
+	(students.data || []).map((row: any) => ({
+		...row,
+		...progressByMember.value[row.member],
+	}))
+)
+
 const filteredChartData = computed(() =>
 	(chartData.data || []).filter((item: { value: number }) => item.value > 0)
 )
@@ -275,12 +326,23 @@ const studentColumns = computed<ListColumn[]>(() => {
 		{
 			label: __('Name'),
 			key: 'member_name',
-			width: '40%',
+			width: '160px',
 		},
 		{
 			label: __('Enrolled On'),
 			key: 'creation',
 			align: 'left',
+			width: '130px',
+		},
+		{
+			label: __('Overall Course Completion'),
+			key: 'course_progress',
+			width: '150px',
+		},
+		{
+			label: __('Programming Exercises Passed'),
+			key: 'programming_pass_rate',
+			width: '170px',
 		},
 	]
 })

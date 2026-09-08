@@ -56,6 +56,7 @@ export class Program {
 
 	render() {
 		this.wrapper = document.createElement('div')
+		this.wrapper.className = 'programming-exercise-block'
 		if (Object.keys(this.data).length) {
 			this.renderExercise(this.data.exercise)
 		} else {

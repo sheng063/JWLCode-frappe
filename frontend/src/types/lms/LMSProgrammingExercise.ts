@@ -3,6 +3,7 @@ import { LMSTestCase } from './LMSTestCase'
 export interface LMSProgrammingExercise {
 	creation: string
 	name: string
+	exercise_number: string
 	modified: string
 	owner: string
 	modified_by: string

@@ -322,7 +322,7 @@ describe('ProgrammingExerciseForm as a route', () => {
 				auto: true,
 			})
 		)
-		expect((wrapper.find('input').element as HTMLInputElement).value).toBe(
+		expect((wrapper.find('[data-testid=programming-exercise-fields] input').element as HTMLInputElement).value).toBe(
 			'Reverse a string'
 		)
 	})

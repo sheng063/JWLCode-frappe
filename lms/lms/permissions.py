@@ -56,6 +56,7 @@ def resolve_lesson_access(lesson: str, *, user: str | None = None) -> tuple[bool
 		# are handled above, so unpublishing never locks them out.
 		if (
 			lesson_row.include_in_preview
+			and frappe.db.get_value("LMS Course", lesson_row.course, "is_public")
 			and frappe.db.get_value("LMS Course", lesson_row.course, "published")
 			and guest_access_allowed()
 		):
@@ -248,6 +249,9 @@ def file_has_permission(doc, ptype="read", user=None):
 	orphaned instructor file.
 	"""
 	user = user or frappe.session.user
+
+	if frappe.db.table_exists("LMS Problem Package Import") and frappe.db.exists("LMS Problem Package Import", {"file_id": doc.name}):
+		return user != "Guest" and (doc.owner == user or "System Manager" in frappe.get_roles(user))
 
 	if doc.attached_to_doctype != "Course Lesson":
 		return True

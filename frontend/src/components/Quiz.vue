@@ -248,6 +248,7 @@
 					<template v-else>
 						<div class="flex items-center justify-center gap-2">
 							<Button
+								v-if="!autoStart"
 								variant="solid"
 								:disabled="!!quiz.data.enable_proctoring && !cameraReady"
 								@click="startQuiz"
@@ -956,6 +957,7 @@ const submissionReason = ref('')
 let submitTimeout = null
 
 const props = defineProps({
+	autoStart: { type: Boolean, default: false },
 	quizName: {
 		type: String,
 		required: true,
@@ -1280,6 +1282,20 @@ const startQuiz = () => {
 	if (quiz.data.enable_proctoring) proctoringActive.value = true
 }
 
+// Wait for questions, attempt limits and any required camera setup before starting.
+watch(
+	() => [props.autoStart, quiz.data, quiz.loading, questions.value.length, attempts.data,
+		attempts.loading, cameraReady.value, activeQuestion.value, quizSubmission.data],
+	() => {
+		if (!props.autoStart || !quiz.data || quiz.loading || !questions.value.length ||
+			activeQuestion.value !== 0 || quizSubmission.data || attemptsExhausted.value) return
+		if (quiz.data.max_attempts && (attempts.loading || !Array.isArray(attempts.data))) return
+		if (quiz.data.enable_proctoring && !cameraReady.value) return
+		startQuiz()
+	},
+	{ flush: 'post' }
+)
+
 // The stored log, read back after submitting. It is the same rows an instructor
 // sees, and unlike the client's own list it carries the camera stills as file URLs
 // rather than data: URIs.
@@ -1490,7 +1506,8 @@ const createSubmission = (reason = 'manual') => {
 			onSuccess(data) {
 				proctoringActive.value = false
 				if (props.quizName !== submittedQuiz) return
-				markLessonProgress()
+				if (props.autoStart) window.dispatchEvent(new Event('lms-quiz-submitted'))
+				else markLessonProgress()
 				if (quiz.data && quiz.data.max_attempts) attempts.reload()
 				stopTimer()
 			},

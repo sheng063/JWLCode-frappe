@@ -48,6 +48,13 @@
 					}
 				"
 			>
+				<Button
+					v-if="isAdmin() && !readOnlyMode"
+					class="self-end mb-2"
+					@click.stop="editLiveClass(cls)"
+				>
+					{{ __('Edit') }}
+				</Button>
 				<div class="font-semibold text-ink-gray-9 mb-1">
 					{{ cls.title }}
 				</div>
@@ -126,6 +133,7 @@ import { createListResource, Button, Tooltip } from 'frappe-ui'
 import { inject, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { formatTime } from '@/utils/'
+import { openFormRoute } from '@/composables/useFormRoute'
 import { openBatchForm } from '@/composables/useBatchForms'
 import LiveClassAttendance from '@/components/Modals/LiveClassAttendance.vue'
 import { safeUrl } from '@/utils/safeUrl'
@@ -156,6 +164,7 @@ const liveClasses = createListResource({
 		batch_name: props.batch.data?.name,
 	},
 	fields: [
+		'name',
 		'title',
 		'description',
 		'time',
@@ -175,6 +184,13 @@ const liveClasses = createListResource({
 const openLiveClassForm = () => {
 	openBatchForm(router, 'NewLiveClass', props.batch.data?.name, route.hash)
 }
+
+const editLiveClass = (cls) =>
+	openFormRoute(router, {
+		name: 'EditLiveClass',
+		params: { batchName: props.batch.data.name, liveClassName: cls.name },
+		hash: route.hash,
+	})
 
 const hasProviderAccount = () => {
 	const data = props.batch.data

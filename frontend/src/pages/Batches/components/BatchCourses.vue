@@ -57,6 +57,7 @@ const props = defineProps({
 })
 
 const courses = createListResource({
+	url: 'lms.lms.utils.get_batch_course_rows',
 	doctype: 'Batch Course',
 	filters: {
 		parent: props.batch.data?.name,

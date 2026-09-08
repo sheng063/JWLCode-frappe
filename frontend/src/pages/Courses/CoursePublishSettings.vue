@@ -4,6 +4,17 @@
 			<div class="flex flex-col gap-y-4">
 				<BooleanSwitch
 					size="sm"
+					v-model="doc.is_public"
+					:label="__('Public')"
+					:description="
+						__(
+							'Visible to all students. Private courses are visible only to enrolled students.'
+						)
+					"
+					@update:modelValue="markDirty()"
+				/>
+				<BooleanSwitch
+					size="sm"
 					v-model="doc.upcoming"
 					:label="__('Upcoming')"
 					:description="__('Not yet open for enrollment.')"

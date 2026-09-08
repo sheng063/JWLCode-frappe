@@ -15,6 +15,8 @@
 		@load-more="exercises.next()"
 	>
 		<template #actions>
+			<Button v-if="!readOnlyMode" @click="importMode = 'single'">{{ __('Import') }}</Button>
+			<Button v-if="!readOnlyMode" @click="importMode = 'bulk'">{{ __('Bulk Import') }}</Button>
 			<router-link
 				v-if="exercises.data?.length"
 				class="hidden md:block"
@@ -44,9 +46,8 @@
 		<template #filters>
 			<FormControl
 				v-model="titleFilter"
-				:placeholder="__('Search')"
-				:aria-label="__('Search')"
-				@input="updateList"
+				:placeholder="__('Search by title or exercise number')"
+				:aria-label="__('Search by title or exercise number')"
 			>
 				<template #prefix>
 					<span class="lucide-search size-4 text-ink-gray-5" />
@@ -63,6 +64,17 @@
 
 		<template #selection-actions="{ unselectAll, selections }">
 			<Button
+				variant="solid"
+				:loading="exporting"
+				:disabled="exporting"
+				@click="exportSelectedExercises(selections)"
+			>
+				<template #prefix>
+					<span class="lucide-download size-4" aria-hidden="true" />
+				</template>
+				{{ exporting ? __('Exporting…') : __('Bulk Export') }}
+			</Button>
+			<Button
 				variant="ghost"
 				:label="__('Delete')"
 				@click="showDeleteConfirmation(selections, unselectAll)"
@@ -74,10 +86,14 @@
 		</template>
 	</ListPage>
 
+	<FormShell v-if="importMode" :title="importMode === 'bulk' ? __('Bulk Import') : __('Import')" size="4xl" @close="importMode = null">
+		<ProblemPackageBulkImport v-if="importMode === 'bulk'" @published="updateList" />
+		<ProblemPackageImport v-else @published="singlePackagePublished" />
+	</FormShell>
 	<router-view />
 </template>
 <script setup lang="ts">
-import { computed, getCurrentInstance, inject, onMounted, ref } from 'vue'
+import { computed, getCurrentInstance, inject, onMounted, ref, watch } from 'vue'
 import type dayjsType from 'dayjs'
 import {
 	Button,
@@ -89,11 +105,36 @@ import {
 	usePageMeta,
 } from 'frappe-ui'
 import ListPage from '@/components/Layouts/ListPage.vue'
+import FormShell from '@/components/FormShell.vue'
+import ProblemPackageImport from '@/components/ProblemPackageImport.vue'
+import ProblemPackageBulkImport from '@/components/ProblemPackageBulkImport.vue'
 import type { ListRow } from '@/types'
 
 import { sessionStore } from '@/stores/session'
 import { useRouter } from 'vue-router'
 import { openFormRoute } from '@/composables/useFormRoute'
+import { exportProgrammingExercises } from '@/utils/exportProgrammingExercises'
+
+const importMode = ref<'single' | 'bulk' | null>(null)
+const singlePackagePublished = (_exercise: string, exerciseNumber?: string) => {
+	toast.success(exerciseNumber ? `${__("Imported")}: ${exerciseNumber}` : __("Imported"))
+	titleFilter.value = ''
+	importMode.value = null
+	updateList()
+}
+const exporting = ref(false)
+const exportSelectedExercises = async (selections: Set<string>) => {
+	if (exporting.value) return
+	exporting.value = true
+	try {
+		await exportProgrammingExercises(Array.from(selections))
+		toast.success(__('Export downloaded successfully'))
+	} catch (error: any) {
+		toast.error(error.message || __('Export failed'))
+	} finally {
+		exporting.value = false
+	}
+}
 
 const readOnlyMode = window.read_only_mode
 const { brand } = sessionStore()
@@ -123,7 +164,7 @@ const validatePermissions = () => {
 const exercises = createListResource({
 	doctype: 'LMS Programming Exercise',
 	cache: ['programmingExercises'],
-	fields: ['name', 'title', 'problem_statement', 'modified'],
+	fields: ['name', 'exercise_number', 'title', 'modified'],
 	auto: true,
 	orderBy: 'modified desc',
 	pageLength: 24,
@@ -148,23 +189,15 @@ const listOptions = computed(() => ({
 }))
 
 const updateList = () => {
-	let filters = getFilters()
-	exercises.update({
-		filters: filters,
-	})
+	exercises.update({ orFilters: getFilters(), start: 0 })
 	exercises.reload()
-	totalExercises.update({
-		filters: filters,
-	})
+	totalExercises.update({ params: { search: titleFilter.value.trim() } })
 	totalExercises.reload()
 }
 
 const getFilters = () => {
-	let filters: any = {}
-	if (titleFilter.value) {
-		filters['title'] = ['like', `%${titleFilter.value}%`]
-	}
-	return filters
+	const search = titleFilter.value.trim()
+	return search ? { title: ['like', `%${search}%`], exercise_number: ['like', `%${search}%`] } : {}
 }
 
 const showDeleteConfirmation = (
@@ -218,11 +251,8 @@ const pageLength = computed({
 })
 
 const totalExercises = createResource({
-	url: 'frappe.client.get_count',
-	params: {
-		doctype: 'LMS Programming Exercise',
-		filters: getFilters(),
-	},
+	url: 'lms.lms.api.get_programming_exercise_count',
+	params: { search: '' },
 	auto: true,
 	cache: ['programming_exercises_count', user.data?.name],
 	onError(err: any) {
@@ -231,19 +261,18 @@ const totalExercises = createResource({
 	},
 })
 
-const tableRows = computed(() =>
-	(exercises.data || []).map((exercise, index) => ({
-		...exercise,
-		serial_number: index + 1,
-	}))
-)
+// FormControl forwards native input before updating its model; observe the model
+// so requests always contain the current text (including paste and clear).
+watch(titleFilter, updateList)
+
+const tableRows = computed(() => exercises.data || [])
 
 const columns = computed(() => {
 	return [
 		{
-			label: __('No.'),
-			key: 'serial_number',
-			width: 0.25,
+			label: __('Exercise Number'),
+			key: 'exercise_number',
+			width: 0.5,
 			align: 'left',
 		},
 		{

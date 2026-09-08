@@ -9895,3 +9895,301 @@ msgstr "名字为必填项"
 #: frontend/src/pages/Batches/Batches.vue
 msgid "Active"
 msgstr "有效"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Bulk Export"
+msgstr "批量导出"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Exporting…"
+msgstr "正在导出…"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Export downloaded successfully"
+msgstr "导出文件已开始下载"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Select between 1 and 50 exercises to export."
+msgstr "请选择 1 至 50 道题目进行导出。"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Export failed. Please try again."
+msgstr "导出失败，请重试。"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "The server did not return a ZIP file. Please sign in and try again."
+msgstr "服务器未返回 ZIP 文件，请登录后重试。"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Exercise {0} has no complete ICPC package. Import a package containing a statement, secret data, accepted solution and input validator first."
+msgstr "题目「{0}」缺少完整 ICPC 题包。请先导入包含题面、隐藏测试数据、参考解和输入校验器的完整题包。"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Exercise {0} has an invalid active package version."
+msgstr "题目「{0}」的当前题包版本无效。"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Selected packages exceed 100 MiB. Export fewer exercises at a time."
+msgstr "所选题包总大小超过 100 MiB，请减少单次导出的题目数量。"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Export exceeds 100 MiB. Export fewer exercises at a time."
+msgstr "导出文件超过 100 MiB，请减少单次导出的题目数量。"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Cannot export exercise {0}: {1}"
+msgstr "无法导出题目「{0}」：{1}"
+
+#: lms/lms/problem_package/export.py frontend/src/utils/exportProgrammingExercises.ts frontend/src/pages/ProgrammingExercises/ProgrammingExercises.vue
+msgid "Expected a list of exercise IDs."
+msgstr "请提供题目 ID 列表。"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Bulk Import"
+msgstr "批量导入"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Upload the ZIP from Bulk Export, containing one ZIP per problem. Up to 50 problems and 100 MiB; your site upload limit also applies."
+msgstr "上传批量导出的 ZIP 合集，内部每道题为一个独立 ZIP。最多 50 道题、总大小 100 MiB，同时受站点上传大小限制。"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Review execution limits before importing. Existing exercises are not overwritten; identical imports may be reused. Programs are not executed during preflight."
+msgstr "请核对执行限制后导入。不会覆盖已有题目，相同题包和设置可复用已导入题目；预检不会执行包内程序。"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Problem bundle"
+msgstr "题包合集"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Import ready packages"
+msgstr "导入已就绪题目"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Imported"
+msgstr "已导入"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Queued"
+msgstr "等待检查"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Ready"
+msgstr "已就绪"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Rejected"
+msgstr "检查未通过"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Committed"
+msgstr "草稿已保存"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Upload a ZIP bundle no larger than 100 MiB."
+msgstr "请上传不超过 100 MiB 的 ZIP 题包合集。"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Private package upload failed"
+msgstr "私有题包上传失败"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Cannot import bundle: {0}"
+msgstr "无法导入题包合集：{0}"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "The uploaded bundle has changed. Upload a new file."
+msgstr "上传的题包合集已发生变化，请重新上传。"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Import ICPC Problem Package"
+msgstr "导入 ICPC 题目"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Legacy subset: PDF statement, standard input/output, up to 100 cases. Programs are not executed during import."
+msgstr "支持 legacy ICPC 子集：PDF 题面、标准输入输出、最多 100 个测试用例。导入时不执行包内程序。"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Public samples"
+msgstr "公开样例"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Hidden cases"
+msgstr "隐藏测试用例"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Preview PDF statement"
+msgstr "预览 PDF 题面"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Statement"
+msgstr "题面"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Confirmed time limit (seconds)"
+msgstr "确认时间限制（秒）"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Memory limit (KiB)"
+msgstr "内存限制（KiB）"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Confirm draft version"
+msgstr "确认导入草稿"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Publish version"
+msgstr "发布题目"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Refresh preflight"
+msgstr "刷新检查结果"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Problem package"
+msgstr "单题题包"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "ICPC package imports are disabled."
+msgstr "站点尚未开启 ICPC 题包导入。"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
+msgid "Judge Service has not advertised verified icpc-legacy-v1 support. Publishing is blocked."
+msgstr "当前判题服务尚未启用 ICPC 支持，暂时无法发布。导入草稿已保留，服务升级后可重试。"
+
+msgid "Exercise Number"
+msgstr "题目编号"
+
+msgid "Exercise number cannot be changed."
+msgstr "题目编号不可修改。"
+
+msgid "Search by title or exercise number"
+msgstr "搜索题目名称或编号"
+
+msgid "Upload a package, review the statement and limits, then import it into the exercise library."
+msgstr "上传题目包，核对题面与运行限制，确认后导入题库。"
+
+msgid "Import progress"
+msgstr "导入进度"
+
+msgid "Upload package"
+msgstr "上传题目包"
+
+msgid "Review problem"
+msgstr "核对题目"
+
+msgid "Import to library"
+msgstr "导入到题库"
+
+msgid "Choose a ZIP or KPP file"
+msgstr "点击选择 ZIP 或 KPP 文件"
+
+msgid "Up to 20 MiB upload · 128 MiB expanded · 16 MiB per input · 100 cases"
+msgstr "支持最大 20 MiB 压缩包 · 解压后 128 MiB · 单个输入 16 MiB · 最多 100 个用例"
+
+msgid "This problem is not in the library yet. Complete the import below to make it searchable."
+msgstr "此题尚未进入题库。请完成下方导入，之后即可通过名称或编号搜索。"
+
+msgid "Inspection notes"
+msgstr "检查说明"
+
+msgid "Retry import to library"
+msgstr "重试导入到题库"
+
+msgid "Inspecting package"
+msgstr "正在检查题目包"
+
+msgid "Ready to import"
+msgstr "检查通过，待导入"
+
+msgid "Package rejected"
+msgstr "检查未通过"
+
+msgid "Draft saved; import pending"
+msgstr "草稿已保存，尚未入库"
+
+msgid "Uploading private package"
+msgstr "正在上传私有题目包…"
+
+msgid "Importing to library"
+msgstr "正在导入题库…"
+
+msgid "Package exceeds 20 MiB"
+msgstr "题目包超过 20 MiB 上传限制"
+
+msgid "Input validators and reference solutions were NOT executed."
+msgstr "检查期间不会执行输入校验器或参考程序。"
+
+msgid "Public"
+msgstr "公开"
+
+msgid "Visible to all students. Private courses are visible only to enrolled students."
+msgstr "所有学生均可见。非公开课程仅对已注册的学生可见。"
+
+msgid "Overall Course Completion"
+msgstr "全部课程完成度"
+
+msgid "Programming Exercises Passed"
+msgstr "编程题通过率"
+
+msgid "Unable to load student progress."
+msgstr "无法加载学员学习进度。"
+
+msgid "Edit Live Class"
+msgstr "编辑课堂"
+
+msgid "Unable to load this live class."
+msgstr "无法加载此课堂。"
+
+msgid "This live class does not belong to this batch."
+msgstr "此课堂不属于当前班级。"
+
+msgid "Please enter a positive duration in minutes."
+msgstr "请输入大于零的整数时长（分钟）。"
+
+msgid "Only instructors can enroll students in a private course."
+msgstr "非公开课程只能由讲师为学生注册。"
+
+msgid "The student is not enrolled in this batch."
+msgstr "该学生尚未加入此班级。"
+
+msgid "Enrollment membership and source cannot be changed."
+msgstr "不能更改课程注册的学生、课程或班级来源。"
+
+msgid "Remove the existing batch enrollment before changing its student or batch."
+msgstr "请先移除已有班级注册，再更改学生或班级。"
+
+msgid "You do not have permission to view this batch's progress."
+msgstr "你没有查看此班级学习进度的权限。"
+
+msgid "Select at most 500 students."
+msgstr "每次最多选择 500 名学生。"
+
+msgid "You do not have permission to edit this live class."
+msgstr "你没有编辑此课堂的权限。"
+
+msgid "This live class has changed. Reload it before saving."
+msgstr "此课堂已被修改，请重新加载后再保存。"
+
+msgid "Invalid live class details."
+msgstr "课堂信息无效。"
+
+msgid "Enter a title, date, time, timezone and a positive duration."
+msgstr "请填写标题、日期、时间、时区和大于零的时长。"
+
+msgid "Enter a valid date, time and timezone."
+msgstr "请输入有效的日期、时间和时区。"
+
+msgid "Invalid recording setting."
+msgstr "录制设置无效。"
+
+msgid "Unable to update the conferencing provider. Please try again."
+msgstr "无法更新视频会议，请重试。"
+
+msgid "Invalid batch course filters."
+msgstr "班级课程筛选条件无效。"
+
+msgid "Select a batch."
+msgstr "请选择一个班级。"
+
+msgid "You do not have permission to view this batch."
+msgstr "你没有查看此班级的权限。"

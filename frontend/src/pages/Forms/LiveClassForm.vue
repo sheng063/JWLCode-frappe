@@ -1,5 +1,9 @@
 <template>
-	<FormShell :title="__('Create a Live Class')" size="xl" @close="close">
+	<FormShell
+		:title="liveClassName ? __('Edit Live Class') : __('Create a Live Class')"
+		size="xl"
+		@close="close"
+	>
 		<template #default>
 			<div v-if="loadingBatch" class="p-4 text-base text-ink-gray-6">
 				{{ __('Loading...') }}
@@ -78,7 +82,9 @@
 					:label="__('Save')"
 					variant="solid"
 					:loading="
-						createLiveClass.loading || createGoogleMeetLiveClass.loading
+						createLiveClass.loading ||
+						createGoogleMeetLiveClass.loading ||
+						updateLiveClass.loading
 					"
 					@click="submitLiveClass()"
 				/>
@@ -105,9 +111,10 @@ import {
 	useBatchDetails,
 } from '@/composables/useBatchForms'
 import { useFormRoute } from '@/composables/useFormRoute'
-import { submitResource } from '@/utils/resource'
+import { resourceErrorMessage, submitResource } from '@/utils/resource'
 
 const props = defineProps({
+	liveClassName: { type: String, default: null },
 	batchName: {
 		type: String,
 		required: true,
@@ -131,10 +138,17 @@ const { close } = useFormRoute(
 // instance — see useBatchForms.ts for why sharing one is not available here.
 const batch = useBatchDetails(() => props.batchName)
 
-const loadingBatch = computed(() => !batch.data && batch.loading)
+const loadingBatch = computed(
+	() =>
+		(!batch.data && batch.loading) ||
+		(props.liveClassName && !existingClass.data && !existingClass.error)
+)
 
 const conferencingProvider = computed(
-	() => batch.data?.conferencing_provider || null
+	() =>
+		existingClass.data?.conferencing_provider ||
+		batch.data?.conferencing_provider ||
+		null
 )
 
 const isAdmin = computed(() =>
@@ -161,7 +175,11 @@ const refusal = computed(() => {
 	if (readOnlyMode) return __('This site is in read-only mode.')
 	if (!isAdmin.value)
 		return __('You are not permitted to create a live class for this batch.')
-	if (!hasProviderAccount.value)
+	if (props.liveClassName && existingClass.error)
+		return __('Unable to load this live class.')
+	if (props.liveClassName && existingClass.data?.batch_name !== props.batchName)
+		return __('This live class does not belong to this batch.')
+	if (!props.liveClassName && !hasProviderAccount.value)
 		return __(
 			'Please select a conferencing provider and add an account to the batch to create live classes.'
 		)
@@ -181,7 +199,41 @@ const liveClass = reactive({
 })
 
 onMounted(() => {
-	liveClass.timezone = getUserTimezone()
+	if (!props.liveClassName) liveClass.timezone = getUserTimezone()
+})
+
+const existingClass = createResource({
+	url: 'frappe.client.get',
+	params: { doctype: 'LMS Live Class', name: props.liveClassName },
+	auto: Boolean(props.liveClassName),
+	onSuccess(doc) {
+		for (const key of [
+			'title',
+			'description',
+			'date',
+			'time',
+			'duration',
+			'timezone',
+			'auto_recording',
+		]) {
+			liveClass[key] = doc[key]
+		}
+		liveClass.time = String(doc.time)
+			.split(':')
+			.slice(0, 2)
+			.map((v) => v.padStart(2, '0'))
+			.join(':')
+	},
+})
+const updateLiveClass = createResource({
+	url: 'lms.lms.doctype.lms_live_class.lms_live_class.update_live_class',
+	makeParams(values) {
+		return {
+			name: props.liveClassName,
+			values,
+			modified: existingClass.data?.modified,
+		}
+	},
 })
 
 const getTimezoneOptions = () => {
@@ -245,30 +297,27 @@ const reloadLiveClassList = () => {
 
 const submitLiveClass = () => {
 	if (refusal.value) return
-	const resource =
-		conferencingProvider.value === 'Google Meet'
+	const resource = props.liveClassName
+		? updateLiveClass
+		: conferencingProvider.value === 'Google Meet'
 			? createGoogleMeetLiveClass
 			: createLiveClass
 	return submitResource(resource, liveClass, {
-		// NOTE: carried over verbatim — the return value is discarded, so
-		// validateFormFields() has never actually blocked a submit. Fixing it
-		// is a behaviour change, so it is not folded into this conversion.
 		validate() {
-			validateFormFields()
+			return validateFormFields()
 		},
 		onSuccess() {
 			reloadLiveClassList()
 			close()
 		},
 		onError(err) {
-			toast.error(err.messages?.[0] || err)
-			console.error(err)
+			toast.error(resourceErrorMessage(err))
 		},
 	})
 }
 
 const validateFormFields = () => {
-	if (!liveClass.title) {
+	if (!liveClass.title.trim()) {
 		return __('Please enter a title.')
 	}
 	if (!liveClass.date) {
@@ -288,6 +337,7 @@ const validateFormFields = () => {
 		true
 	)
 	if (
+		!props.liveClassName &&
 		liveClassDateTime.isSameOrBefore(
 			dayjs().tz(liveClass.timezone, false),
 			'minute'
@@ -295,22 +345,13 @@ const validateFormFields = () => {
 	) {
 		return __('Please select a future date and time.')
 	}
-	if (!liveClass.duration) {
-		return __('Please select a duration.')
+	if (
+		!Number.isInteger(Number(liveClass.duration)) ||
+		Number(liveClass.duration) <= 0
+	) {
+		return __('Please enter a positive duration in minutes.')
 	}
 }
 
-const valideTime = () => {
-	let time = liveClass.time.split(':')
-	if (time.length != 2) {
-		return false
-	}
-	if (time[0] < 0 || time[0] > 23) {
-		return false
-	}
-	if (time[1] < 0 || time[1] > 59) {
-		return false
-	}
-	return true
-}
+const valideTime = () => /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(liveClass.time)
 </script>

@@ -24,7 +24,12 @@
   "memory_kb",
   "compiler_message",
   "section_break_idyi",
-  "test_cases"
+  "test_cases",
+  "package_version",
+  "config_digest",
+  "attempt_id",
+  "passed_tests",
+  "total_tests"
  ],
  "fields": [
   {
@@ -54,13 +59,43 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nQueued\nCompiling\nRunning\nPassed\nFailed\nTime Limit Exceeded\nMemory Limit Exceeded\nCompilation Error\nRuntime Error\nSystem Error\nCanceled"
+   "options": "\nQueued\nCompiling\nRunning\nPassed\nFailed\nTime Limit Exceeded\nMemory Limit Exceeded\nCompilation Error\nRuntime Error\nSystem Error\nCanceled\nOutput Limit Exceeded\nConnection Timeout"
   },
-  {"default": "0", "fieldname": "score", "fieldtype": "Percent", "label": "Score", "read_only": 1},
-  {"fieldname": "judge_request_id", "fieldtype": "Data", "label": "Judge Request ID", "read_only": 1, "unique": 1},
-  {"fieldname": "client_request_id", "fieldtype": "Data", "label": "Client Request ID", "read_only": 1},
-  {"default": "0", "fieldname": "status_version", "fieldtype": "Int", "hidden": 1, "label": "Status Version", "read_only": 1},
-  {"fieldname": "event_id", "fieldtype": "Data", "hidden": 1, "label": "Event ID", "read_only": 1},
+  {
+   "default": "0",
+   "fieldname": "score",
+   "fieldtype": "Percent",
+   "label": "Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "judge_request_id",
+   "fieldtype": "Data",
+   "label": "Judge Request ID",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "client_request_id",
+   "fieldtype": "Data",
+   "label": "Client Request ID",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "status_version",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Status Version",
+   "read_only": 1
+  },
+  {
+   "fieldname": "event_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Event ID",
+   "read_only": 1
+  },
   {
    "fieldname": "column_break_jkjs",
    "fieldtype": "Column Break"
@@ -93,9 +128,24 @@
    "label": "Code",
    "reqd": 1
   },
-  {"fieldname": "time_ms", "fieldtype": "Int", "label": "Time (ms)", "read_only": 1},
-  {"fieldname": "memory_kb", "fieldtype": "Int", "label": "Memory (KB)", "read_only": 1},
-  {"fieldname": "compiler_message", "fieldtype": "Long Text", "label": "Compiler Message", "read_only": 1},
+  {
+   "fieldname": "time_ms",
+   "fieldtype": "Int",
+   "label": "Time (ms)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "memory_kb",
+   "fieldtype": "Int",
+   "label": "Memory (KB)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "compiler_message",
+   "fieldtype": "Long Text",
+   "label": "Compiler Message",
+   "read_only": 1
+  },
   {
    "fetch_from": "exercise.title",
    "fieldname": "exercise_title",
@@ -108,6 +158,37 @@
    "fieldname": "member_image",
    "fieldtype": "Attach",
    "label": "Member Image"
+  },
+  {
+   "fieldname": "package_version",
+   "fieldtype": "Link",
+   "label": "Package Version",
+   "options": "LMS Problem Package Version",
+   "read_only": 1
+  },
+  {
+   "fieldname": "config_digest",
+   "fieldtype": "Data",
+   "label": "Config Digest",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attempt_id",
+   "fieldtype": "Data",
+   "label": "Attempt Id",
+   "read_only": 1
+  },
+  {
+   "fieldname": "passed_tests",
+   "fieldtype": "Int",
+   "label": "Passed Tests",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_tests",
+   "fieldtype": "Int",
+   "label": "Total Tests",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

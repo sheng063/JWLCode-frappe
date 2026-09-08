@@ -34,14 +34,14 @@ describe('programming exercise answer editor', () => {
 		expect(submissionSource).toContain('def solve() -> None:')
 		expect(submissionSource).toContain('data-testid="submission-language"')
 		expect(submissionSource).toContain('language: selectedLanguage.value')
-		expect(submissionSource).toContain('code.value = loadedSubmissionCode.value || starterCode.value')
+		expect(submissionSource).toContain('code.value = saved?.code ?? starterCode.value')
 		expect(submissionSource).not.toContain('cout')
 	})
 
-	it('persists code after both run actions', () => {
+	it('saves submitted code locally without overwriting historical submissions', () => {
 		expect(submissionSource).toContain('await createSubmission()')
-		expect(submissionSource).toContain('await saveJudgeRunCode()')
-		expect(submissionSource).toContain('save_programming_exercise_code')
+		expect(submissionSource).toContain('saveProgrammingCode(user.data?.name, props.exerciseID,')
+		expect(submissionSource).not.toContain('save_programming_exercise_code')
 		expect(submissionSource).toContain('msg.file || msg.stream || msg.channel')
 		expect(submissionSource).toContain("testCase.output || '—'")
 	})

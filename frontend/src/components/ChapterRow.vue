@@ -103,8 +103,8 @@
 								lesson.locked
 									? 'cursor-not-allowed opacity-60'
 									: inlineSelect
-									? 'cursor-pointer'
-									: ''
+										? 'cursor-pointer'
+										: ''
 							"
 							@click="onLessonClick(lesson)"
 						>
@@ -161,6 +161,15 @@
 				</template>
 			</Draggable>
 			<div v-if="allowEdit" class="flex mt-2 mb-4 ps-8">
+				<select
+					v-model="newLessonType"
+					:aria-label="__('课时类型')"
+					class="me-2 rounded border-outline-gray-2 text-sm"
+					:disabled="creatingLesson"
+				>
+					<option value="Text">{{ __('文本') }}</option>
+					<option value="Programming">{{ __('编程题目') }}</option>
+				</select>
 				<Button :loading="creatingLesson" @click="addLesson">
 					<template #prefix>
 						<span class="lucide-plus size-4" />
@@ -216,7 +225,13 @@ const emit = defineEmits<{
 	'delete-chapter': [string]
 	'delete-lesson': [{ lesson: string; chapter: string }]
 	'move-lesson': [DraggableEvent]
-	'create-lesson': [{ chapter: OutlineChapter; lessonIdx: number }]
+	'create-lesson': [
+		{
+			chapter: OutlineChapter
+			lessonIdx: number
+			lessonType: 'Text' | 'Programming'
+		},
+	]
 }>()
 
 const route = useRoute()
@@ -272,7 +287,7 @@ const defaultOpen = computed<boolean>(() => {
 const isScormChapterComplete = computed<boolean>(() =>
 	Boolean(
 		props.chapter.lessons?.length &&
-			props.chapter.lessons.every((l) => l.is_complete)
+		props.chapter.lessons.every((l) => l.is_complete)
 	)
 )
 
@@ -283,8 +298,8 @@ const isScormChapterComplete = computed<boolean>(() =>
 const isScormChapterLocked = computed<boolean>(() =>
 	Boolean(
 		props.chapter.is_scorm_package &&
-			props.chapter.lessons?.length &&
-			props.chapter.lessons.every((l) => l.locked)
+		props.chapter.lessons?.length &&
+		props.chapter.lessons.every((l) => l.locked)
 	)
 )
 
@@ -323,8 +338,11 @@ function onLessonClick(lesson: OutlineLesson) {
 	})
 }
 
+const newLessonType = ref<'Text' | 'Programming'>('Text')
+
 function addLesson() {
 	emit('create-lesson', {
+		lessonType: newLessonType.value,
 		chapter: props.chapter,
 		lessonIdx: (props.chapter.lessons?.length ?? 0) + 1,
 	})

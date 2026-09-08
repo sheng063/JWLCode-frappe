@@ -1,0 +1,8 @@
+{
+  "spec_url": "https://icpc.io/problem-package-format/spec/legacy-icpc.html",
+  "snapshot_date": "2026-09-06",
+  "spec_sha256": "b02cd7d36afeb046d03e93a8b05438fde935a011cb5788165542b7f7b372eebf",
+  "reference_tool": "Kattis/problemtools",
+  "reference_commit": "4be848fc10fc74a9f604f2f31c62c64b70189fa5",
+  "supported_flags": []
+}

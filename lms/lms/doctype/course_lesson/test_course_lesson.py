@@ -102,10 +102,10 @@ class TestApplyEnforcementFlags(unittest.TestCase):
 			(True, False),
 		)
 
-	def test_quiz_off_returns_true_for_quiz(self):
+	def test_quiz_still_requires_submission_when_flag_off(self):
 		self.assertEqual(
 			self._call(quiz_done=False, assignment_done=False, enforce_quiz=0, enforce_assignment=1),
-			(True, False),
+			(False, False),
 		)
 
 	def test_assignment_off_returns_true_for_assignment(self):
@@ -114,10 +114,10 @@ class TestApplyEnforcementFlags(unittest.TestCase):
 			(False, True),
 		)
 
-	def test_both_off_returns_true_true(self):
+	def test_both_off_still_requires_quiz_submission(self):
 		self.assertEqual(
 			self._call(quiz_done=False, assignment_done=False, enforce_quiz=0, enforce_assignment=0),
-			(True, True),
+			(False, True),
 		)
 
 	def test_missing_settings_keys_treated_as_enforced(self):
@@ -146,7 +146,7 @@ class TestApplyEnforcementFlagsEdgeCases(unittest.TestCase):
 			pass
 
 		settings = _Dict({"enforce_quiz_completion": 0, "enforce_assignment_completion": 1})
-		self.assertEqual(self.fn(quiz_done=False, assignment_done=False, settings=settings), (True, False))
+		self.assertEqual(self.fn(quiz_done=False, assignment_done=False, settings=settings), (False, False))
 
 	def test_string_zero_is_truthy_treated_as_enforced(self):
 		"""Frappe may return '0' as a string from raw queries. `not '0'` is False, so it's still enforced.
@@ -168,7 +168,7 @@ class TestApplyEnforcementFlagsEdgeCases(unittest.TestCase):
 		Distinct from missing key (which defaults to 1 / enforced via dict.get's default).
 		"""
 		settings = {"enforce_quiz_completion": None, "enforce_assignment_completion": 1}
-		self.assertEqual(self.fn(quiz_done=False, assignment_done=False, settings=settings), (True, False))
+		self.assertEqual(self.fn(quiz_done=False, assignment_done=False, settings=settings), (False, False))
 
 	def test_both_int_zero_disabled(self):
 		settings = {"enforce_quiz_completion": 0, "enforce_assignment_completion": 0}
@@ -177,7 +177,7 @@ class TestApplyEnforcementFlagsEdgeCases(unittest.TestCase):
 				with self.subTest(quiz_done=quiz_done, assignment_done=assignment_done):
 					self.assertEqual(
 						self.fn(quiz_done=quiz_done, assignment_done=assignment_done, settings=settings),
-						(True, True),
+						(quiz_done, True),
 					)
 
 	def test_idempotent(self):

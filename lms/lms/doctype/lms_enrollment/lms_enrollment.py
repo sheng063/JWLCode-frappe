@@ -26,6 +26,12 @@ class LMSEnrollment(Document):
 			return
 
 		previous = None if self.is_new() else self.get_doc_before_save()
+		if previous:
+			for field in ("member", "course", "enrollment_from_batch"):
+				if self.get(field) != previous.get(field):
+					frappe.throw(
+						_("Enrollment membership and source cannot be changed."), frappe.PermissionError
+					)
 		defaults = {"progress": 0, "purchased_certificate": 0}
 		for field, default in defaults.items():
 			setattr(self, field, previous.get(field) if previous else default)
@@ -60,16 +66,9 @@ class LMSEnrollment(Document):
 		course_details = frappe.db.get_value(
 			"LMS Course",
 			self.course,
-			["published", "disable_self_learning", "paid_course", "paid_certificate"],
+			["published", "is_public", "disable_self_learning", "paid_course", "paid_certificate"],
 			as_dict=True,
 		)
-
-		if course_details.disable_self_learning and not is_admin():
-			frappe.throw(
-				_(
-					"You cannot enroll in this course as self-learning is disabled. Please contact the Administrator."
-				)
-			)
 
 		if self.enrollment_from_batch:
 			if not frappe.db.exists(
@@ -81,6 +80,19 @@ class LMSEnrollment(Document):
 				"LMS Batch Enrollment", {"batch": self.enrollment_from_batch, "member": self.member}
 			):
 				return
+			frappe.throw(_("The student is not enrolled in this batch."), frappe.PermissionError)
+
+		if course_details.disable_self_learning and not is_admin():
+			frappe.throw(
+				_(
+					"You cannot enroll in this course as self-learning is disabled. Please contact the Administrator."
+				)
+			)
+
+		if not course_details.is_public and not is_admin():
+			frappe.throw(
+				_("Only instructors can enroll students in a private course."), frappe.PermissionError
+			)
 
 		if not course_details.published and not is_admin():
 			frappe.throw(_("You cannot enroll in an unpublished course."))

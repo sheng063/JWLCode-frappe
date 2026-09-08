@@ -16,32 +16,43 @@
 	</div>
 	<div
 		ref="workspace"
-		class="programming-workspace flex flex-col lg:flex-row h-[calc(100vh_-_3rem)] bg-surface-gray-1"
-		:class="{ resizing: horizontalDragging || verticalDragging }"
+		class="programming-workspace flex flex-col md:flex-row h-[calc(100vh_-_3rem)] bg-surface-gray-1"
+		:class="{ resizing: horizontalDragging || verticalDragging, 'lesson-workspace': fromLesson, 'expand-problem': expandedPane === 'problem', 'expand-code': expandedPane === 'code' }"
 	>
 		<div
-			class="border-b lg:border-b-0 lg:border-e py-5 px-8 bg-surface-white shrink-0 lg:h-full lg:overflow-y-auto"
+			class="problem-pane bg-surface-white shrink-0"
 			:style="isDesktop ? { width: leftPanelWidth + 'px' } : null"
 		>
-			<h2 class="font-semibold mb-2 text-ink-gray-9">
-				{{ __('Problem Statement') }}
-			</h2>
+			<div class="workspace-panel-heading problem-tabs">
+				<button class="problem-tab" :class="{ active: activeProblemTab === 'description' }" :aria-pressed="activeProblemTab === 'description'" @click="activeProblemTab = 'description'"><span class="lucide-file-text size-4 text-blue-500" />{{ __('题目描述') }}</button>
+				<button class="problem-tab" :class="{ active: activeProblemTab === 'submissions' }" :aria-pressed="activeProblemTab === 'submissions'" @click="activeProblemTab = 'submissions'"><span class="lucide-history size-4 text-blue-500" />{{ __('提交记录') }}</button>
+				<button class="pane-icon ms-auto" :aria-label="__('展开题目描述')" :aria-pressed="expandedPane === 'problem'" @click="togglePane('problem')"><span :class="expandedPane === 'problem' ? 'lucide-minimize size-4' : 'lucide-maximize size-4'" /></button>
+			</div>
+			<ProgrammingSubmissionHistory v-if="activeProblemTab === 'submissions'" :exercise="exerciseID" :member="user.data?.name" :revision="submission.doc?.modified" @select="openSubmission" />
+			<div v-show="activeProblemTab === 'description'" class="problem-content">
+			<div class="flex items-start justify-between gap-4 mb-5">
+				<h1 class="problem-title">{{ exercise.doc?.title || __('Problem Statement') }}</h1>
+				<span v-if="submission.doc?.status === 'Passed'" class="solved-label"><span class="lucide-circle-check size-4" />{{ __('已解答') }}</span>
+			</div>
 			<MathContent
 				:html="exercise.doc?.problem_statement"
 				class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal"
 			/>
-			<section v-if="exercise.doc?.test_cases?.length" class="mt-8 pt-6 border-t">
-				<h2 class="font-semibold text-ink-gray-9">{{ __('Test Cases') }}</h2>
+			<p v-if="exercise.doc?.source_type === 'icpc'" class="mt-3 text-sm">{{ exercise.doc.time_limit_seconds }} s · {{ exercise.doc.memory_limit_kb }} KiB · {{ __('All tests must pass. Hidden test details are private.') }}</p>
+			<p v-if="exercise.doc && !exercise.doc.test_cases?.length" class="mt-3">{{ __('No public samples available') }}</p>
+			<section v-if="exercise.doc?.test_cases?.length" class="problem-examples">
+
 				<div class="mt-3 space-y-3">
-					<div v-for="(testCase, index) in exercise.doc.test_cases" :key="testCase.name || index" class="rounded-lg border border-outline-gray-2 bg-surface-gray-1 p-4">
-						<div class="text-sm font-medium text-ink-gray-9">{{ __('Test {0}').format(index + 1) }}</div>
-						<div class="mt-3 grid gap-3 sm:grid-cols-2">
+					<div v-for="(testCase, index) in exercise.doc.test_cases" :key="testCase.name || index" class="problem-example">
+						<div class="text-sm font-medium text-ink-gray-9">{{ __('示例 {0}：').format(index + 1) }}</div>
+						<div class="example-values mt-3 grid gap-3">
 							<div><div class="text-xs text-ink-gray-6">{{ __('Input') }}</div><pre class="test-case-value">{{ testCase.input || '—' }}</pre></div>
 							<div><div class="text-xs text-ink-gray-6">{{ __('Expected Output') }}</div><pre class="test-case-value">{{ testCase.expected_output }}</pre></div>
 						</div>
 					</div>
 				</div>
 			</section>
+			</div>
 		</div>
 
 		<!-- Resizable divider between the problem-statement pane and the editor pane -->
@@ -55,8 +66,15 @@
 			aria-label="Resize panes"
 		></div>
 
-		<div ref="rightColumn" class="flex min-h-0 flex-col flex-1">
-			<div ref="rightHeader" class="flex items-center justify-between p-3 bg-surface-white border-b shrink-0">
+		<div ref="rightColumn" class="code-column flex min-h-0 min-w-0 flex-col flex-1">
+			<div ref="rightHeader" class="code-header bg-surface-white shrink-0">
+				<div class="workspace-panel-heading"><button class="problem-tab" :class="{ active: !activeSubmission }" @click="activeSubmission = ''"><span class="lucide-code-xml size-4 text-green-500" />{{ __('代码') }}</button><div v-for="name in submissionTabs" :key="name" class="flex items-center shrink-0"><button class="problem-tab" :class="{ active: activeSubmission === name }" @click="activeSubmission = name">提交记录 {{ name }}</button><button class="pane-icon" :aria-label="'关闭提交记录 ' + name" @click="closeSubmission(name)">×</button></div>
+					<button class="pane-icon ms-auto" aria-label="代码格式化" title="代码格式化 (Alt+Shift+F)" :disabled="formatting || running || submitting" @click="formatCode"><span :class="formatting ? 'lucide-loader-circle size-4 animate-spin' : 'lucide-braces size-4'" /></button>
+                    <button class="pane-icon" aria-label="编辑器设置" title="设置" @click="editorSettingsOpen = true"><span class="lucide-settings size-4" /></button>
+                    <button class="pane-icon" :aria-label="__('展开代码编辑器')" :aria-pressed="expandedPane === 'code'" @click="togglePane('code')"><span :class="expandedPane === 'code' ? 'lucide-minimize size-4' : 'lucide-maximize size-4'" /></button>
+				</div>
+				<div v-show="!activeSubmission" class="code-toolbar">
+				<div class="language-control">
 				<FormControl
 					v-model="selectedLanguage"
 					data-testid="submission-language"
@@ -65,6 +83,7 @@
 					:disabled="running || submitting"
 					class="w-32"
 				/>
+				</div>
 				<div class="flex items-center gap-x-2">
 					<Badge
 						v-if="submission.doc?.status"
@@ -91,7 +110,7 @@
 						"
 						@click="runCodeOnly"
 						:loading="running"
-						:disabled="running || submitting"
+						:disabled="running || submitting || !exercise.doc?.test_cases?.length"
 						class="text-ink-gray-9"
 					>
 						<template #prefix>
@@ -108,7 +127,7 @@
 						@click="submitCode"
 						:loading="submitting"
 						:disabled="running || submitting"
-						class="text-ink-gray-9 !bg-transparent hover:!bg-surface-gray-2"
+						class="!text-green-700 !bg-green-50 hover:!bg-green-100"
 					>
 						<template #prefix>
 							<span class="lucide-send size-3" />
@@ -117,27 +136,36 @@
 					</Button>
 				</div>
 			</div>
+			</div>
 			<div
+				v-show="!activeSubmission"
 				ref="editorPane"
 				:class="[
-					'flex flex-col overflow-hidden bg-surface-white',
+					'code-pane flex flex-col overflow-hidden bg-surface-white',
 					testPanelCollapsed ? 'flex-1 min-h-0' : 'shrink-0',
 				]"
 				:style="testPanelCollapsed ? null : { height: editorPaneHeight + 'px' }"
 			>
-				<div class="flex-1 min-h-0 p-4 editor-fill">
+				<div class="flex-1 min-h-0 editor-fill" :style="{ backgroundColor: editorPreferences.theme === 'dark' ? '#141414' : '#fff' }">
 					<CodeEditor
+                        ref="codeEditor"
+                        :preferences="editorPreferences"
 						v-model="code"
 						:type="editorLanguage"
 						:show-line-numbers="true"
+						:font-size="14"
+						@cursor-change="editorCursor = $event"
 						fill
 					/>
 				</div>
+				<div class="editor-status"><span>{{ selectedLanguage }}</span><span>{{ __('行 {0}，列 {1}').format(editorCursor.row, editorCursor.column) }}</span></div>
 			</div>
+
+			<ProgrammingSubmissionDetail v-for="name in submissionTabs" v-show="activeSubmission === name" :key="name" :name="name" :revision="submission.doc?.modified" @restore="restoreSubmissionCode" />
 
 			<!-- Resizable divider between the editor pane and the test-results pane -->
 			<div
-				v-if="!testPanelCollapsed"
+				v-if="!testPanelCollapsed && !activeSubmission"
 				class="programming-resizer resizer-horizontal"
 				:class="{ dragging: verticalDragging }"
 				@mousedown.prevent="startVerticalResize"
@@ -147,15 +175,16 @@
 			></div>
 
 			<div
+				v-show="!activeSubmission"
 				ref="testCaseSection"
 				:class="[
-					'bg-surface-white',
+					'test-pane bg-surface-white',
 					testPanelCollapsed ? 'shrink-0' : 'min-h-0 flex-1 overflow-y-auto',
 				]"
 			>
-				<div class="flex items-center gap-6 border-b px-5">
-					<button class="test-panel-tab" :class="{ 'test-panel-tab-active': activeTestPanel === 'cases' }" @click="activeTestPanel = 'cases'"><span class="lucide-list-checks size-4" />{{ __('Test Cases') }}</button>
-					<button class="test-panel-tab" :class="{ 'test-panel-tab-active': activeTestPanel === 'results' }" @click="activeTestPanel = 'results'"><span class="lucide-terminal size-4" />{{ __('测试结果') }}</button>
+				<div class="test-panel-heading flex items-center gap-6 px-4">
+					<button class="test-panel-tab" :class="{ 'test-panel-tab-active': activeTestPanel === 'cases' }" @click="selectTestPanel('cases')"><span class="lucide-list-checks size-4" />{{ __('Test Cases') }}</button>
+					<button class="test-panel-tab" :class="{ 'test-panel-tab-active': activeTestPanel === 'results' }" @click="selectTestPanel('results')"><span class="lucide-terminal size-4" />{{ __('测试结果') }}</button>
 					<button
 						class="test-panel-collapse ms-auto"
 						:class="{ 'test-panel-collapse-active': testPanelCollapsed }"
@@ -172,12 +201,15 @@
 						/>
 					</button>
 				</div>
-				<template v-if="!testPanelCollapsed">
+				<template v-if="!testPanelCollapsed && !activeSubmission">
 					<div v-if="activeTestPanel === 'cases'" class="p-5">
-					<div v-if="exercise.doc?.test_cases?.length" class="divide-y">
-						<div v-for="(testCase, index) in exercise.doc.test_cases" :key="testCase.name || index" class="py-3 first:pt-0">
-							<div class="font-medium text-ink-gray-9">{{ __('Test {0}').format(index + 1) }}</div>
-							<div class="mt-2 grid gap-3 sm:grid-cols-2 text-sm"><div><span class="text-ink-gray-6">{{ __('Input') }}:</span><pre class="test-case-value">{{ testCase.input || '—' }}</pre></div><div><span class="text-ink-gray-6">{{ __('Expected Output') }}:</span><pre class="test-case-value">{{ testCase.expected_output }}</pre></div></div>
+					<div v-if="exercise.doc?.test_cases?.length">
+						<div class="case-tabs" aria-label="测试用例">
+							<button v-for="(testCase, index) in exercise.doc.test_cases" :key="testCase.name || index" class="case-tab" :class="{ 'case-tab-active': selectedCaseIndex === index }" :aria-pressed="selectedCaseIndex === index" @click="selectedCaseIndex = index">Case {{ index + 1 }}</button>
+						</div>
+						<div v-if="selectedCase" class="case-fields">
+							<div><div class="case-field-label">{{ __('Input') }}</div><pre class="test-case-value">{{ selectedCase.input || '—' }}</pre></div>
+							<div><div class="case-field-label">{{ __('Expected Output') }}</div><pre class="test-case-value">{{ selectedCase.expected_output }}</pre></div>
 						</div>
 					</div>
 					<div v-else class="text-sm text-ink-gray-6">{{ __('No test cases available.') }}</div>
@@ -237,9 +269,12 @@
 			</div>
 		</div>
 	</div>
+<ProgrammingEditorSettings v-model="editorPreferences" v-model:open="editorSettingsOpen" />
 </template>
 <script setup lang="ts">
 import MathContent from '@/components/MathContent.vue'
+import ProgrammingSubmissionDetail from '@/components/ProgrammingSubmissionDetail.vue'
+import ProgrammingSubmissionHistory from '@/components/ProgrammingSubmissionHistory.vue'
 import {
 	Badge,
 	Button,
@@ -249,11 +284,14 @@ import {
 	toast,
 	usePageMeta,
 } from 'frappe-ui'
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import PageHeader from '@/components/Layouts/PageHeader.vue'
 import CodeEditor from '@/components/Controls/CodeEditor.vue'
 import { sessionStore } from '@/stores/session'
 import { useRouter } from 'vue-router'
+import ProgrammingEditorSettings from '@/components/ProgrammingEditorSettings.vue'
+import { readEditorPreferences, editorPreferencesKey } from '@/utils/editorPreferences'
+import { readProgrammingCode, saveProgrammingCode } from '@/utils/programmingCodeCache'
 import { openSettings } from '@/utils'
 import { useSettings } from '@/stores/settings'
 import { getLmsRoute } from '@/utils/basePath'
@@ -275,7 +313,73 @@ const { mockedUser: user } = provideStudentView(
 	realUser,
 	() => studentView.value
 )
+const submissionTabs = ref<string[]>([])
+const activeSubmission = ref('')
+function openSubmission(name: string) {
+ if (!submissionTabs.value.includes(name)) submissionTabs.value.push(name)
+ activeSubmission.value = name
+}
+function closeSubmission(name: string) {
+ submissionTabs.value = submissionTabs.value.filter(item => item !== name)
+ if (activeSubmission.value === name) activeSubmission.value = ''
+}
+async function restoreSubmissionCode(doc: any) {
+ selectedLanguage.value = doc.language
+ await nextTick()
+ code.value = doc.code ?? ''
+ activeSubmission.value = ''
+}
+const activeProblemTab = ref<'description' | 'submissions'>('description')
 const code = ref<string | null>('')
+const codeEditor = ref<InstanceType<typeof CodeEditor> | null>(null)
+const editorSettingsOpen = ref(false)
+const editorPreferences = ref(readEditorPreferences())
+const formatting = ref(false)
+watch(editorPreferences, (value) => {
+ try { localStorage.setItem(editorPreferencesKey, JSON.stringify(value)) } catch { /* Private browsing may disable storage. */ }
+}, { deep: true })
+const formatCode = async () => {
+ if (formatting.value || running.value || submitting.value) return
+ const source = codeEditor.value?.getValue() ?? code.value ?? ''
+ const language = selectedLanguage.value
+ formatting.value = true
+ try {
+  const formatted = await call('lms.lms.programming_editor.format_code', {
+   code: source, language, tab_size: editorPreferences.value.tabSize,
+  })
+  if (selectedLanguage.value !== language || codeEditor.value?.getValue() !== source) {
+   toast.info('代码已修改，请重新格式化。')
+   return
+  }
+  codeEditor.value?.replaceCode(formatted)
+ } catch (error: any) {
+  toast.error(error.messages?.[0] || error.message || '代码格式化失败，请检查语法后重试。')
+ } finally { formatting.value = false }
+}
+const handleEditorShortcut = (event: KeyboardEvent) => {
+ if (event.isComposing || event.repeat || editorSettingsOpen.value) return
+ const modifier = event.ctrlKey || event.metaKey
+ const format = event.altKey && event.shiftKey && event.code === 'KeyF'
+ const expand = event.altKey && !event.shiftKey && event.code === 'KeyF'
+ const submit = modifier && event.shiftKey && event.key === 'Enter' && editorPreferences.value.submitShortcut
+ const run = modifier && !event.shiftKey && event.key === 'Enter' && editorPreferences.value.runShortcut
+ if (!format && !expand && !submit && !run) return
+ event.preventDefault()
+ event.stopPropagation()
+ if (expand) { togglePane('code'); return }
+ if (format) { void formatCode(); return }
+ if (running.value || submitting.value || formatting.value || !exercise.doc) return
+ if (props.submissionID !== 'new' && submission.doc?.owner !== user.data?.name) return
+ if (exercise.doc.evaluation_mode !== 'Judge Service' && falconError.value) return
+ if (submit) void submitCode()
+ else if (exercise.doc.test_cases?.length) void runCodeOnly()
+}
+
+const expandedPane = ref<'problem' | 'code' | null>(null)
+const editorCursor = ref({ row: 1, column: 1 })
+const togglePane = (pane: 'problem' | 'code') => {
+	expandedPane.value = expandedPane.value === pane ? null : pane
+}
 const selectedLanguage = ref<'Python' | 'C++'>('Python')
 const codeLanguageOptions = [
 	{ label: 'Python', value: 'Python' },
@@ -288,15 +392,21 @@ const testCaseSection = ref<HTMLElement | null>(null)
 const testCases = ref<TestCase[]>([])
 const activeTestPanel = ref<'cases' | 'results'>('cases')
 const testPanelCollapsed = ref(false)
+const selectedCaseIndex = ref(0)
+const selectTestPanel = (panel: 'cases' | 'results') => {
+	activeTestPanel.value = panel
+	testPanelCollapsed.value = false
+}
 const resultMessage = ref<{ tone: 'success' | 'error' | 'info'; title: string; detail?: string | null } | null>(null)
 const { brand } = sessionStore()
 const { settings } = useSettings()
 const router = useRouter()
-const fromLesson = ref(false)
+const fromLesson = ref(new URLSearchParams(window.location.search).has('fromLesson'))
 const falconURL = ref<string>('https://falcon.frappe.io')
 const falconError = ref<string | null>(null)
 const running = ref<boolean>(false)
 const submitting = ref<boolean>(false)
+let workspaceObserver: ResizeObserver | null = null
 let statusTimer: ReturnType<typeof setTimeout> | null = null
 
 // Resizable panes: the divider between the problem-statement pane and the
@@ -306,7 +416,7 @@ let statusTimer: ReturnType<typeof setTimeout> | null = null
 // the document so the drag keeps tracking even when the pointer leaves the thin
 // divider. Sizes are clamped so no pane collapses below a usable minimum.
 const { size } = useScreenSize()
-const isDesktop = computed(() => size.width >= 1024)
+const isDesktop = computed(() => size.width >= 768)
 
 const workspace = ref<HTMLElement | null>(null)
 const rightColumn = ref<HTMLElement | null>(null)
@@ -318,11 +428,11 @@ const editorPaneHeight = ref(420)
 const horizontalDragging = ref(false)
 const verticalDragging = ref(false)
 
-const LEFT_PANE_MIN = 320
-const RIGHT_PANE_MIN = 480
+const LEFT_PANE_MIN = 280
+const RIGHT_PANE_MIN = 360
 const EDITOR_PANE_MIN = 120
 const TEST_RESULTS_PANE_MIN = 160
-const RESIZER_THICKNESS = 6
+const RESIZER_THICKNESS = 8
 
 const clamp = (value: number, min: number, max: number) =>
 	Math.min(Math.max(value, min), max)
@@ -342,7 +452,7 @@ const maxEditorHeight = () => {
 
 const setInitialLayout = () => {
 	if (workspace.value) {
-		const maxLeft = workspace.value.clientWidth - RIGHT_PANE_MIN
+		const maxLeft = workspace.value.clientWidth - RIGHT_PANE_MIN - RESIZER_THICKNESS - 12
 		leftPanelWidth.value = clamp(
 			Math.round(workspace.value.clientWidth * 0.42),
 			LEFT_PANE_MIN,
@@ -350,15 +460,14 @@ const setInitialLayout = () => {
 		)
 	}
 	if (rightColumn.value) {
-		const computed = Math.round(maxEditorHeight() * 0.55)
+		const computed = Math.round((rightColumn.value.clientHeight - headerHeight() - RESIZER_THICKNESS) * 0.55)
 		editorPaneHeight.value = clamp(computed, EDITOR_PANE_MIN, maxEditorHeight())
 	}
 }
 
 const reflowPanes = () => {
-	if (!isDesktop.value) return
 	if (workspace.value) {
-		const maxLeft = workspace.value.clientWidth - RIGHT_PANE_MIN
+		const maxLeft = workspace.value.clientWidth - RIGHT_PANE_MIN - RESIZER_THICKNESS - 12
 		leftPanelWidth.value = clamp(
 			leftPanelWidth.value,
 			LEFT_PANE_MIN,
@@ -379,7 +488,7 @@ const startHorizontalResize = (event: MouseEvent) => {
 	horizontalDragging.value = true
 	const startX = event.clientX
 	const startWidth = leftPanelWidth.value
-	const maxLeft = workspace.value.clientWidth - RIGHT_PANE_MIN
+	const maxLeft = workspace.value.clientWidth - RIGHT_PANE_MIN - RESIZER_THICKNESS - 12
 
 	const onMove = (e: MouseEvent) => {
 		leftPanelWidth.value = clamp(
@@ -438,17 +547,23 @@ const props = withDefaults(
 )
 
 onMounted(() => {
-	loadFalcon()
+	loadFalcon().catch(() => { falconError.value = '代码运行服务加载失败。' })
 	checkIfUserIsPermitted()
 	checkIfInLesson()
 	fetchSubmission()
 	setInitialLayout()
+	workspaceObserver = new ResizeObserver(reflowPanes)
+	if (workspace.value) workspaceObserver.observe(workspace.value)
+	if (rightColumn.value) workspaceObserver.observe(rightColumn.value)
 	window.addEventListener('resize', reflowPanes)
+	workspace.value?.addEventListener('keydown', handleEditorShortcut, true)
 })
 
 onBeforeUnmount(() => {
+	workspaceObserver?.disconnect()
 	if (statusTimer) clearTimeout(statusTimer)
 	window.removeEventListener('resize', reflowPanes)
+	workspace.value?.removeEventListener('keydown', handleEditorShortcut, true)
 })
 
 const checkIfInLesson = () => {
@@ -473,6 +588,8 @@ const exercise = createDocumentResource({
 	auto: true,
 })
 
+const selectedCase = computed(() => exercise.doc?.test_cases?.[selectedCaseIndex.value])
+
 const editorLanguage = computed<'Python' | 'C++'>(() => selectedLanguage.value)
 
 const submission = createDocumentResource({
@@ -492,6 +609,7 @@ const submission = createDocumentResource({
 })
 
 const loadedSubmissionCode = ref('')
+const loadedSubmissionName = ref('')
 
 const starterCode = computed(() => {
 	if (selectedLanguage.value === 'C++') {
@@ -516,24 +634,35 @@ if __name__ == "__main__":
 `
 })
 
-const updateCode = () => {
-	// A new C++ exercise starts from the minimal template. Once a member has
-	// run or submitted code, load that saved source instead.
-	code.value = loadedSubmissionCode.value || starterCode.value
+const restoreExerciseCode = () => {
+	const saved = readProgrammingCode(user.data?.name, props.exerciseID)
+	selectedLanguage.value = saved?.language || (exercise.doc?.language === 'C++' ? 'C++' : 'Python')
+	code.value = saved?.code ?? starterCode.value
 }
 
-watch(() => exercise.doc, updateCode)
+const updateCode = () => {
+	if (loadedSubmissionName.value) {
+		code.value = loadedSubmissionCode.value
+	} else {
+		restoreExerciseCode()
+	}
+}
 
-// For an unanswered exercise, changing the language must start from that
-// language's template instead of retaining source written for another runtime.
-// Saved submissions remain authoritative and are restored unchanged.
-watch(selectedLanguage, () => {
-	if (!loadedSubmissionCode.value) code.value = starterCode.value
+// Restore even when the resource was already cached before this page mounted.
+watch(() => exercise.doc?.name, updateCode, { immediate: true })
+watch(() => user.data?.name, () => {
+	if (props.submissionID === 'new') restoreExerciseCode()
 })
+
+watch(selectedLanguage, () => {
+	const saved = readProgrammingCode(user.data?.name, props.exerciseID, selectedLanguage.value)
+	code.value = saved?.language === selectedLanguage.value ? saved.code : starterCode.value
+}, { flush: 'sync' })
 
 // Reset the editor to its language starter template and clear any run output.
 const resetCode = () => {
 	loadedSubmissionCode.value = ''
+	loadedSubmissionName.value = ''
 	code.value = starterCode.value
 	output.value = null
 	error.value = null
@@ -574,16 +703,40 @@ const updateTestCases = (doc: any) => {
 watch(
 	() => submission.doc,
 	(doc) => {
-		if (doc) {
+		if (doc && doc.exercise === props.exerciseID && doc.name === props.submissionID) {
 			checkIfUserIsPermitted(doc)
 			updateTestCases(doc)
-			if (doc.language === 'Python' || doc.language === 'C++') selectedLanguage.value = doc.language
-			loadedSubmissionCode.value = doc.code || ''
-			updateCode()
+			if (doc.name !== loadedSubmissionName.value) {
+				loadedSubmissionName.value = doc.name
+				if (doc.language === 'Python' || doc.language === 'C++') selectedLanguage.value = doc.language
+				loadedSubmissionCode.value = doc.code || ''
+				updateCode()
+			}
 		}
 	},
 	{ immediate: true }
 )
+
+watch(() => submission.doc?.status, (status) => {
+	if (status === 'Passed' && window.parent !== window && fromLesson.value && !studentView.value) {
+		window.parent.postMessage({ type: 'lms-programming-passed' }, window.location.origin)
+	}
+}, { immediate: true })
+
+// The page is reused when browser history changes only the submission ID.
+watch(() => props.submissionID, (name) => {
+ if (statusTimer) clearTimeout(statusTimer)
+ testCases.value = []
+ resultMessage.value = null
+ if (name === 'new') {
+  submission.doc = null
+  loadedSubmissionName.value = ''
+  loadedSubmissionCode.value = ''
+  updateCode()
+ } else {
+  fetchSubmission(name)
+ }
+})
 
 const loadFalcon = () => {
 	// An unset livecode_url leaves the default in place rather than building
@@ -601,6 +754,12 @@ const loadFalcon = () => {
 }
 
 const submitCode = async () => {
+	code.value = codeEditor.value?.getValue() ?? code.value
+	// Persist the exact submitted source before any asynchronous evaluation/navigation.
+	saveProgrammingCode(user.data?.name, props.exerciseID, {
+		code: code.value ?? '',
+		language: selectedLanguage.value,
+	})
 	submitting.value = true
 	try {
 		if (exercise.doc?.evaluation_mode === 'Judge Service') {
@@ -609,22 +768,24 @@ const submitCode = async () => {
 			await runCode()
 			await createSubmission()
 		}
+	} catch (error: any) {
+		toast.error(error.messages?.[0] || error.message || '提交失败，请重试。')
 	} finally {
 		submitting.value = false
 	}
 }
 
 const runCodeOnly = async () => {
+	code.value = codeEditor.value?.getValue() ?? code.value
 	running.value = true
 	error.value = false
 	errorMessage.value = null
 	try {
 		if (exercise.doc?.evaluation_mode === 'Judge Service') {
 			await runJudgeCode()
-			await saveJudgeRunCode()
+			// Public runs do not overwrite historical submissions.
 		} else {
 			await runCode()
-			await createSubmission()
 		}
 	} catch (e: any) {
 		error.value = true
@@ -670,40 +831,16 @@ const createJudgeSubmission = async () => {
 	testCases.value = []
 	const data = await call('lms.lms.judge_service.submit_programming_exercise', {
 		exercise: props.exerciseID,
-		submission: props.submissionID,
+		submission: 'new',
 		code: code.value || '',
 		language: selectedLanguage.value,
 		client_request_id: crypto.randomUUID(),
 	})
 	const submissionName = data.submission
-	if (props.submissionID === 'new') {
-		await router.push({
-			name: 'ProgrammingExerciseSubmission',
-			params: { exerciseID: props.exerciseID, submissionID: submissionName },
-		})
-	}
+	if (submissionName) openSubmission(submissionName)
 	fetchSubmission(submissionName)
 	pollJudgeStatus(submissionName)
 	showResult('info', __('Submission queued'), __('Your code is being evaluated.'))
-}
-
-// A public Judge Service run is not sent to the judge queue, but it should
-// still retain the member's source just like the local runner does.
-const saveJudgeRunCode = async () => {
-	const data = await call('lms.lms.api.save_programming_exercise_code', {
-		exercise: props.exerciseID,
-		submission: props.submissionID,
-		code: code.value || '',
-		language: selectedLanguage.value,
-	})
-	const submissionName = data as string
-	if (props.submissionID === 'new') {
-		await router.push({
-			name: 'ProgrammingExerciseSubmission',
-			params: { exerciseID: props.exerciseID, submissionID: submissionName },
-		})
-	}
-	fetchSubmission(submissionName)
 }
 
 const pollJudgeStatus = (submissionName: string) => {
@@ -766,7 +903,7 @@ const showTestCaseSummary = () => {
 }
 
 const showResult = (tone: 'success' | 'error' | 'info', title: string, detail: string | null = null) => {
-	activeTestPanel.value = 'results'
+	selectTestPanel('results')
 	resultMessage.value = { tone, title, detail }
 }
 
@@ -775,16 +912,13 @@ const createSubmission = async () => {
 	try {
 		const data = await call('lms.lms.api.create_programming_exercise_submission', {
 			exercise: props.exerciseID,
-			submission: props.submissionID,
+			submission: 'new',
 			code: code.value || '',
 			language: selectedLanguage.value,
 			test_cases: testCases.value,
 		})
-		if (props.submissionID == 'new') {
-			await router.push({
-				name: 'ProgrammingExerciseSubmission',
-				params: { exerciseID: props.exerciseID, submissionID: data },
-			})
+		if (data) {
+			openSubmission(data)
 			fetchSubmission(data)
 		} else {
 			fetchSubmission(props.submissionID)
@@ -862,8 +996,8 @@ usePageMeta(() => {
 	}
 })
 </script>
-<style>
-.ProseMirror pre {
+<style scoped>
+:deep(.ProseMirror pre) {
 	background: theme('colors.gray.200');
 	color: theme('colors.gray.900');
 }
@@ -964,4 +1098,76 @@ usePageMeta(() => {
 .test-panel-collapse-active {
 	color: theme('colors.gray.900');
 }
+</style>
+
+<style scoped>
+.programming-workspace { padding: 6px; background: #f0f0f0; overflow: hidden; box-sizing: border-box; }
+.programming-workspace.lesson-workspace { height: 100dvh; }
+.problem-pane { background: #fff; display: flex; flex-direction: column; min-height: 0; border: 1px solid #dedede; border-radius: 12px; overflow: hidden; }
+.workspace-panel-heading { overflow-x: auto; display: flex; align-items: center; gap: 8px; min-height: 36px; flex-shrink: 0; padding: 0 14px; background: #fafafa; color: #262626; font-size: 14px; font-weight: 600; }
+.problem-content { overflow-y: auto; padding: 22px 16px; flex: 1; }
+.problem-title { font-size: 24px; font-weight: 650; line-height: 1.4; color: #262626; overflow-wrap: anywhere; }
+.solved-label { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; color: #16a34a; font-size: 13px; padding-top: 8px; }
+.problem-content :deep(.prose) { font-size: 14px; line-height: 1.9; }
+.problem-content :deep(.prose pre) { white-space: pre-wrap; overflow-wrap: anywhere; }
+.code-header { background: #fff; overflow: hidden; border-radius: 12px 12px 0 0; }
+.code-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 6px 12px; border-bottom: 1px solid #ededed; flex-wrap: wrap; }
+.code-pane { background: #fff; border-radius: 0 0 12px 12px; }
+.editor-fill { padding: 10px 0; }
+.editor-fill :deep(.ace_editor) { border: 0; border-radius: 0 !important; line-height: 1.65; box-shadow: none; }
+.editor-fill :deep(.ace-chrome .ace_gutter) { background: #fff; color: #77909c; }
+.editor-fill :deep(.ace-chrome .ace_marker-layer .ace_active-line) { background: #f7f7f7; }
+.test-pane { background: #fff; border-radius: 12px; }
+.test-panel-heading { position: sticky; top: 0; background: #fafafa; border-radius: 12px 12px 0 0; z-index: 1; }
+.test-panel-tab { border-bottom: 0; min-height: 36px; padding: 10px 0; color: #888; }
+.test-panel-tab-active { color: #262626; font-weight: 600; }
+.test-panel-tab span { color: #22c55e; }
+.case-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 22px; }
+.case-tab { padding: 9px 16px; border-radius: 8px; color: #666; font-size: 14px; font-weight: 500; white-space: nowrap; }
+.case-tab:hover, .case-tab-active { background: #f2f2f4; color: #262626; }
+.case-fields { display: grid; gap: 20px; }
+.case-field-label { color: #888; font-size: 13px; margin-bottom: 9px; }
+.test-case-value { border-radius: 9px; background: #f3f3f5; padding: 13px 16px; font-size: 14px; line-height: 1.6; }
+.programming-resizer { background: transparent; }
+.resizer-vertical { width: 8px; }
+.resizer-horizontal { height: 8px; }
+.resizer-vertical::before { top: calc(50% - 16px); bottom: auto; height: 32px; background: #dcdcdc; border-radius: 2px; }
+.resizer-horizontal::before { left: calc(50% - 16px); right: auto; width: 32px; background: #dcdcdc; border-radius: 2px; }
+button:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+@media (max-width: 767px) {
+	.programming-workspace, .programming-workspace.lesson-workspace { height: 100dvh; min-height: 0; gap: 8px; }
+	.problem-pane { height: 30%; max-height: 30%; min-height: 100px; }
+	.code-column { flex: 1; min-height: 0; }
+	.problem-content { padding: 20px 16px; }
+	.problem-title { font-size: 21px; }
+}
+[data-theme="dark"] .programming-workspace { background: #171717; }
+[data-theme="dark"] .workspace-panel-heading, [data-theme="dark"] .test-panel-heading { background: #242424; color: #eee; }
+[data-theme="dark"] .problem-pane, [data-theme="dark"] .code-toolbar { border-color: #383838; }
+[data-theme="dark"] .problem-title, [data-theme="dark"] .test-panel-tab-active { color: #eee; }
+[data-theme="dark"] .test-case-value, [data-theme="dark"] .case-tab-active, [data-theme="dark"] .case-tab:hover { background: #303030; color: #eee; }
+</style>
+
+<style scoped>
+.problem-tabs { gap: 0; }
+.problem-tab { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: #888; white-space: nowrap; }
+.problem-tab + .problem-tab { margin-left: 10px; padding-left: 10px; border-left: 1px solid #e5e5e5; }
+.problem-tab.active { color: #262626; font-weight: 600; }
+.pane-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 5px; color: #888; }
+.pane-icon:hover { background: #eaeaea; color: #262626; }
+.problem-examples { margin-top: 40px; }
+.problem-example { padding: 12px 0; }
+.example-values { border-left: 2px solid #eee; padding-left: 16px; }
+.example-values .test-case-value { padding: 0; background: transparent; border-radius: 0; color: #777; }
+.editor-status { display: flex; justify-content: space-between; flex-shrink: 0; padding: 8px 12px; font-size: 12px; color: #aaa; }
+.code-toolbar :deep(select) { background-color: transparent; border-color: transparent; box-shadow: none; color: #777; }
+.programming-workspace.expand-problem .problem-pane { width: 100% !important; max-height: none; height: 100%; }
+.expand-problem .code-column, .expand-problem > .programming-resizer, .expand-code .problem-pane, .expand-code > .programming-resizer { display: none; }
+[data-theme="dark"] .problem-tab.active { color: #eee; }
+</style>
+
+<style scoped>
+.language-control { width: 120px; flex: 0 0 120px; }
+[data-theme="dark"] .problem-pane, [data-theme="dark"] .code-header, [data-theme="dark"] .code-pane, [data-theme="dark"] .test-pane { background: #1f1f1f; }
+
 </style>

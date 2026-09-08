@@ -124,3 +124,66 @@ class TestJudgeService(TestCase):
 		assert payload["source_code"] == "int main() {}"
 		assert payload["test_cases"] == [{"input": "1", "expected_output": "2", "hidden": False}]
 
+
+
+class TestPackageJudgeService(TestCase):
+	def make_doc(self):
+		return SimpleNamespace(
+			name="SUB-1", package_version="V1", config_digest="digest", attempt_id="attempt",
+			judge_request_id="REQ-1", status_version=0, event_id=None,
+			flags=SimpleNamespace(), set=Mock(), append=Mock(), save=Mock(), reload=Mock(),
+		)
+
+	def result(self, status="WRONG_ANSWER"):
+		return {"package_version": "V1", "config_digest": "digest", "attempt_id": "attempt",
+			"judge_request_id": "REQ-1", "status_version": 1, "event_id": "event",
+			"status": status, "score": 50, "compiler_message": "SECRET diagnostic",
+			"cases": [{"case_id": "secret/01", "status": "Wrong Answer", "stdout": "SECRET"}]}
+
+	@patch("lms.lms.judge_service.frappe.get_doc")
+	def test_strict_feedback_never_persists_secret_or_partial_score(self, get_doc):
+		get_doc.return_value = SimpleNamespace(cases='[{"case_id":"secret/01"}]')
+		doc = self.make_doc()
+		_apply_result(doc, self.result())
+		assert doc.score == 0
+		assert doc.compiler_message is None
+		doc.append.assert_not_called()
+		doc.set.assert_called_once_with("test_cases", [])
+
+	@patch("lms.lms.judge_service.frappe.get_doc")
+	def test_rejects_old_attempt_wrong_version_and_unknown_case(self, get_doc):
+		get_doc.return_value = SimpleNamespace(cases='[{"case_id":"secret/01"}]')
+		for key in ("attempt_id", "package_version", "config_digest", "judge_request_id"):
+			doc, result = self.make_doc(), self.result()
+			result[key] = "old"
+			with self.assertRaises(Exception):
+				_apply_result(doc, result)
+			doc.save.assert_not_called()
+		result = self.result()
+		result["cases"][0]["case_id"] = "other"
+		with self.assertRaises(Exception):
+			_apply_result(self.make_doc(), result)
+
+	@patch("lms.lms.judge_service.frappe.get_doc")
+	def test_accepted_requires_complete_results(self, get_doc):
+		get_doc.return_value = SimpleNamespace(cases='[{"case_id":"secret/01"}]')
+		result = self.result("ACCEPTED")
+		with self.assertRaises(Exception):
+			_apply_result(self.make_doc(), result)
+		result["cases"][0]["status"] = "Accepted"
+		doc = self.make_doc()
+		_apply_result(doc, result)
+		assert doc.score == 100
+
+	def test_payload_uses_stored_version_and_filters_public_run(self):
+		import json
+		from lms.lms.judge_service import _package_payload
+		config = dict(protocol_version="icpc-legacy-v1", comparison_mode="icpc_default", validator_flags=[],
+			scoring_mode="icpc", language="Python", time_limit_seconds=3, memory_limit_kb=131072)
+		cases = [dict(case_id="sample", input="1", expected_output="", hidden=False),
+			dict(case_id="secret", input="SECRET", expected_output="answer", hidden=True)]
+		version = SimpleNamespace(name="V1", config_digest="digest", judge_config=json.dumps(config), cases=json.dumps(cases))
+		assert len(_package_payload(version)["test_cases"]) == 2
+		public = _package_payload(version, public_only=True)
+		assert public["test_cases"] == cases[:1]
+		assert public["time_limit_seconds"] == 3

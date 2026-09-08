@@ -8,6 +8,9 @@ requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]
 dependencies = [
+    "PyYAML~=6.0",
+    "black~=25.1.0",
+    "clang-format~=19.1.7",
     # core dependencies
     "websocket_client~=1.6.4",
     "markdown~=3.5.1",

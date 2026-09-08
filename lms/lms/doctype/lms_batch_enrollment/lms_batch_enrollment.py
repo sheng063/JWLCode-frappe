@@ -16,6 +16,7 @@ from lms.lms.batch_enrollment_sync import (
 
 class LMSBatchEnrollment(Document):
 	def after_insert(self):
+		self.validate_course_enrollment()
 		send_confirmation_email(self)
 		self.add_member_to_live_class()
 
@@ -23,12 +24,14 @@ class LMSBatchEnrollment(Document):
 		remove_member_from_batch_courses(self.batch, self.member)
 
 	def validate(self):
+		previous = self.get_doc_before_save()
+		if previous and (previous.batch != self.batch or previous.member != self.member):
+			frappe.throw(_("Remove the existing batch enrollment before changing its student or batch."))
 		self.validate_owner()
 		self.validate_duplicate_members()
 		self.validate_payment()
 		self.validate_self_enrollment()
 		self.validate_seat_availability()
-		self.validate_course_enrollment()
 
 	def validate_owner(self):
 		if self.owner == self.member:

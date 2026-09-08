@@ -1,16 +1,19 @@
 <template>
 	<FormShell :title="title" size="4xl" @close="close">
 		<template #header-action>
+			<Badge v-if="exerciseDoc?.doc?.exercise_number">{{ exerciseDoc.doc.exercise_number }}</Badge>
 			<Badge v-if="isDirty && canManageExercise" theme="orange">
 				{{ __('Not Saved') }}
 			</Badge>
 		</template>
 		<template #default>
+			<ProblemPackageImport v-if="canManageExercise" :exercise="exerciseID" :active-version="exerciseDoc?.doc?.active_package_version" @published="packagePublished" />
+			<p v-if="exerciseDoc?.doc?.source_type === 'icpc'" class="p-4">{{ __('This exercise uses an immutable package. Import a new version to update it.') }}</p>
 			<div v-if="!canManageExercise" class="p-4 text-base text-ink-gray-6">
 				{{ __('You are not permitted to manage programming exercises.') }}
 			</div>
 			<div
-				v-else
+				v-else-if="exerciseDoc?.doc?.source_type !== 'icpc'"
 				data-testid="programming-exercise-fields"
 				class="grid grid-cols-1 sm:grid-cols-2 gap-10"
 			>
@@ -111,6 +114,7 @@
 					/>
 				</router-link>
 				<HeaderButton
+					v-if="exerciseDoc?.doc?.source_type !== 'icpc'"
 					data-testid="programming-exercise-save"
 					:label="__('Save')"
 					variant="solid"
@@ -137,9 +141,17 @@ import { ProgrammingExercise, TestCase } from '@/types'
 import ChildTable from '@/components/Controls/ChildTable.vue'
 import FormShell from '@/components/FormShell.vue'
 import HeaderButton from '@/components/HeaderButton.vue'
+import ProblemPackageImport from '@/components/ProblemPackageImport.vue'
 import RichTextEditor from '@/components/RichTextEditor.vue'
 import { useFormRoute } from '@/composables/useFormRoute'
 import { submitResource } from '@/utils/resource'
+
+const packagePublished = async (name: string) => {
+	await exercises.reload()
+	await exerciseCount.reload()
+	if (props.exerciseID === name) await exerciseDoc?.reload()
+	else close()
+}
 
 const user = inject<any>('$user')
 const problemStatementLabelId = useId()
@@ -174,7 +186,7 @@ const { close, saveAndReplace } = useFormRoute({ name: 'ProgrammingExercises' })
 const exercises = createListResource({
 	doctype: 'LMS Programming Exercise',
 	cache: ['programmingExercises'],
-	fields: ['name', 'title', 'problem_statement', 'modified'],
+	fields: ['name', 'exercise_number', 'title', 'modified'],
 	auto: true,
 	orderBy: 'modified desc',
 	pageLength: 24,
@@ -186,10 +198,8 @@ const exercises = createListResource({
 // because the filters live in the list page's refs; the list page always
 // constructs this first in the app, so its params are the ones that survive.
 const exerciseCount = createResource({
-	url: 'frappe.client.get_count',
-	params: {
-		doctype: 'LMS Programming Exercise',
-	},
+	url: 'lms.lms.api.get_programming_exercise_count',
+	params: { search: '' },
 	cache: ['programming_exercises_count', user.data?.name],
 })
 

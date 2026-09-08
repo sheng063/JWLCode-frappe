@@ -215,3 +215,19 @@ describe('ChapterRow locked lesson', () => {
 		expect(wrapper.emitted('select-lesson')).toBeUndefined()
 	})
 })
+
+it('passes the selected type when adding a lesson', async () => {
+	const wrapper = mountRow()
+	const disclosure = wrapper.find('button')
+	await disclosure.trigger('click')
+	const select = wrapper.find('select')
+	await select.setValue('Programming')
+	const add = wrapper
+		.findAll('button')
+		.find((button) => button.text().includes('Add Lesson'))!
+	await add.trigger('click')
+	expect(wrapper.emitted('create-lesson')?.[0]).toEqual([
+		{ chapter, lessonIdx: 2, lessonType: 'Programming' },
+	])
+	wrapper.unmount()
+})

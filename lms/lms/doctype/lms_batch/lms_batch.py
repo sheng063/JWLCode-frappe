@@ -14,9 +14,9 @@ from frappe.utils import add_days, cint, format_datetime, get_time, nowdate
 
 from lms.lms.batch_enrollment_sync import (
 	enroll_member_in_batch_courses,
+	remove_batch_course_enrollments,
 	remove_member_from_batch_courses,
 )
-
 from lms.lms.utils import (
 	format_timezone,
 	generate_slug,
@@ -50,6 +50,9 @@ class LMSBatch(Document):
 		if self.has_value_changed("published") and self.published:
 			frappe.enqueue(send_notification_for_published_batch, batch=self)
 
+	def on_trash(self):
+		remove_batch_course_enrollments(self.name)
+
 	def sync_course_enrollments(self):
 		"""Mirror changes to this batch's course table to its current students."""
 		if self.is_new():
@@ -66,6 +69,9 @@ class LMSBatch(Document):
 		if not added_courses and not removed_courses:
 			return
 
+		# Lock the full change set in one order, including replacements.
+		for course in sorted(added_courses | removed_courses):
+			frappe.db.get_value("LMS Course", course, "name", for_update=True)
 		members = frappe.get_all("LMS Batch Enrollment", {"batch": self.name}, pluck="member")
 		for member in members:
 			if added_courses:

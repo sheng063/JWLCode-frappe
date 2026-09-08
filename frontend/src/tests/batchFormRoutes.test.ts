@@ -52,6 +52,7 @@ describe('the batch-detail form routes', () => {
 	it.each([
 		['/batches/B1/certificates', 'BulkCertificates'],
 		['/batches/B1/live-class/new', 'NewLiveClass'],
+		['/batches/B1/live-class/LC1/edit', 'EditLiveClass'],
 		['/batches/B1/announcement/new', 'NewAnnouncement'],
 		['/batches/B1/course/new', 'NewBatchCourse'],
 		['/batches/B1/assessment/new', 'NewAssessment'],

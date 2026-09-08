@@ -7,6 +7,7 @@ const resourceState = vi.hoisted(() => ({
 	cache: new Map<string, any>(),
 	request: vi.fn(),
 	response: null as any,
+	attempts: [] as any[],
 }))
 
 vi.mock('frappe-ui', async () => {
@@ -38,6 +39,7 @@ vi.mock('frappe-ui', async () => {
 				options.onSuccess?.(raw)
 			}
 
+			if (options.url === 'frappe.client.get_list') resource.data = resourceState.attempts
 			resource.loading = false
 			return resource.data
 		})
@@ -129,9 +131,9 @@ const quizResponse = () => ({
 	},
 })
 
-const mountQuiz = () =>
+const mountQuiz = (autoStart = false) =>
 	mount(Quiz, {
-		props: { quizName: 'QUIZ-1' },
+		props: { quizName: 'QUIZ-1', autoStart },
 		global: {
 			provide: { $user: { data: { name: 'learner@example.com' } } },
 			mocks: { __: (value: string) => value },
@@ -142,6 +144,7 @@ beforeEach(() => {
 	resourceState.cache.clear()
 	resourceState.request.mockReset()
 	resourceState.response = quizResponse()
+	resourceState.attempts = []
 	localStorage.clear()
 })
 
@@ -182,5 +185,47 @@ describe('Quiz remount', () => {
 		expect(second.text()).toContain('Visible question body')
 		expect(resourceState.request).toHaveBeenCalledTimes(2)
 		second.unmount()
+	})
+})
+
+
+describe('inline lesson quizzes', () => {
+	it('opens the first question immediately and resets on quiz changes', async () => {
+		const wrapper = mountQuiz(true)
+		await flushPromises()
+		expect(wrapper.text()).toContain('Visible question body')
+		expect(wrapper.text()).not.toContain('Start Quiz')
+		resourceState.response.quiz.name = 'QUIZ-2'
+		resourceState.response.questions_by_name.Q1.question = 'Second quiz question'
+		await wrapper.setProps({ quizName: 'QUIZ-2' })
+		await flushPromises()
+		expect(wrapper.text()).toContain('Second quiz question')
+		wrapper.unmount()
+	})
+
+	it('respects the maximum attempt limit before auto-starting', async () => {
+		resourceState.response.quiz.max_attempts = 1
+		resourceState.attempts = [{ name: 'SUBMISSION-1' }]
+		const wrapper = mountQuiz(true)
+		await flushPromises()
+		expect(wrapper.text()).not.toContain('Visible question body')
+		expect(wrapper.text()).toContain("You've used all")
+		wrapper.unmount()
+	})
+
+	it('auto-starts after unused attempt limits resolve', async () => {
+		resourceState.response.quiz.max_attempts = 1
+		const wrapper = mountQuiz(true)
+		await flushPromises()
+		expect(wrapper.text()).toContain('Visible question body')
+		wrapper.unmount()
+	})
+
+	it('does not start an empty quiz', async () => {
+		resourceState.response.quiz.questions = []
+		const wrapper = mountQuiz(true)
+		await flushPromises()
+		expect(wrapper.text()).toContain('This quiz has no questions available yet.')
+		wrapper.unmount()
 	})
 })

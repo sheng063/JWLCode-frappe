@@ -316,7 +316,7 @@ const publishToggle = createResource({
 		const msg =
 			typeof err === 'string'
 				? err
-				: err.messages?.[0] ?? __('Could not update publish status')
+				: (err.messages?.[0] ?? __('Could not update publish status'))
 		toast.error(msg)
 	},
 }) as Resource<unknown>
@@ -364,6 +364,12 @@ const props = defineProps<{
 // file the new course's data under the course you arrived on.
 const course = createResource({
 	url: 'lms.lms.utils.get_course_details',
+	transform(data: CourseDetails | null) {
+		return data?.name ? data : null
+	},
+	onSuccess(data: CourseDetails | null) {
+		if (!data?.name) router.replace({ name: 'Courses' })
+	},
 	makeParams() {
 		return {
 			course: props.courseName,
@@ -413,17 +419,26 @@ watch(
 	}
 )
 
-watch(course, () => {
-	if (!isAdmin.value && !course.data?.published && !course.data?.upcoming) {
-		router.push({
-			name: 'Courses',
-		})
+watch(
+	() => course.data,
+	() => {
+		if (
+			!isAdmin.value &&
+			course.data?.name &&
+			!course.data?.membership &&
+			!course.data?.published &&
+			!course.data?.upcoming
+		) {
+			router.push({
+				name: 'Courses',
+			})
+		}
 	}
-})
+)
 
 const isInstructor = (): boolean => {
 	let user_is_instructor = false
-	course.data?.instructors.forEach((instructor: CourseInstructorInfo) => {
+	course.data?.instructors?.forEach((instructor: CourseInstructorInfo) => {
 		if (!user_is_instructor && instructor.name == user.data?.name) {
 			user_is_instructor = true
 		}

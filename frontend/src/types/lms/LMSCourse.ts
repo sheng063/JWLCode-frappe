@@ -3,6 +3,7 @@ import { CourseInstructor } from './CourseInstructor'
 import { RelatedCourses } from './RelatedCourses'
 
 export interface LMSCourse {
+	is_public?: 0 | 1 | boolean
 	creation: string
 	name: string
 	modified: string
