@@ -26,7 +26,9 @@ def can_view_course(course, user=None):
 def has_permission(doc, ptype="read", user=None):
 	if ptype in ("read", "select", "print", "export"):
 		return can_view_course(doc.name, user)
-	return None
+	# Hooks can only deny permissions. Return True to preserve DocPerm checks;
+	# Frappe treats None as a denial too.
+	return True
 
 
 def get_permission_query_conditions(user=None):

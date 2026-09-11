@@ -151,6 +151,8 @@ vi.mock('@/components/Controls/ChildTable.vue', () => ({
 	}),
 }))
 
+import { call } from 'frappe-ui'
+import ProblemPackageImport from '@/components/ProblemPackageImport.vue'
 import ProgrammingExerciseForm from '@/pages/Forms/ProgrammingExerciseForm.vue'
 
 // The list page hosts the form as a child route, so the parent stub has to
@@ -216,7 +218,7 @@ const student = {
 
 // Every field the exercise form is meant to collect. Pin the set: a field lost
 // in the modal→route move is otherwise invisible to the rest of the suite.
-const FIELD_LABELS = ['Title', 'Test Cases', 'Problem Statement']
+const FIELD_LABELS = ['Title', 'Public samples', 'Problem Statement']
 
 describe('ProgrammingExerciseForm as a route', () => {
 	beforeEach(() => {
@@ -374,16 +376,31 @@ describe('ProgrammingExerciseForm as a route', () => {
 		expect(testCasesReload).not.toHaveBeenCalled()
 	})
 
-	it('loads editable hidden test cases only after the exercise exists', async () => {
+	it('keeps hidden cases collapsed and offers complete ZIP transfer', async () => {
 		const router = makeRouter()
 		await router.push('/programming-exercises/edit/EX-0001')
 		const wrapper = await mountForm(router, moderator)
 
-		expect(hiddenTestCasesUpdate).toHaveBeenCalledWith({
-			filters: { exercise: 'EX-0001' },
-		})
-		expect(hiddenTestCasesReload).toHaveBeenCalledTimes(1)
-		expect(wrapper.find('[data-testid="hidden-test-cases"]').exists()).toBe(true)
+		expect(call).toHaveBeenCalledWith(expect.stringContaining('hidden_case_count'), { exercise: 'EX-0001' })
+		const hidden = wrapper.get('[data-testid="hidden-test-cases"]')
+		expect(hidden.attributes('open')).toBeUndefined()
+		expect(hidden.get('a').attributes('href')).toContain('download_hidden_cases?exercise=EX-0001')
+		expect(hidden.get('input[type=file]').attributes('accept')).toBe('.zip')
+	})
+
+	it('opens an ICPC exercise as an editor and uploads against its existing ID and version', async () => {
+		createDocumentResourceMock.mockImplementation(documentResourceStub({ name: 'EX-0001', title: 'T',
+			problem_statement: '<p>Statement</p>', source_type: 'icpc', active_package_version: 'V1', exercise_number: 'P-000042' }))
+		const router = makeRouter()
+		await router.push('/programming-exercises/edit/EX-0001')
+		const wrapper = await mountForm(router, moderator)
+		expect(wrapper.findComponent(ProblemPackageImport).exists()).toBe(false)
+		expect(wrapper.find('[data-testid=programming-exercise-fields]').exists()).toBe(true)
+		expect(wrapper.find('[data-testid=programming-exercise-save]').exists()).toBe(true)
+		const upload = wrapper.get('[data-testid=programming-exercise-upload]')
+		expect(upload.element.nextElementSibling?.getAttribute('data-testid')).toBe('programming-exercise-delete')
+		await upload.trigger('click')
+		expect(wrapper.getComponent(ProblemPackageImport).props()).toMatchObject({ exercise: 'EX-0001', activeVersion: 'V1' })
 	})
 
 	it('scopes its list resource to the SAME cache key ProgrammingExercises.vue uses', async () => {
@@ -418,7 +435,7 @@ describe('ProgrammingExerciseForm as a route', () => {
 		expect(setValueSubmit).not.toHaveBeenCalled()
 	})
 
-	it('updates through its own resource in edit mode and refreshes the count', async () => {
+	it('saves through the version-aware endpoint and refreshes the list', async () => {
 		createDocumentResourceMock.mockImplementation(
 			documentResourceStub({ name: 'EX-0001', title: 'T', language: 'Python' })
 		)
@@ -432,8 +449,8 @@ describe('ProgrammingExerciseForm as a route', () => {
 		await wrapper
 			.find('[data-testid="programming-exercise-save"]')
 			.trigger('click')
-		expect(setValueSubmit).toHaveBeenCalledTimes(1)
-		expect(setValueSubmit.mock.calls[0][0]).toMatchObject({ name: 'EX-0001' })
+		await flushPromises()
+		expect(call).toHaveBeenCalledWith(expect.stringContaining('save_exercise'), expect.objectContaining({ exercise: 'EX-0001', title: 'T' }))
 		expect(exercisesReload).toHaveBeenCalledTimes(1)
 	})
 

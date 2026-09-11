@@ -69,9 +69,18 @@ class TestReadBundle(TestCase):
 			with self.subTest(manifest=manifest), self.assertRaises(PackageError):
 				bulk_import.read_bundle(bundle({"p001.zip": b"x", "manifest.json": json.dumps(manifest)}))
 
-	def test_enforces_package_count(self):
+	def test_accepts_large_bundles_with_and_without_manifest(self):
+		for count in (51, 2001):
+			for with_manifest in (False, True):
+				with self.subTest(count=count, manifest=with_manifest):
+					files = {f"p{i:04}.zip": b"x" for i in range(count)}
+					if with_manifest:
+						files["manifest.json"] = json.dumps([{"file": path} for path in files])
+					self.assertEqual(len(bulk_import.read_bundle(bundle(files))), count)
+
+	def test_rejects_empty_bundle(self):
 		with self.assertRaises(PackageError):
-			bulk_import.read_bundle(bundle({f"p{i:03}.zip": b"x" for i in range(51)}))
+			bulk_import.read_bundle(bundle({}))
 
 	@patch.object(bulk_import, "_", lambda text: text)
 	@patch.object(bulk_import, "_enabled")
@@ -86,3 +95,9 @@ class TestReadBundle(TestCase):
 			with self.assertRaises(PermissionError):
 				bulk_import.create_bulk_import("FILE")
 			file.get_content.assert_not_called()
+
+	def test_ignores_macos_metadata_in_bundle(self):
+		self.assertEqual(bulk_import.read_bundle(bundle({
+			"p001.zip": b"package", "__MACOSX/._p001.zip": b"metadata",
+			".DS_Store": b"metadata", "._p001.zip": b"metadata",
+		})), [("p001.zip", b"package", {})])

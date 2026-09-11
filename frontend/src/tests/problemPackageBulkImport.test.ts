@@ -41,6 +41,39 @@ describe('bulk problem package import', () => {
 		expect(wrapper.text()).toContain('2 / 2')
 		wrapper.unmount()
 	})
+	it('imports more than 50 packages and updates progress', async () => {
+		call.mockImplementation(async (method, args) => method.endsWith('create_bulk_import') ? {
+			imports: Array.from({ length: 51 }, (_, index) => ({ name: `I${index}`, filename: `p${index}.zip`, options: { time_limit_seconds: 2 } })),
+		} : responses(method, args))
+		const wrapper = mount(ProblemPackageBulkImport, { global: { mocks: { __: translate } } })
+		await upload(wrapper)
+		expect(wrapper.text()).toContain('There is no problem count limit.')
+		expect(wrapper.get('progress').attributes('max')).toBe('51')
+		await wrapper.get('button').trigger('click'); await flushPromises()
+		expect(wrapper.emitted('published')).toHaveLength(51)
+		expect(wrapper.get('progress').attributes('value')).toBe('51')
+		wrapper.unmount()
+	})
+	it('defaults to 2 seconds and 128 MiB without a language selector and renders TeX', async () => {
+		call.mockImplementation(async (method, args) => {
+			if (method.endsWith('create_bulk_import')) return { imports: [{ name: 'I1', filename: 'p001.zip', options: {} }] }
+			if (method.endsWith('get_import')) return { name: 'I1', status: 'Ready', statements: ['problem_statement/problem.tex'] }
+			if (method.endsWith('get_statement_source')) return { source: String.raw`\begin{document}\section{题目描述} 计算 $a+b$\end{document}` }
+			return responses(method, args)
+		})
+		const wrapper = mount(ProblemPackageBulkImport, { global: { mocks: { __: translate } } })
+		await upload(wrapper)
+		expect(wrapper.findAll('select')).toHaveLength(0)
+		const inputs = wrapper.findAll('input[type=number]')
+		expect((inputs[0].element as HTMLInputElement).value).toBe('2')
+		expect((inputs[1].element as HTMLInputElement).value).toBe('128')
+		expect(wrapper.get('.statement-line').text()).toContain('题目描述')
+		expect(wrapper.get('.statement-line').classes()).toContain('whitespace-nowrap')
+		expect(wrapper.find('.katex').exists()).toBe(true)
+		await wrapper.get('button').trigger('click'); await flushPromises()
+		expect(call).toHaveBeenCalledWith(expect.stringContaining('commit_import'), expect.objectContaining({ options: expect.objectContaining({ time_limit_seconds: 2, memory_limit_kb: 131072, language: 'C++' }) }))
+		wrapper.unmount()
+	})
 	it('retains a failed draft and retries only the failed publication', async () => {
 		let failed = true
 		call.mockImplementation(async (method, args) => {

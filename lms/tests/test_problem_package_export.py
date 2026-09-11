@@ -151,3 +151,21 @@ class TestPackageExport(TestCase):
 		with self.assertRaises(ValueError):
 			export.export_exercises(["EX1"])
 		self.assertFalse(hasattr(self.response, "filecontent"))
+
+	@patch.object(export, "_content")
+	def test_tex_preferred_and_macos_metadata_omitted(self, content):
+		original, files = fixture_package()
+		out = io.BytesIO(original)
+		tex = b"\\section{Example} $a+b$"
+		with zipfile.ZipFile(out, "a") as archive:
+			archive.writestr("example/problem_statement/problem.en.tex", tex)
+			archive.writestr("__MACOSX/._example", b"metadata")
+			archive.writestr("example/.DS_Store", b"metadata")
+		content.return_value = out.getvalue()
+		export.export_exercises(["EX1"])
+		with zipfile.ZipFile(io.BytesIO(self.response.filecontent)) as bundle:
+			manifest = json.loads(bundle.read("manifest.json"))[0]
+			self.assertEqual(manifest["statement_path"], "problem_statement/problem.en.tex")
+			with zipfile.ZipFile(io.BytesIO(bundle.read(manifest["file"]))) as package:
+				self.assertFalse(any(export.is_macos_metadata(p) for p in package.namelist()))
+				self.assertEqual(package.read(manifest["file"][:-4] + "/problem_statement/problem.en.tex"), tex)

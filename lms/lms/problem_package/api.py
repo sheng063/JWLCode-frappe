@@ -4,6 +4,7 @@ import hashlib
 import html
 import json
 import math
+import re
 
 import frappe
 import requests
@@ -217,7 +218,7 @@ def commit_import(import_id: str, expected_target_version: str = "", options: di
 	language = options.get("language")
 	statement = options.get("statement_path")
 	if language not in {"Python", "C++"} or statement not in report["statements"]:
-		frappe.throw("Choose a supported language and PDF statement.")
+		frappe.throw("Choose a supported language and PDF or TeX statement.")
 	config = {
 		"protocol_version": PROTOCOL,
 		"comparison_mode": "icpc_default",
@@ -304,9 +305,24 @@ def publish_version(version_id: str):
 	metadata = json.loads(version.metadata)
 	exercise.title = metadata.get("name") or exercise.title or "Imported programming exercise"
 	url = "/api/method/lms.lms.problem_package.api.download_statement?version_id=" + version.name
+	statement_format = "TeX" if version.statement_path.endswith(".tex") else "PDF"
 	exercise.problem_statement = (
-		f'<p><a href="{html.escape(url, quote=True)}" target="_blank">Download PDF statement</a></p>'
+		f'<p><a href="{html.escape(url, quote=True)}" target="_blank" rel="noopener">Download {statement_format} statement</a></p>'
 	)
+	if statement_format == "TeX":
+		files = read_archive(_content(frappe.get_doc(IMPORT, version.import_record)))
+		path = version.statement_path
+		if path not in files:
+			path = next(iter(files)).split("/")[0] + "/" + path
+		exercise.problem_statement += "<pre>" + html.escape(files[path].decode("utf-8-sig")) + "</pre>"
+	if statement_format == "PDF":
+		files = read_archive(_content(frappe.get_doc(IMPORT, version.import_record)))
+		root = "" if "problem.yaml" in files else next(iter(files)).split("/")[0] + "/"
+		if root + "lms/statement.html" in files:
+			exercise.problem_statement = re.sub(
+				r"/api/method/lms\.lms\.problem_package\.api\.download_statement\?version_id=[^\"'<>\s&]+",
+				url, files[root + "lms/statement.html"].decode("utf-8"),
+			)
 	exercise.set(
 		"test_cases",
 		[{"input": c["input"], "expected_output": c["expected_output"]} for c in cases if not c["hidden"]],
@@ -331,7 +347,9 @@ def download_statement(version_id: str):
 	if path not in files:
 		root = next(iter(files)).split("/")[0]
 		path = root + "/" + path
-	frappe.local.response.filename = "statement.pdf"
+	is_tex = path.endswith(".tex")
+	frappe.local.response.filename = "statement.tex" if is_tex else "statement.pdf"
+	frappe.local.response.content_type = "text/plain; charset=utf-8" if is_tex else "application/pdf"
 	frappe.local.response.filecontent = files[path]
 	frappe.local.response.type = "download"
 	frappe.local.response.display_content_as = "attachment"
@@ -342,12 +360,29 @@ def preview_statement(import_id: str, statement_path: str):
 	doc = _owned(import_id)
 	report = json.loads(doc.report or "{}")
 	if statement_path not in report.get("statements", []):
-		frappe.throw("Choose an available PDF statement.")
+		frappe.throw("Choose an available PDF or TeX statement.")
 	files = read_archive(_content(doc))
 	path = (
 		statement_path if statement_path in files else next(iter(files)).split("/")[0] + "/" + statement_path
 	)
-	frappe.local.response.filename = "statement.pdf"
+	is_tex = path.endswith(".tex")
+	frappe.local.response.filename = "statement.tex" if is_tex else "statement.pdf"
+	frappe.local.response.content_type = "text/plain; charset=utf-8" if is_tex else "application/pdf"
 	frappe.local.response.filecontent = files[path]
 	frappe.local.response.type = "download"
-	frappe.local.response.display_content_as = "attachment"
+	frappe.local.response.display_content_as = "inline" if is_tex else "attachment"
+
+
+@frappe.whitelist()
+def get_statement_source(import_id: str, statement_path: str):
+	"""Return only an owned, preflight-approved TeX statement for display."""
+	doc = _owned(import_id)
+	report = json.loads(doc.report or "{}")
+	if not statement_path.endswith(".tex") or statement_path not in report.get("statements", []):
+		frappe.throw("Choose an available TeX statement.")
+	files = read_archive(_content(doc))
+	path = statement_path
+	if path not in files:
+		path = next(iter(files)).split("/")[0] + "/" + path
+	# A single-line preview does not need an unbounded document response.
+	return {"source": files[path].decode("utf-8-sig")[:32000]}

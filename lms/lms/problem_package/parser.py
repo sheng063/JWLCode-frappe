@@ -21,7 +21,7 @@ class Limits:
 	archive_bytes: int = 20 * 1024 * 1024
 	total_bytes: int = 128 * 1024 * 1024
 	file_bytes: int = 16 * 1024 * 1024
-	files: int = 2000
+	files: int | None = 2000
 	ratio: int | None = None
 	cases: int = 100
 	text_chars: int = 16 * 1024 * 1024
@@ -53,6 +53,11 @@ class StrictLoader(yaml.SafeLoader):
 		return result
 
 
+def is_macos_metadata(path):
+	parts = path.rstrip("/").split("/")
+	return "__MACOSX" in parts or parts[-1] == ".DS_Store" or parts[-1].startswith("._")
+
+
 def read_archive(content, limits=DEFAULT_LIMITS):
 	if len(content) > limits.archive_bytes:
 		raise PackageError("Archive exceeds upload capacity")
@@ -60,7 +65,7 @@ def read_archive(content, limits=DEFAULT_LIMITS):
 	try:
 		with zipfile.ZipFile(io.BytesIO(content)) as archive:
 			entries = archive.infolist()
-			if len(entries) > limits.files:
+			if limits.files is not None and len(entries) > limits.files:
 				raise PackageError("Archive has too many entries")
 			for entry in entries:
 				path = entry.filename.rstrip("/")
@@ -91,6 +96,8 @@ def read_archive(content, limits=DEFAULT_LIMITS):
 					or (limits.ratio is not None and entry.file_size > max(1, entry.compress_size) * limits.ratio)
 				):
 					raise PackageError(f"Archive capacity exceeded: {path}")
+				if is_macos_metadata(path):
+					continue
 				with archive.open(entry) as stream:
 					data = stream.read(limits.file_bytes + 1)
 				if len(data) != entry.file_size:
@@ -190,8 +197,21 @@ def preflight(content, *, allow_flat=False, limits=DEFAULT_LIMITS):
 	pdfs = [p for p in statements if p.endswith(".pdf") and files[p].startswith(b"%PDF-")]
 	if not statements:
 		errors.append("Missing problem statement")
-	if not pdfs:
-		errors.append("A PDF statement is required; isolated TeX conversion is not available")
+	texs = []
+	for path in statements:
+		if not path.endswith(".tex"):
+			continue
+		try:
+			text = files[path].decode("utf-8-sig")
+		except UnicodeError:
+			errors.append(f"TeX statement must be UTF-8: {path}")
+			continue
+		if not text.strip() or "\x00" in text:
+			errors.append(f"Empty or invalid TeX statement: {path}")
+		else:
+			texs.append(path)
+	if not pdfs and not texs:
+		errors.append("A valid PDF or UTF-8 TeX statement is required")
 	cases = []
 	for path in sorted(files):
 		if PurePosixPath(path).name == "testdata.yaml":
@@ -251,7 +271,7 @@ def preflight(content, *, allow_flat=False, limits=DEFAULT_LIMITS):
 		"metadata": metadata,
 		"manifest": manifest,
 		"cases": cases,
-		"statements": pdfs,
+		"statements": texs + pdfs,
 		"title": metadata.get("name") or "Imported programming exercise",
 		"errors": errors,
 		"warnings": warnings,

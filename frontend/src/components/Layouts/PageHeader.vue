@@ -2,7 +2,14 @@
 	<SkeletonLoader v-if="loading" variant="header" />
 	<header v-else class="header-frame sticky top-0 z-10 justify-between">
 		<div class="flex min-w-0 flex-1 items-center gap-2">
-			<template v-if="isMobile">
+			<nav v-if="fullBreadcrumbs" :aria-label="__('Breadcrumbs')" class="flex min-w-0 flex-wrap items-center gap-1 py-2">
+				<template v-for="(item, index) in breadcrumbs" :key="index">
+					<span v-if="index" class="text-ink-gray-4" aria-hidden="true">/</span>
+					<router-link v-if="item.route" :to="item.route" class="break-words text-ink-gray-7 hover:underline">{{ item.label }}</router-link>
+					<span v-else class="break-words text-ink-gray-9" :aria-current="index === breadcrumbs.length - 1 ? 'page' : undefined">{{ item.label }}</span>
+				</template>
+			</nav>
+			<template v-else-if="isMobile">
 				<router-link
 					v-if="backTo"
 					:to="backTo"
@@ -39,6 +46,7 @@ const props = withDefaults(
 		breadcrumbs: Breadcrumb[]
 		published?: boolean
 		loading?: boolean
+		fullBreadcrumbs?: boolean
 	}>(),
 	{ published: false, loading: false }
 )

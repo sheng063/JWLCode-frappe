@@ -187,3 +187,64 @@ class TestPackageJudgeService(TestCase):
 		public = _package_payload(version, public_only=True)
 		assert public["test_cases"] == cases[:1]
 		assert public["time_limit_seconds"] == 3
+
+
+class TestSubmissionLanguages(TestCase):
+	def test_run_and_dispatch_use_selected_language_and_baseline_limits(self):
+		import json
+		from lms.lms import judge_service as service
+
+		for packaged in (False, True):
+			for language, multiplier in (("C++", 1), ("Python", 2)):
+				with self.subTest(packaged=packaged, language=language):
+					exercise = Mock(time_limit_seconds=2.5, memory_limit_kb=128000,
+						active_package_version="V1" if packaged else None,
+						test_cases=[SimpleNamespace(input="1", expected_output="2")])
+					version = SimpleNamespace(name="V1", config_digest="digest",
+						judge_config=json.dumps(dict(protocol_version="icpc-legacy-v1",
+							comparison_mode="icpc_default", validator_flags=[], scoring_mode="icpc",
+							language="C++", time_limit_seconds=3.5, memory_limit_kb=131072)),
+						cases=json.dumps([dict(case_id="sample", input="1", expected_output="2", hidden=False)]))
+					doc = Mock(status="Queued", language=language, code="source", exercise="EX-1",
+						client_request_id="request-1", attempt_id="attempt")
+					doc.name = "SUB-1"
+					doc.get.side_effect = lambda key: "V1" if key == "package_version" and packaged else None
+					settings = SimpleNamespace(service_url="http://judge", request_timeout_seconds=15,
+						callback_url="http://callback", get_password=lambda _: "token")
+					def get_doc(doctype, name):
+						return {"LMS Programming Exercise": exercise, "LMS Problem Package Version": version,
+							"LMS Programming Exercise Submission": doc}[doctype]
+					with patch.object(service, "_validate_submission_access"), \
+						patch.object(service, "_get_settings", return_value=settings), \
+						patch.object(service, "_test_cases", return_value=[{"input": "1", "expected_output": "2"}]), \
+						patch.object(service.frappe, "get_doc", side_effect=get_doc), \
+						patch.object(service.frappe.db, "set_value"), \
+						patch("lms.lms.problem_package.api.require_capability"), \
+						patch.object(service.requests, "post") as post:
+						post.return_value.json.return_value = {"judge_request_id": "REQ-1", "status": "QUEUED"}
+						service.run_programming_exercise("EX-1", "source", language)
+						service.dispatch_submission("SUB-1")
+						self.assertEqual(post.call_count, 2)
+						for call in post.call_args_list:
+							payload = call.kwargs["json"]
+							self.assertEqual(payload["language"], language)
+							self.assertEqual(payload["time_limit_seconds"], (3.5 if packaged else 2.5) * multiplier)
+							self.assertEqual(payload["memory_limit_kb"], 131072 if packaged else 128000)
+
+	def test_package_accepts_submissions_in_both_languages(self):
+		from lms.lms import judge_service as service
+
+		for language in ("C++", "Python"):
+			with self.subTest(language=language):
+				doc = Mock(flags=SimpleNamespace())
+				exercise = Mock()
+				exercise.get.return_value = "V1"
+				version = SimpleNamespace(config_digest="digest", cases='[{}]', judge_config='{"language":"C++"}')
+				with patch.object(service, "_validate_submission_access"), \
+					patch.object(service.frappe.db, "get_value", return_value=None), \
+					patch.object(service.frappe, "new_doc", return_value=doc), \
+					patch.object(service.frappe, "get_doc", side_effect=[exercise, version]), \
+					patch.object(service.frappe, "enqueue"):
+					service.submit_programming_exercise("EX-1", "source", "request-123", language)
+					self.assertEqual(doc.language, language)
+					doc.save.assert_called_once()

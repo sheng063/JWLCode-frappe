@@ -9949,8 +9949,8 @@ msgid "Bulk Import"
 msgstr "批量导入"
 
 #: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
-msgid "Upload the ZIP from Bulk Export, containing one ZIP per problem. Up to 50 problems and 100 MiB; your site upload limit also applies."
-msgstr "上传批量导出的 ZIP 合集，内部每道题为一个独立 ZIP。最多 50 道题、总大小 100 MiB，同时受站点上传大小限制。"
+msgid "Upload a ZIP containing one ZIP or KPP per problem at the root. There is no problem count limit."
+msgstr "上传 ZIP 合集，每道题的 ZIP 或 KPP 题包直接放在根目录。题目数量不限。"
 
 #: frontend/src/components/ProblemPackageBulkImport.vue frontend/src/components/ProblemPackageImport.vue lms/lms/problem_package/bulk_import.py
 msgid "Review execution limits before importing. Existing exercises are not overwritten; identical imports may be reused. Programs are not executed during preflight."
@@ -10193,3 +10193,68 @@ msgstr "请选择一个班级。"
 
 msgid "You do not have permission to view this batch."
 msgstr "你没有查看此班级的权限。"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue
+msgid "Upload problem bundle"
+msgstr "上传题包合集"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue
+msgid "Bundle: up to 100 MiB. Each problem: up to 20 MiB. Your site upload limit also applies."
+msgstr "合集最大 100 MiB，单题最大 20 MiB，同时受站点上传大小限制。"
+
+#: frontend/src/components/ProblemPackageBulkImport.vue
+msgid "Processing packages…"
+msgstr "正在处理题包…"
+
+#: frontend/src/components/ProblemPackageImport.vue
+msgid "Preview TeX source"
+msgstr "预览 TeX 源码"
+
+msgid "Loading statement…"
+msgstr "正在加载题面…"
+
+msgid "Memory limit (MiB)"
+msgstr "内存限制（MiB）"
+
+
+msgid "Upload problem"
+msgstr "上传题目"
+
+
+msgid "TeX source"
+msgstr "TeX 源码"
+
+
+msgid "Download all hidden cases"
+msgstr "下载全部隐藏用例"
+
+
+msgid "Upload hidden cases"
+msgstr "上传隐藏用例"
+
+
+msgid "Uploading hidden cases"
+msgstr "正在上传隐藏用例"
+
+
+msgid "Hidden cases replaced successfully"
+msgstr "隐藏用例已全部替换"
+
+
+msgid "Upload a ZIP of paired .in and .ans files. This replaces all existing hidden cases immediately."
+msgstr "上传包含配对 .in 输入文件和 .ans 答案文件的 ZIP 压缩包。上传成功后将立即覆盖现有全部隐藏用例。"
+
+
+msgid "Upload a package to replace this exercise. Its ID and exercise number are preserved."
+msgstr "上传题包以覆盖当前题目，原题目 ID 和编号保持不变。"
+
+
+msgid "Replace this exercise"
+msgstr "覆盖当前题目"
+
+
+msgid "Exercise changed. Refresh before saving."
+msgstr "题目已发生变化，请刷新后再保存。"
+
+msgid "Preview limited to 2000 characters per field. Download for complete data."
+msgstr "每个字段最多预览 2000 个字符，完整数据请下载查看。"

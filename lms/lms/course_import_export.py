@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import re
@@ -12,6 +13,7 @@ from frappe import _
 from frappe.utils import escape_html, validate_email_address
 from frappe.utils.file_manager import is_safe_path
 
+from lms.lms.lesson_type import resolve_lesson_type
 from lms.lms.utils import create_user as create_lms_user
 from lms.lms.utils import get_editorjs_blocks
 
@@ -62,7 +64,7 @@ def get_assessment_from_block(block):
 	data_field = "exercise" if block_type == "program" else block_type
 	name = block.get("data", {}).get(data_field)
 	doctype = get_assessment_map().get(block_type)
-	if frappe.db.exists(doctype, name):
+	if doctype and name and frappe.db.exists(doctype, name):
 		return frappe.get_doc(doctype, name)
 	return None
 
@@ -85,12 +87,12 @@ def get_exercise_test_cases(doc):
 
 def get_assessments_from_lesson(lesson):
 	assessments, questions, test_cases = [], [], []
-	for block in get_editorjs_blocks(lesson.content):
+	for block in get_editorjs_blocks(lesson.content) + get_editorjs_blocks(lesson.get("instructor_content")):
 		if block.get("type") not in ("quiz", "assignment", "program"):
 			continue
 		doc = get_assessment_from_block(block)
 		if not doc:
-			continue
+			frappe.throw(_("Lesson {0} references a missing assessment.").format(lesson.name))
 		assessments.append(doc.as_dict())
 		if doc.doctype == "LMS Quiz":
 			questions.extend(get_quiz_questions(doc))
@@ -106,7 +108,9 @@ def get_course_assessments(lessons):
 		assessments.extend(lesson_assessments)
 		questions.extend(lesson_questions)
 		test_cases.extend(lesson_test_cases)
-	return assessments, questions, test_cases
+	return tuple(
+		list({row["name"]: row for row in rows}.values()) for rows in (assessments, questions, test_cases)
+	)
 
 
 def get_course_instructors(course):
@@ -136,7 +140,9 @@ def get_course_assets(course, lessons, instructors, evaluator):
 	if course.image:
 		assets.append(course.image)
 	for lesson in lessons:
-		for block in get_editorjs_blocks(lesson.content):
+		for block in get_editorjs_blocks(lesson.content) + get_editorjs_blocks(
+			lesson.get("instructor_content")
+		):
 			if block.get("type") == "upload":
 				url = block.get("data", {}).get("file_url")
 				assets.append(url)
@@ -201,6 +207,9 @@ def build_course_zip(
 	tmp_path, course, chapters, lessons, assets, assessments, questions, test_cases, instructors, evaluator
 ):
 	with zipfile.ZipFile(tmp_path, "w", compression=zipfile.ZIP_DEFLATED) as zip_file:
+		from lms.lms.course_bundle import write_programming_packages
+
+		write_programming_packages(zip_file, assessments)
 		write_course_json(zip_file, course)
 		write_chapters_json(zip_file, chapters)
 		write_lessons_json(zip_file, lessons)
@@ -218,48 +227,70 @@ def write_chapters_json(zip_file, chapters):
 	for chapter in chapters:
 		chapter_data = chapter.as_dict()
 		chapter_json = frappe_json_dumps(chapter_data)
-		safe_name = sanitize_string(chapter.name)
+		safe_name = hashlib.sha256(chapter.name.encode()).hexdigest()
 		zip_file.writestr(f"chapters/{safe_name}.json", chapter_json)
 
 
 def write_lessons_json(zip_file, lessons):
 	for lesson in lessons:
 		lesson_data = lesson.as_dict()
+		lesson_data["lesson_type"] = export_lesson_type(lesson_data)
 		lesson_json = frappe_json_dumps(lesson_data)
-		safe_name = sanitize_string(lesson.name)
+		safe_name = hashlib.sha256(lesson.name.encode()).hexdigest()
 		zip_file.writestr(f"lessons/{safe_name}.json", lesson_json)
+
+
+def export_lesson_type(data):
+	# Historical lessons may still be labelled Text despite containing only programs.
+	blocks = get_editorjs_blocks(data.get("content"))
+	kind = "Programming" if any(b.get("type") == "program" for b in blocks) else data.get("lesson_type")
+	try:
+		return resolve_lesson_type(
+			blocks,
+			kind,
+			body=data.get("body"),
+			youtube=data.get("youtube"),
+			quiz_id=data.get("quiz_id"),
+			question=data.get("question"),
+			raw_content=data.get("content"),
+		)
+	except ValueError as exc:
+		frappe.throw(str(exc))
 
 
 def write_assessments_json(zip_file, assessments, questions, test_cases):
 	for question in questions:
 		question_json = frappe_json_dumps(question)
-		safe_name = sanitize_string(question["name"])
+		safe_name = hashlib.sha256(question["name"].encode()).hexdigest()
 		zip_file.writestr(f"assessments/questions/{safe_name}.json", question_json)
 
 	for test_case in test_cases:
 		test_case_json = frappe_json_dumps(test_case)
-		safe_name = sanitize_string(test_case["name"])
+		safe_name = hashlib.sha256(test_case["name"].encode()).hexdigest()
 		zip_file.writestr(f"assessments/test_cases/{safe_name}.json", test_case_json)
 
 	for assessment in assessments:
 		assessment_json = frappe_json_dumps(assessment)
 		doctype = "_".join(assessment["doctype"].lower().split(" "))
-		safe_name = "_".join(sanitize_string(assessment["name"]).split(" "))
+		safe_name = hashlib.sha256(assessment["name"].encode()).hexdigest()
 		zip_file.writestr(f"assessments/{doctype}_{safe_name}.json", assessment_json)
 
 
 def write_assets(zip_file, assets):
-	assets = list(set(assets))
-	for asset in assets:
-		real_path = frappe.get_site_path(asset.lstrip("/"))
-		if not asset or not isinstance(asset, str) or not is_safe_path(real_path):
+	manifest = []
+	for asset in dict.fromkeys(assets):
+		if not isinstance(asset, str) or not asset.startswith(("/files/", "/private/files/")):
 			continue
-
 		file_doc = frappe.get_doc("File", {"file_url": asset})
 		file_path = os.path.abspath(file_doc.get_full_path())
-
-		safe_filename = sanitize_string(os.path.basename(asset))
-		zip_file.write(file_path, f"assets/{safe_filename}")
+		if not is_safe_path(file_path):
+			frappe.throw(_("Unsafe asset path detected."))
+		path = "assets/" + hashlib.sha256(asset.encode()).hexdigest() + "/" + os.path.basename(asset)
+		zip_file.write(file_path, path)
+		manifest.append(
+			{"url": asset, "file": path, "file_name": file_doc.file_name, "is_private": file_doc.is_private}
+		)
+	zip_file.writestr("assets.json", frappe_json_dumps(manifest))
 
 
 def move_zip_to_private(tmp_path, zip_filename):
@@ -328,27 +359,14 @@ def frappe_json_dumps(data):
 
 
 def import_course_zip(zip_file_path):
-	zip_file_path = zip_file_path.lstrip("/")
-	actual_path = frappe.get_site_path(zip_file_path)
-	validate_zip_file(actual_path)
+	from lms.lms.course_bundle import import_bundle
 
-	with zipfile.ZipFile(actual_path, "r") as zip_file:
-		course_data = read_json_from_zip(zip_file, "course.json")
-		if not course_data:
-			frappe.throw(_("Invalid course ZIP: Missing course.json"))
-
-		create_assets(zip_file)
-		create_user_for_instructors(zip_file)
-		create_evaluator(zip_file)
-		course_doc = create_course_doc(course_data)
-		chapter_docs = create_chapter_docs(zip_file, course_doc.name)
-		create_assessment_docs(zip_file)
-		create_lesson_docs(zip_file, course_doc.name, chapter_docs)
-		save_course_structure(zip_file, course_doc, chapter_docs)
-		return course_doc.name
+	return import_bundle(zip_file_path)
 
 
 def read_json_from_zip(zip_file, filename):
+	if filename not in zip_file.namelist():
+		return None
 	try:
 		with zip_file.open(filename) as f:
 			return json.load(f)
@@ -474,6 +492,7 @@ def get_course_fields():
 		"short_introduction",
 		"description",
 		"published",
+		"is_public",
 		"upcoming",
 		"featured",
 		"disable_self_learning",

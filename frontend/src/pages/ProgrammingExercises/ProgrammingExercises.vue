@@ -147,6 +147,7 @@ const { $dialog } = app?.appContext.config.globalProperties
 
 onMounted(() => {
 	validatePermissions()
+	updateList()
 })
 
 const validatePermissions = () => {
@@ -189,7 +190,10 @@ const listOptions = computed(() => ({
 }))
 
 const updateList = () => {
-	exercises.update({ orFilters: getFilters(), start: 0 })
+	// An older search response must not replace the results of clearing the input.
+	exercises.list.abort?.()
+	totalExercises.abort?.()
+	exercises.update({ filters: {}, orFilters: getFilters(), start: 0 })
 	exercises.reload()
 	totalExercises.update({ params: { search: titleFilter.value.trim() } })
 	totalExercises.reload()

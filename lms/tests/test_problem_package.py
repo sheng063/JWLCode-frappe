@@ -139,3 +139,21 @@ def test_large_compressible_input_and_icpc_limits():
 
 def test_answer_respects_declared_output_limit():
 	assert preflight(archive({"data/secret/01.ans": b"a" * 1025 + b"\n"}, metadata=b"limits: {output: 0.0009765625}\n"))["errors"]
+
+
+def test_tex_only_and_tex_preferred_over_pdf():
+	for pdf in (None, b"%PDF-1.4\n"):
+		report = preflight(archive({
+			"problem_statement/problem.en.pdf": pdf,
+			"problem_statement/problem.zh.tex": "\\section{题目} $a+b$".encode(),
+			".DS_Store": b"metadata",
+			"problem_statement/._problem.zh.tex": b"metadata",
+		}))
+		assert report["errors"] == []
+		assert report["statements"][0] == "problem_statement/problem.zh.tex"
+
+
+@pytest.mark.parametrize("content", [b"", b"\xff", b"abc\x00"])
+def test_invalid_tex_is_rejected(content):
+	assert preflight(archive({"problem_statement/problem.en.pdf": None,
+		"problem_statement/problem.tex": content}))["errors"]

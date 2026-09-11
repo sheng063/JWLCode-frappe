@@ -11,7 +11,7 @@ import frappe
 from frappe import _
 
 from lms.lms.problem_package.api import EXERCISE, IMPORT, VERSION, _content
-from lms.lms.problem_package.parser import PackageError, preflight
+from lms.lms.problem_package.parser import PackageError, is_macos_metadata, preflight
 
 MAX_EXERCISES = 50
 MAX_TOTAL_BYTES = 100 * 1024 * 1024
@@ -26,7 +26,7 @@ def package_zip(content, package_name, *, allow_flat=False):
 	with zipfile.ZipFile(io.BytesIO(content)) as source, zipfile.ZipFile(output, "w") as target:
 		flat = "problem.yaml" in source.namelist()
 		for entry in source.infolist():
-			if entry.is_dir():
+			if entry.is_dir() or is_macos_metadata(entry.filename):
 				continue
 			path = entry.filename if flat else entry.filename.split("/", 1)[1]
 			if any(
@@ -106,6 +106,7 @@ def export_exercises(exercises: list[str] | str):
 					"file": package_name + ".zip",
 					"package_version": version.name,
 					"format_version": report["format_version"],
+					"statement_path": report["statements"][0],
 					"sha256": hashlib.sha256(package).hexdigest(),
 					"judge_config": json.loads(version.judge_config),
 					"validation_status": report["validation_status"],
@@ -118,7 +119,8 @@ def export_exercises(exercises: list[str] | str):
 			(
 				"Each ZIP is a separate legacy ICPC problem package.\n"
 				"manifest.json maps filenames to exercises and their active versions.\n"
-				"Original problem files, metadata and program permissions are preserved.\n"
+				"Original problem files and program permissions are preserved; macOS metadata is omitted.\n"
+				"statement_path identifies the preferred statement (TeX before PDF).\n"
 				"LMS execution limits are recorded in judge_config in the manifest; legacy ICPC\n"
 				"time multipliers are not absolute time limits in seconds.\n"
 				"Structure checked; input validators and reference solutions were NOT executed.\n"

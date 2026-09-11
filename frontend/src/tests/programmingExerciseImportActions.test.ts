@@ -6,8 +6,8 @@ const { reload, push } = vi.hoisted(() => ({ reload: vi.fn(), push: vi.fn() }))
 vi.mock('frappe-ui', () => ({
 	Button: { template: '<button><slot /></button>' }, FormControl: { template: '<input />' },
 	call: vi.fn(), toast: { success: vi.fn(), error: vi.fn() }, usePageMeta: vi.fn(),
-	createListResource: () => ({ data: [{ name: 'EX1', title: 'Example' }], list: {}, reload, pageLength: 24 }),
-	createResource: () => ({ data: 1, reload }),
+	createListResource: () => ({ data: [{ name: 'EX1', title: 'Example' }], list: {}, update: vi.fn(), reload, pageLength: 24 }),
+	createResource: () => ({ data: 1, update: vi.fn(), reload }),
 }))
 vi.mock('@/stores/session', () => ({ sessionStore: () => ({ brand: {} }) }))
 vi.mock('vue-router', () => ({ useRouter: () => ({ push }) }))

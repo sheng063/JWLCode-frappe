@@ -85,9 +85,6 @@ def submit_programming_exercise(
 	doc.attempt_id = str(uuid.uuid4())
 	if package_version:
 		version = frappe.get_doc("LMS Problem Package Version", package_version)
-		config = json.loads(version.judge_config)
-		if language != config["language"]:
-			frappe.throw("Use the published exercise language.")
 		doc.config_digest = version.config_digest
 	doc.passed_tests = 0
 	doc.total_tests = len(json.loads(version.cases)) if package_version else len(_test_cases(exercise_doc))
@@ -135,8 +132,7 @@ def run_programming_exercise(exercise: str, code: str, language: str = "Python")
 		from lms.lms.problem_package.api import require_capability
 		require_capability()
 		payload.update(_package_payload(version, public_only=True))
-		if language != payload["language"]:
-			frappe.throw("Use the published exercise language.")
+	_apply_submission_language(payload, language)
 	response = requests.post(
 		f"{settings.service_url.rstrip('/')}/internal/v1/runs",
 		json=payload,
@@ -145,6 +141,12 @@ def run_programming_exercise(exercise: str, code: str, language: str = "Python")
 	)
 	response.raise_for_status()
 	return response.json()
+
+
+def _apply_submission_language(payload, language):
+	"""Treat stored time limits as the C++ baseline for every execution path."""
+	payload["language"] = language
+	payload["time_limit_seconds"] = flt(payload["time_limit_seconds"]) * (1 if language == "C++" else 2)
 
 
 def _package_payload(version, public_only=False):
@@ -198,6 +200,7 @@ def dispatch_submission(submission_name: str):
 		version = frappe.get_doc("LMS Problem Package Version", doc.package_version)
 		payload.update(_package_payload(version))
 		payload["attempt_id"] = doc.attempt_id
+	_apply_submission_language(payload, doc.language or "Python")
 	try:
 		if doc.get("package_version"):
 			from lms.lms.problem_package.api import require_capability

@@ -3,7 +3,7 @@
 		<div class="flex items-start gap-3">
 			<span class="lucide-package mt-1 size-6 text-ink-gray-6" aria-hidden="true" />
 			<div><h3 class="font-semibold text-ink-gray-9">{{ __('Import ICPC Problem Package') }}</h3>
-				<p class="mt-1 text-sm text-ink-gray-6">{{ __('Upload a package, review the statement and limits, then import it into the exercise library.') }}</p>
+				<p class="mt-1 text-sm text-ink-gray-6">{{ replacing ? __('Upload a package to replace this exercise. Its ID and exercise number are preserved.') : __('Upload a package, review the statement and limits, then import it into the exercise library.') }}</p>
 			</div>
 		</div>
 		<ol class="grid grid-cols-3 gap-2 text-sm" :aria-label="__('Import progress')">
@@ -24,11 +24,10 @@
 				<div class="flex flex-wrap items-center justify-between gap-2"><h4 class="font-semibold">{{ report.title || filename }}</h4><span class="rounded bg-surface-gray-2 px-2 py-1 text-xs">{{ statusText }}</span></div>
 				<p class="mt-2 text-sm text-ink-gray-6">{{ __('Public samples') }}: {{ report.samples?.length || 0 }} · {{ __('Hidden cases') }}: {{ report.hidden_count || 0 }}</p>
 				<p v-if="report.status === 'Published'" class="mt-2 text-sm text-ink-green-4">{{ __('Imported') }} · {{ report.exercise_number }}</p>
-				<p v-if="report.status === 'Ready' || report.status === 'Committed'" class="mt-2 text-sm text-ink-gray-6">{{ __('This problem is not in the library yet. Complete the import below to make it searchable.') }}</p>
+				<p v-if="!replacing && (report.status === 'Ready' || report.status === 'Committed')" class="mt-2 text-sm text-ink-gray-6">{{ __('This problem is not in the library yet. Complete the import below to make it searchable.') }}</p>
 				<ul v-if="report.errors?.length" class="mt-3 space-y-1 text-sm text-ink-red-4"><li v-for="message in report.errors" :key="message">{{ __(message) }}</li></ul>
 				<details v-if="report.warnings?.length" class="mt-3 text-sm text-ink-gray-6"><summary class="cursor-pointer">{{ __('Inspection notes') }}</summary><ul class="mt-2 space-y-1"><li v-for="message in report.warnings" :key="message">{{ __(message) }}</li></ul></details>
 			</div>
-			<a v-if="statement" :href="`/api/method/lms.lms.problem_package.api.preview_statement?import_id=${encodeURIComponent(report.name)}&statement_path=${encodeURIComponent(statement)}`" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm underline"><span class="lucide-file-text size-4" />{{ __('Preview PDF statement') }}</a>
 			<details v-if="report.samples?.length" class="rounded-lg border border-outline-gray-2 p-3 text-sm">
 				<summary class="cursor-pointer font-medium">{{ __('Public samples') }}</summary>
 				<div v-for="sample in report.samples" :key="sample.case_id" class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -38,14 +37,13 @@
 			</details>
 			<template v-if="report.status === 'Ready'">
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<label class="text-sm">{{ __('Statement') }}<select v-model="statement" :disabled="busy" class="mt-1 block w-full rounded-lg border border-outline-gray-2 p-2"><option v-for="path in report.statements" :key="path">{{ path }}</option></select></label>
-					<label class="text-sm">{{ __('Language') }}<select v-model="language" :disabled="busy" class="mt-1 block w-full rounded-lg border border-outline-gray-2 p-2"><option>Python</option><option>C++</option></select></label>
+					<ImportStatementPreview v-if="statement" :import-id="report.name" :path="statement" />
 					<label class="text-sm">{{ __('Confirmed time limit (seconds)') }}<input v-model="seconds" :disabled="busy" type="number" min="0.001" max="30" step="0.001" class="mt-1 block w-full rounded-lg border border-outline-gray-2 p-2" /></label>
 					<label class="text-sm">{{ __('Memory limit (KiB)') }}<input v-model="memory" :disabled="busy || report.memory_mib != null" type="number" min="16000" max="1048576" class="mt-1 block w-full rounded-lg border border-outline-gray-2 p-2" /><span v-if="report.memory_mib" class="mt-1 block text-xs text-ink-gray-5">{{ report.memory_mib }} MiB × 1024</span></label>
 				</div>
 			</template>
 			<div class="flex items-center justify-end border-t border-outline-gray-2 pt-4">
-				<button v-if="report.status === 'Ready' || report.status === 'Committed'" :disabled="busy || !validOptions" class="rounded-lg bg-surface-gray-10 px-4 py-2 text-sm font-medium text-ink-base hover:bg-surface-gray-9 disabled:cursor-not-allowed disabled:opacity-50" @click="importProblem">{{ report.package_version ? __('Retry import to library') : __('Import to library') }}</button>
+				<button v-if="report.status === 'Ready' || report.status === 'Committed'" :disabled="busy || !validOptions" class="rounded-lg bg-surface-gray-10 px-4 py-2 text-sm font-medium text-ink-base hover:bg-surface-gray-9 disabled:cursor-not-allowed disabled:opacity-50" @click="importProblem">{{ replacing ? __('Replace this exercise') : report.package_version ? __('Retry import to library') : __('Import to library') }}</button>
 				<button v-if="report.status === 'Queued'" :disabled="busy" class="rounded-lg border border-outline-gray-2 px-4 py-2 text-sm" @click="refresh">{{ __('Refresh preflight') }}</button>
 			</div>
 		</div>
@@ -54,7 +52,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { call } from 'frappe-ui'
+import ImportStatementPreview from './ImportStatementPreview.vue'
 const props = defineProps<{ exercise?: string; activeVersion?: string }>()
+const replacing = computed(() => !!props.exercise && props.exercise !== 'new')
 const emit = defineEmits<{ published: [exercise: string, exerciseNumber?: string] }>()
 const busy = ref(false), error = ref(''), report = ref<any>(null), filename = ref(''), activity = ref('')
 const statement = ref(''), language = ref('C++'), seconds = ref('2'), memory = ref(131072)

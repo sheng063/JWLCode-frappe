@@ -2,13 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ProgrammingExercises from '@/pages/ProgrammingExercises/ProgrammingExercises.vue'
 import ListPage from '@/components/Layouts/ListPage.vue'
-const { update, countUpdate, reload, rows } = vi.hoisted(() => ({ update: vi.fn(), countUpdate: vi.fn(), reload: vi.fn(), rows: [{ name: 'EX1', exercise_number: 'P-000042', title: 'Example' }] }))
+const { update, countUpdate, reload, abort, countAbort, rows } = vi.hoisted(() => ({ update: vi.fn(), countUpdate: vi.fn(), reload: vi.fn(), abort: vi.fn(), countAbort: vi.fn(), rows: [{ name: 'EX1', exercise_number: 'P-000042', title: 'Example' }] }))
 vi.mock('frappe-ui', () => ({
  Button: { template: '<button><slot /></button>' },
  FormControl: { props: ['modelValue'], emits: ['update:modelValue', 'input'], template: `<input :value="modelValue" @input="$emit('input'); $emit('update:modelValue', $event.target.value)" />` },
  call: vi.fn(), toast: { success: vi.fn(), error: vi.fn() }, usePageMeta: vi.fn(),
- createListResource: () => ({ data: rows, list: {}, update, reload, pageLength: 24 }),
- createResource: () => ({ data: 1, update: countUpdate, reload }),
+ createListResource: () => ({ data: rows, list: { abort }, update, reload, pageLength: 24 }),
+ createResource: () => ({ data: 1, abort: countAbort, update: countUpdate, reload }),
 }))
 vi.mock('@/stores/session', () => ({ sessionStore: () => ({ brand: {} }) }))
 vi.mock('vue-router', () => ({ useRouter: () => ({ push: vi.fn() }) }))
@@ -27,10 +27,12 @@ describe('permanent exercise numbers', () => {
   expect(wrapper.getComponent(ListPage).props('rows')[0].exercise_number).toBe('P-000042')
   expect(wrapper.getComponent(ListPage).props('columns')[0].key).toBe('exercise_number')
   await wrapper.get('input').setValue(' P-000042 ')
-  expect(update).toHaveBeenLastCalledWith({ start: 0, orFilters: { title: ['like', '%P-000042%'], exercise_number: ['like', '%P-000042%'] } })
+  expect(update).toHaveBeenLastCalledWith({ filters: {}, start: 0, orFilters: { title: ['like', '%P-000042%'], exercise_number: ['like', '%P-000042%'] } })
   expect(countUpdate).toHaveBeenLastCalledWith({ params: { search: 'P-000042' } })
   await wrapper.get('input').setValue('')
-  expect(update).toHaveBeenLastCalledWith({ start: 0, orFilters: {} })
+  expect(update).toHaveBeenLastCalledWith({ filters: {}, start: 0, orFilters: {} })
+  expect(abort).toHaveBeenCalledTimes(3)
+  expect(countAbort).toHaveBeenCalledTimes(3)
   wrapper.unmount()
  })
 })

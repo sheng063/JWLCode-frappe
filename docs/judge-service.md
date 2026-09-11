@@ -15,6 +15,9 @@ Frappe Learning 负责题目、课程权限、提交记录、成绩和进度；�
 - Callback Secret：与 Judge Service 的 `CALLBACK_SECRET` 一致。
 
 在 **LMS Programming Exercise** 中选择 `Evaluation Mode = Judge Service`，配置语言、时间和内存限制。
+题目语言仅作为编辑器的默认语言，同一道题（包括题目包）允许使用当前支持的 C++ 或 Python 分别提交。
+时间限制以 C++ 为基准：运行样例和正式提交时，C++ 使用原值，其他支持语言使用 2 倍时间；内存限制不变。题目包使用已发布版本中的限制作为基准。
+
 原有 Test Cases 是学生可见样例；隐藏测试数据写入 **LMS Judge Test Case**，该 DocType 不授予学生读取权限。
 
 ## 提交流程

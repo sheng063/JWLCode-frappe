@@ -12,7 +12,6 @@ from lms.lms.problem_package.api import IMPORT, _enabled, _manage, create_import
 from lms.lms.problem_package.parser import DEFAULT_LIMITS, PackageError, read_archive
 
 BUNDLE_BYTES = 100 * 1024 * 1024
-MAX_PACKAGES = 50
 
 
 def read_bundle(content):
@@ -24,13 +23,14 @@ def read_bundle(content):
 			archive_bytes=BUNDLE_BYTES,
 			total_bytes=BUNDLE_BYTES,
 			file_bytes=20 * 1024 * 1024,
-			files=MAX_PACKAGES + 2,
+			files=None,
 		),
 	)
 	packages = {path: data for path, data in files.items() if path.lower().endswith((".zip", ".kpp"))}
-	if not 1 <= len(packages) <= MAX_PACKAGES:
-		raise PackageError("A bundle must contain between 1 and 50 problem ZIP/KPP files.")
-	if any("/" in path or path not in {*packages, "manifest.json", "README.txt"} for path in files):
+	if not packages:
+		raise PackageError("A bundle must contain at least one problem ZIP/KPP file.")
+	allowed_files = {*packages, "manifest.json", "README.txt"}
+	if any("/" in path or path not in allowed_files for path in files):
 		raise PackageError(
 			"Place problem ZIP/KPP files at the bundle root, with optional manifest.json and README.txt."
 		)
@@ -49,8 +49,8 @@ def read_bundle(content):
 			manifest = json.loads(files["manifest.json"])
 		except (ValueError, UnicodeError) as exc:
 			raise PackageError("Invalid bundle manifest JSON.") from exc
-		if not isinstance(manifest, list) or len(manifest) > MAX_PACKAGES:
-			raise PackageError("Bundle manifest must be a list of at most 50 entries.")
+		if not isinstance(manifest, list):
+			raise PackageError("Bundle manifest must be a list.")
 		for entry in manifest:
 			if not isinstance(entry, dict) or not isinstance(entry.get("file"), str):
 				raise PackageError("Each manifest entry must name a problem file.")
