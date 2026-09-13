@@ -7,6 +7,7 @@ import shutil
 import tempfile
 import zipfile
 from datetime import date, datetime, timedelta
+from urllib.parse import unquote, urlsplit
 
 import frappe
 from frappe import _
@@ -24,8 +25,8 @@ def export_course_zip(course_name):
 	lessons = get_lessons_for_export(course_name)
 	instructors = get_course_instructors(course)
 	evaluator = get_course_evaluator(course)
-	assets = get_course_assets(course, lessons, instructors, evaluator)
 	assessments, questions, test_cases = get_course_assessments(lessons)
+	assets = get_course_assets(course, lessons, instructors, evaluator, assessments + questions)
 	safe_time = frappe.utils.now_datetime().strftime("%Y%m%d_%H%M%S")
 	zip_filename = f"{course.name}_{safe_time}_{secrets.token_hex(4)}.zip"
 	create_course_zip(
@@ -135,23 +136,51 @@ def get_course_evaluator(course):
 	return evaluators
 
 
-def get_course_assets(course, lessons, instructors, evaluator):
-	assets = []
-	if course.image:
-		assets.append(course.image)
-	for lesson in lessons:
-		for block in get_editorjs_blocks(lesson.content) + get_editorjs_blocks(
-			lesson.get("instructor_content")
-		):
-			if block.get("type") == "upload":
-				url = block.get("data", {}).get("file_url")
-				assets.append(url)
-	for instructor in instructors:
-		if instructor.get("user_image"):
-			assets.append(instructor["user_image"])
-	if len(evaluator):
-		assets.append(evaluator[0].user_image)
-	return assets
+# Match complete external URLs too, so their /files/ suffix is never mistaken
+# for a local attachment. No remote resources are fetched during export.
+ASSET_URL = re.compile(r"(?:https?://|//)[^\s\"'<>\\]+|/(?:private/)?files/[^\s\"'<>\\]+")
+
+
+def local_asset_url(url):
+	parts = urlsplit(url)
+	if parts.scheme or parts.netloc:
+		if parts.scheme not in ("", "http", "https"):
+			return None
+		hosts = {urlsplit(frappe.utils.get_url()).hostname, frappe.local.site}
+		if parts.hostname not in hosts:
+			return None
+	if parts.path.startswith(("/files/", "/private/files/")):
+		return parts.path
+	return None
+
+
+def asset_references(value):
+	if callable(getattr(value, "as_dict", None)):
+		value = value.as_dict()
+	if isinstance(value, dict):
+		for item in value.values():
+			yield from asset_references(item)
+	elif isinstance(value, (list, tuple)):
+		for item in value:
+			yield from asset_references(item)
+	elif isinstance(value, str):
+		for match in ASSET_URL.finditer(value):
+			if url := local_asset_url(match.group()):
+				yield url
+
+
+def portable_asset_urls(value):
+	if isinstance(value, dict):
+		return {key: portable_asset_urls(item) for key, item in value.items()}
+	if isinstance(value, (list, tuple)):
+		return [portable_asset_urls(item) for item in value]
+	if isinstance(value, str):
+		return ASSET_URL.sub(lambda match: local_asset_url(match.group()) or match.group(), value)
+	return value
+
+
+def get_course_assets(course, lessons, instructors, evaluator, assessments=None):
+	return list(dict.fromkeys(asset_references([course, lessons, instructors, evaluator, assessments or []])))
 
 
 def read_asset_content(url):
@@ -281,7 +310,12 @@ def write_assets(zip_file, assets):
 	for asset in dict.fromkeys(assets):
 		if not isinstance(asset, str) or not asset.startswith(("/files/", "/private/files/")):
 			continue
-		file_doc = frappe.get_doc("File", {"file_url": asset})
+		file_name = frappe.db.get_value("File", {"file_url": asset}, "name")
+		if not file_name:
+			file_name = frappe.db.get_value("File", {"file_url": unquote(asset)}, "name")
+		if not file_name:
+			frappe.throw(_("Course asset is missing: {0}").format(asset))
+		file_doc = frappe.get_doc("File", file_name)
 		file_path = os.path.abspath(file_doc.get_full_path())
 		if not is_safe_path(file_path):
 			frappe.throw(_("Unsafe asset path detected."))
@@ -355,7 +389,7 @@ def frappe_json_dumps(data):
 		except Exception as e:
 			frappe.log_error(f"Error serializing object {obj}: {e}")
 
-	return json.dumps(data, indent=4, default=default)
+	return json.dumps(portable_asset_urls(data), indent=4, default=default)
 
 
 def import_course_zip(zip_file_path):

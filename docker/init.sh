@@ -36,6 +36,10 @@ bench set-config -g socketio_port 9000
 
 # Redis is supplied by Compose. Asset watching is not needed for this packaged run.
 sed -i '/^redis_/d; /^watch:/d' Procfile
+# Keep interactive judge dispatch available while the general worker indexes courses.
+if ! grep -q '^worker_short:' Procfile; then
+	printf '\nworker_short: bench worker --queue short 1>> logs/worker-short.log 2>> logs/worker-short.error.log\n' >> Procfile
+fi
 sed -i -E 's#^web: bench serve.*#web: bench serve --port 8000 --host 0.0.0.0#' Procfile
 
 if [[ ! -d apps/payments ]]; then

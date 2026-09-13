@@ -25,6 +25,7 @@
 			class="video-block relative group"
 		>
 			<video
+				preload="metadata"
 				@timeupdate="updateTime"
 				@ended="videoEnded"
 				@click="togglePlay"
@@ -175,6 +176,28 @@ import { safeUrl } from '@/utils/safeUrl'
    controls get clipped, which happens both on a phone and in the narrow column
    of the video statistics modal. */
 const videoRef = ref(null)
+let disposed = false
+const pendingTimers = new Set()
+const schedule = (callback, delay) => {
+ const timer = setTimeout(() => {
+  pendingTimers.delete(timer)
+  if (!disposed) callback()
+ }, delay)
+ pendingTimers.add(timer)
+}
+onBeforeUnmount(() => {
+ disposed = true
+ for (const timer of pendingTimers) clearTimeout(timer)
+ pendingTimers.clear()
+ const video = videoRef.value
+ if (video) {
+  video.onloadedmetadata = null
+  video.ontimeupdate = null
+  video.pause()
+  video.removeAttribute('src')
+  video.load()
+ }
+})
 const videoContainer = ref(null)
 let playing = ref(false)
 let currentTime = ref(0)
@@ -230,7 +253,8 @@ onMounted(() => {
 })
 
 const updateCurrentTime = () => {
-	setTimeout(() => {
+	schedule(() => {
+		if (!videoRef.value) return
 		videoRef.value.onloadedmetadata = () => {
 			duration.value = videoRef.value.duration
 		}
@@ -250,7 +274,7 @@ const updateCurrentTime = () => {
 watch(quizLoadTimer, () => {
 	if (quizLoadTimer.value > 0) {
 		showQuizLoader.value = true
-		setTimeout(() => {
+		schedule(() => {
 			quizLoadTimer.value -= 1
 		}, 1000)
 	} else {
@@ -263,7 +287,8 @@ const resumeVideo = (restart = false) => {
 	showQuiz.value = false
 	currentQuiz.value = null
 	updateCurrentTime()
-	setTimeout(() => {
+	schedule(() => {
+		if (!videoRef.value) return
 		videoRef.value.currentTime = restart ? 0 : currentTime.value
 		videoRef.value.play()
 		playing.value = true

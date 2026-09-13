@@ -123,6 +123,7 @@ const editor = ref<HTMLElement | null>(null)
 let aceEditor = null as ace.Ace.Editor | null
 let resizeObserver: ResizeObserver | null = null
 let syncingModel = false
+let lastEditorValue = ''
 
 onMounted(() => {
 	isDark.value = localStorage.getItem('theme') === 'dark'
@@ -167,10 +168,13 @@ const setupEditor = () => {
 		if (syncingModel) return
 		try {
 			let value = aceEditor?.getValue() || ''
+			// Props update on the next Vue tick. Comparing against them drops
+			// the final insertion when a paste first removes identical old code.
+			if (value === lastEditorValue) return
+			lastEditorValue = value
 			if (props.type === 'JSON') {
 				value = JSON.parse(value)
 			}
-			if (value === props.modelValue) return
 			if (!props.showSaveButton && !props.readonly) {
 				emit('update:modelValue', value)
 			}
@@ -219,6 +223,7 @@ function resetEditor(value: string, resetHistory = false) {
 	syncingModel = true
 	try {
 		aceEditor?.setValue(value)
+		lastEditorValue = value
 	} finally {
 		syncingModel = false
 	}

@@ -334,3 +334,38 @@ class TestCourseBundle(unittest.TestCase):
 		asset = frappe.get_doc("File", {"file_url": url})
 		self.assertTrue(asset.is_private)
 		self.assertEqual(asset.get_content(), "lesson asset")
+
+
+class TestCourseAssetDiscovery(unittest.TestCase):
+	def test_collects_images_nested_files_html_and_teacher_notes(self):
+		lesson = frappe._dict(
+			content=json.dumps({"blocks": [
+				{"type": "image", "data": {"url": "http://school.localhost:8000/files/one.png"}},
+				{"type": "image", "data": {"file": {"url": "/files/two.png"}}},
+				{"type": "paragraph", "data": {"text": '<img src="/files/three.png">'}},
+			]}),
+			instructor_content=json.dumps({"blocks": [
+				{"type": "upload", "data": {"file_url": "/private/files/notes.pdf"}},
+			]}),
+		)
+		with patch.object(frappe.utils, "get_url", return_value="http://school.localhost:8000"):
+			assets = transfer.get_course_assets(
+				frappe._dict(image="/files/one.png"), [lesson], [], [],
+				[{"question": '<img src="/files/question.png">'}],
+			)
+		self.assertEqual(set(assets), {
+			"/files/one.png", "/files/two.png", "/files/three.png",
+			"/private/files/notes.pdf", "/files/question.png",
+		})
+		self.assertEqual(len(assets), 5)
+
+	def test_portable_json_keeps_external_urls_and_preserves_source(self):
+		local = "http://school.localhost:8000/files/image.png"
+		external = "https://example.org/files/external.png"
+		data = {"content": json.dumps({"blocks": [{"data": {"url": local}}]}), "external": external}
+		with patch.object(frappe.utils, "get_url", return_value="http://school.localhost:8000"):
+			result = json.loads(transfer.frappe_json_dumps(data))
+			self.assertEqual(list(transfer.asset_references(external)), [])
+		self.assertEqual(json.loads(result["content"])["blocks"][0]["data"]["url"], "/files/image.png")
+		self.assertEqual(result["external"], external)
+		self.assertIn(local, data["content"])

@@ -1,6 +1,11 @@
 <template>
+ <div v-if="lesson.error" role="alert" class="m-5 rounded border p-4">
+  <p>{{ __('Unable to load lesson. Please try again.') }}</p>
+  <Button class="mt-3" @click="resetLessonState">{{ __('Retry') }}</Button>
+ </div>
+ <div v-if="lesson.loading" role="status" class="fixed top-0 inset-x-0 z-50 h-1 bg-surface-blue-3" :aria-label="__('Loading lesson')" />
 	<div
-		v-if="lesson.data"
+		v-if="lesson.data && !lesson.error"
 		:class="{ 'programming-lesson-page': programmingLesson }"
 	>
 		<template v-if="programmingLesson">
@@ -441,6 +446,7 @@ import {
 	call,
 	createListResource,
 	createResource,
+	frappeRequest,
 	TabButtons,
 	Tooltip,
 	usePageMeta,
@@ -451,6 +457,7 @@ import {
 	watch,
 	inject,
 	ref,
+	shallowRef,
 	onMounted,
 	onBeforeUnmount,
 	nextTick,
@@ -472,8 +479,11 @@ import {
 	shouldStartDwellTimer,
 	shouldAttachVideoFallback,
 } from '@/utils/lessonProgress'
+import { createLatestRequest } from '@/utils/latestRequest'
+import { disposeLessonEditor, disposeLessonPlayers } from '@/utils/lessonLifecycle'
 import EditorJS from '@editorjs/editorjs'
 import LessonContent from '@/components/LessonContent.vue'
+import { LessonMarkdownBlock } from '@/utils/lessonMarkdown'
 import CourseInstructors from '@/components/CourseInstructors.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import Discussions from '@/components/Discussions.vue'
@@ -504,8 +514,8 @@ const { isStudentView, mockedUser } = provideStudentView(
 const user = mockedUser
 const socket = inject('$socket')
 const allowDiscussions = ref(false)
-const editor = ref(null)
-const instructorEditor = ref(null)
+const editor = shallowRef(null)
+const instructorEditor = shallowRef(null)
 const lessonProgress = ref(0)
 const lessonContainer = ref(null)
 const zenModeEnabled = ref(false)
@@ -514,7 +524,7 @@ const discussionsContainer = ref(null)
 const timer = ref(0)
 const { brand } = sessionStore()
 const sidebarStore = useSidebar()
-const plyrSources = ref([])
+const plyrSources = shallowRef([])
 const showInlineMenu = ref(false)
 const currentTab = ref(null)
 const completedLesson = ref(null)
@@ -523,6 +533,8 @@ const { isMobile } = useScreenSize()
 const showChapters = ref(false)
 const isLessonSidebarCollapsed = ref(false)
 let timerInterval = null
+let lessonGeneration = 0
+const lessonRequest = createLatestRequest(frappeRequest)
 
 const tabs = ref([])
 
@@ -574,6 +586,7 @@ const isCourseAdmin = () =>
 	Boolean(user.data?.is_moderator || user.data?.is_instructor)
 
 onMounted(() => {
+	lesson.submit().catch(() => {})
 	startTimer()
 	// Keep the app sidebar open for admins/instructors so they can navigate
 	// while reviewing; only collapse it for students to maximise reading space.
@@ -620,10 +633,14 @@ const attachFullscreenEvent = () => {
 
 onBeforeUnmount(() => {
 	trackVideoWatchDuration()
+	lessonRequest.invalidate()
+	lessonGeneration++
+	fallbackGeneration++
+	disposeLessonPlayers(plyrSources.value)
 	readingGeneration++
 	readingObserver?.disconnect()
-	editor.value?.destroy?.()
-	instructorEditor.value?.destroy?.()
+	disposeLessonEditor(editor.value)
+	disposeLessonEditor(instructorEditor.value)
 	document.removeEventListener('fullscreenchange', attachFullscreenEvent)
 	// Without this the handler outlives the page, and every revisit adds another
 	// one — so a single progress event fires one outline reload per past visit.
@@ -635,6 +652,8 @@ onBeforeUnmount(() => {
 
 const lesson = createResource({
 	url: 'lms.lms.utils.get_lesson',
+	resourceFetcher: lessonRequest.fetch,
+	onError() {},
 	makeParams(values) {
 		return {
 			course: props.courseName,
@@ -642,7 +661,7 @@ const lesson = createResource({
 			lesson: values ? values.lesson : props.lessonNumber,
 		}
 	},
-	auto: true,
+	auto: false,
 })
 
 const programmingLesson = computed(
@@ -653,6 +672,7 @@ const programmingLesson = computed(
 )
 
 const setupLesson = (data) => {
+	if (!data) return
 	showChapters.value = false
 	if (Object.keys(data).length === 0) {
 		router.push({
@@ -690,8 +710,8 @@ const setupLesson = (data) => {
 			data.instructor_content
 		)
 	editor.value?.isReady.then(() => {
-		checkIfDiscussionsAllowed()
-	})
+		if (data === lesson.data) checkIfDiscussionsAllowed()
+	}).catch(() => {})
 	checkQuiz()
 }
 
@@ -708,11 +728,18 @@ const checkQuiz = () => {
 }
 
 const renderEditor = (holder, content) => {
-	if (document.getElementById(holder))
-		document.getElementById(holder).innerHTML = ''
+	const root = document.getElementById(holder)
+	if (!root) return null
+	const editorHolder = document.createElement('div')
+	editorHolder.className = 'lesson-editor-holder'
+	root.replaceChildren(editorHolder)
 	return new EditorJS({
-		holder: holder,
-		tools: getEditorTools(false, {}, { studentView: isStudentView.value }),
+		holder: editorHolder,
+		tools: {
+			...getEditorTools(false, {}, { studentView: isStudentView.value }),
+			markdown: LessonMarkdownBlock,
+			paragraph: LessonMarkdownBlock,
+		},
 		data: sanitizeEditorJs(JSON.parse(content)),
 		readOnly: true,
 		defaultBlock: 'embed',
@@ -720,9 +747,7 @@ const renderEditor = (holder, content) => {
 			direction: document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr',
 		},
 		onReady() {
-			const root = document.getElementById(holder)
-			if (!root) return
-			root.querySelectorAll('a').forEach((a) => {
+			editorHolder.querySelectorAll('a').forEach((a) => {
 				a.setAttribute('target', '_blank')
 				a.setAttribute('rel', 'noopener noreferrer')
 			})
@@ -911,6 +936,11 @@ const goNext = () => {
 
 const switchLesson = (direction) => {
 	if (direction === 'next' && !canGoNext.value) return
+	if (outlineReady.value && currentIndex.value >= 0) {
+		const number = lessonNumbers.value[currentIndex.value + (direction === 'prev' ? -1 : 1)]
+		if (number) goToLessonNumber(number)
+		return
+	}
 	trackVideoWatchDuration()
 	let target =
 		direction === 'prev'
@@ -930,49 +960,41 @@ const switchLesson = (direction) => {
 }
 
 watch(
-	[() => route.params.chapterNumber, () => route.params.lessonNumber],
-	async (
-		[newChapterNumber, newLessonNumber],
-		[oldChapterNumber, oldLessonNumber]
-	) => {
-		if (newChapterNumber || newLessonNumber) {
-			plyrSources.value = []
-			await nextTick()
-			resetLessonState(newChapterNumber, newLessonNumber)
-			updateNotes()
-			checkIfDiscussionsAllowed()
-			checkQuiz()
-		}
-	}
+ () => [props.courseName, props.chapterNumber, props.lessonNumber],
+ () => resetLessonState(),
+ { flush: 'sync' }
 )
 
-const resetLessonState = (newChapterNumber, newLessonNumber) => {
-	readingGeneration++
-	editor.value?.destroy?.()
-	instructorEditor.value?.destroy?.()
-	readingObserver?.disconnect()
-	completedLesson.value = null
-	editor.value = null
-	instructorEditor.value = null
-	allowDiscussions.value = false
-	lesson.submit({
-		chapter: newChapterNumber,
-		lesson: newLessonNumber,
-	})
-	videoFallbackArmed = false
-	fallbackGeneration++
-	clearInterval(timerInterval)
-	timer.value = 0
+const resetLessonState = () => {
+ // Invalidate before teardown: even an already-resolving old response is stale.
+ lessonRequest.invalidate()
+ lessonGeneration++
+ readingGeneration++
+ fallbackGeneration++
+ disposeLessonPlayers(plyrSources.value)
+ plyrSources.value = []
+ disposeLessonEditor(editor.value)
+ disposeLessonEditor(instructorEditor.value)
+ readingObserver?.disconnect()
+ completedLesson.value = null
+ editor.value = null
+ instructorEditor.value = null
+ allowDiscussions.value = false
+ videoFallbackArmed = false
+ clearInterval(timerInterval)
+ timer.value = 0
+ lesson.submit({ chapter: props.chapterNumber, lesson: props.lessonNumber }).catch(() => {})
 }
 
 const trackVideoWatchDuration = () => {
 	if (!lesson.data?.membership) return
 	let videoDetails = getVideoDetails()
 	videoDetails = videoDetails.concat(getPlyrSourceDetails())
+	if (!videoDetails.length) return
 	call('lms.lms.api.track_video_watch_duration', {
 		lesson: lesson.data.name,
 		videos: videoDetails,
-	})
+	}).catch((error) => console.warn('Unable to save video watch duration', error))
 }
 
 const getVideoDetails = () => {
@@ -1005,16 +1027,21 @@ const getPlyrSourceDetails = () => {
 
 const cleanYouTubeUrl = (url) => {
 	if (!url) return url
-	const urlObj = new URL(url)
-	urlObj.searchParams.delete('t')
-	return urlObj.toString()
+	try {
+		const urlObj = new URL(url, window.location.origin)
+		urlObj.searchParams.delete('t')
+		return urlObj.toString()
+	} catch {
+		return url
+	}
 }
 
 watch(
 	() => lesson.data,
 	async (data) => {
+		const generation = lessonGeneration
 		await nextTick()
-		if (data !== lesson.data) return
+		if (!data || data !== lesson.data || generation !== lessonGeneration) return
 		setupLesson(data)
 		observeReadingEnd(data)
 		// Settings drive dwell + enforcement; if they haven't resolved yet
@@ -1026,8 +1053,10 @@ watch(
 				await settingsStore.settings.promise
 			} catch {}
 		}
+		if (data !== lesson.data || generation !== lessonGeneration) return
 		startTimer()
-		await getPlyrSource()
+		await getPlyrSource(generation)
+		if (data !== lesson.data || generation !== lessonGeneration) return
 		updateNotes()
 		const hasVideoListener =
 			plyrSources.value.length > 0 || !!document.querySelector('video')
@@ -1062,10 +1091,13 @@ watch(
 	}
 )
 
-const getPlyrSource = async () => {
+const getPlyrSource = async (generation = lessonGeneration) => {
 	await nextTick()
+	if (generation !== lessonGeneration) return
 	if (plyrSources.value.length == 0) {
-		plyrSources.value = await enablePlyr()
+		const players = await enablePlyr(() => generation === lessonGeneration)
+		if (generation !== lessonGeneration) return
+		plyrSources.value = players
 		const enforceVideo = Number(
 			settingsStore.settings?.data?.enforce_video_completion ?? 0
 		)
@@ -1340,7 +1372,7 @@ const scrollDiscussionsIntoView = () => {
 }
 
 const updateNotes = () => {
-	if (!user.data) return
+	if (!user.data || !lesson.data?.name) return
 	notes.update({
 		filters: {
 			lesson: lesson.data?.name,
@@ -1421,7 +1453,7 @@ usePageMeta(() => {
 	border-radius: 0.5rem;
 }
 
-.lesson-content code {
+.lesson-content pre code {
 	display: block;
 	overflow-x: auto;
 	padding: 1rem 1.25rem;
@@ -1579,6 +1611,7 @@ usePageMeta(() => {
 .programming-lesson-author { display: flex; align-items: center; flex-shrink: 0; padding-bottom: 2px; }
 .programming-lesson-body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 .programming-lesson-content { flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
+.programming-lesson-content > .lesson-editor-holder,
 .programming-lesson-content .codex-editor,
 .programming-lesson-content .codex-editor__redactor,
 .programming-lesson-content .ce-block,
@@ -1596,5 +1629,19 @@ usePageMeta(() => {
 	.programming-lesson-nav { gap: 8px; padding: 10px; flex-wrap: wrap; }
 	.programming-lesson-heading { order: -1; flex-basis: 100%; gap: 12px; }
 	.programming-lesson-chapters { position: absolute; right: 0; top: 110px; bottom: 0; background: var(--surface-base, white); z-index: 2; max-width: 85vw; }
+}
+</style>
+
+<style>
+.lesson-markdown :not(pre) > code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 0.875em;
+	background: var(--surface-gray-2, #f3f4f6);
+	border-radius: 0.25rem;
+	padding: 0.125rem 0.375rem;
+}
+.lesson-markdown :not(pre) > code::before,
+.lesson-markdown :not(pre) > code::after {
+	content: none;
 }
 </style>

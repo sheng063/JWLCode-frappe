@@ -33,6 +33,22 @@ describe('Ace editor integration', () => {
 		wrapper.unmount()
 	})
 
+	it('keeps identical pasted code after Ace emits removal and insertion', async () => {
+		const source = 'int main(){return 0;}'
+		const Host = defineComponent({
+			components: { CodeEditor },
+			setup: () => ({ code: ref(source), preferences: editorDefaults }),
+			template: `<CodeEditor v-model="code" type="C++" :preferences="preferences" :autofocus="false" />`,
+		})
+		const wrapper = mount(Host, { attachTo: document.body })
+		const editor = ace.edit(wrapper.find('#test-code-editor').element as HTMLElement)
+		editor.setValue(source, -1)
+		await nextTick()
+		expect(wrapper.vm.code).toBe(source)
+		expect(editor.getValue()).toBe(source)
+		wrapper.unmount()
+	})
+
 	it('applies preferences live and keeps formatting undoable', async () => {
 		const wrapper = mount(CodeEditor, {
 			attachTo: document.body,

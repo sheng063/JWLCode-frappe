@@ -35,6 +35,7 @@ vi.mock('frappe-ui', async () => {
 		template: `<div><slot name="prefix" /><slot name="icon" /><slot /><slot name="suffix" /></div>`,
 	})
 	return {
+		frappeRequest: vi.fn(),
 		createResource: (config: any) => {
 			const resource: any = reactive({
 				data: null,

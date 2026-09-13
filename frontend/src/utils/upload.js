@@ -7,7 +7,7 @@ import { h, createApp } from 'vue'
 import { Upload as UploadIcon } from 'lucide-vue-next'
 import { createDialog } from '@/utils/dialogs'
 import { usesWebkitPdfViewer } from '@/utils/pdfViewer'
-import { embedFrame } from '@/utils/blockDom'
+import { embedFrame, vueBlockContainer } from '@/utils/blockDom'
 import { safeUrl } from '@/utils/safeUrl'
 import translationPlugin from '../translation'
 
@@ -39,7 +39,7 @@ export class Upload {
 	}
 
 	render() {
-		this.wrapper = document.createElement('div')
+		this.wrapper = vueBlockContainer()
 
 		if (this.data && this.data.file_url) {
 			this.renderFile(this.data)
@@ -51,8 +51,9 @@ export class Upload {
 	}
 
 	renderFile(file) {
+		this.destroy()
 		if (this.isVideo(file.file_type)) {
-			const app = createApp(VideoBlock, {
+			const app = this.app = createApp(VideoBlock, {
 				file: file.file_url,
 				readOnly: this.readOnly,
 				quizzes: file.quizzes || [],
@@ -67,7 +68,7 @@ export class Upload {
 			app.mount(this.wrapper)
 			return
 		} else if (this.isAudio(file.file_type)) {
-			const app = createApp(AudioBlock, {
+			const app = this.app = createApp(AudioBlock, {
 				file: file.file_url,
 			})
 			registerDirectives(app)
@@ -109,7 +110,7 @@ export class Upload {
 	}
 
 	renderFileUploader() {
-		const app = createApp(UploadPlugin, {
+		const app = this.app = createApp(UploadPlugin, {
 			uploadContext: this.config,
 			onFileUploaded: (file) => {
 				this.data.file_url = file.file_url

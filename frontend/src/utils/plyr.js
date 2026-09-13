@@ -4,8 +4,9 @@ import { useSettings } from '@/stores/settings'
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export const enablePlyr = async () => {
+export const enablePlyr = async (isCurrent = () => true) => {
 	await wait(500)
+	if (!isCurrent()) return []
 
 	const players = []
 	const videoElements = document.getElementsByClassName('video-player')

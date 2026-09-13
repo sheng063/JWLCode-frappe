@@ -6,7 +6,7 @@ import { usersStore } from '../stores/user'
 import translationPlugin from '../translation'
 import { CircleHelp } from 'lucide-vue-next'
 import router from '@/router'
-import { blockNotice } from '@/utils/blockDom'
+import { blockNotice, vueBlockContainer } from '@/utils/blockDom'
 
 export class Quiz {
 	constructor({ data, api, readOnly }) {
@@ -34,7 +34,7 @@ export class Quiz {
 	}
 
 	render() {
-		this.wrapper = document.createElement('div')
+		this.wrapper = vueBlockContainer()
 		if (Object.keys(this.data).length) {
 			this.renderQuiz(this.data.quiz)
 		} else {

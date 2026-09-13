@@ -32,3 +32,13 @@ export const blockNotice = (text: string): HTMLDivElement => {
 	card.append(label)
 	return card
 }
+
+// EditorJS calls normalize() during its emptiness checks. Native normalize
+// removes the empty text nodes Vue uses as Fragment anchors; subsequent updates
+// or unmount then crash with nextSibling on a detached anchor. Vue owns this
+// subtree, so EditorJS must inspect it without merging/removing its text nodes.
+export const vueBlockContainer = (): HTMLDivElement => {
+ const container = document.createElement('div')
+ container.normalize = () => {}
+ return container
+}

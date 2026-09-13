@@ -102,7 +102,8 @@ def submit_programming_exercise(
 	frappe.enqueue(
 		"lms.lms.judge_service.dispatch_submission",
 		submission_name=doc.name,
-		queue="long",
+		# Dispatch is a short HTTP request; never wait behind course indexing/imports.
+		queue="short",
 		enqueue_after_commit=True,
 	)
 	return {"submission": doc.name, "status": doc.status}

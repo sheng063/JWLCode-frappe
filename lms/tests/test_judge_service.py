@@ -248,3 +248,23 @@ class TestSubmissionLanguages(TestCase):
 					service.submit_programming_exercise("EX-1", "source", "request-123", language)
 					self.assertEqual(doc.language, language)
 					doc.save.assert_called_once()
+
+
+class TestInteractiveDispatchQueue(TestCase):
+ def test_submission_is_committed_before_dispatching_on_short_queue(self):
+  from lms.lms import judge_service as service
+  exercise = Mock()
+  exercise.get.return_value = None
+  doc = Mock()
+  doc.name = "SUB-QUEUE-TEST"
+  with patch.object(service, "_validate_submission_access"), \
+    patch.object(service.frappe.db, "get_value", return_value=None), \
+    patch.object(service.frappe, "new_doc", return_value=doc), \
+    patch.object(service.frappe, "get_doc", return_value=exercise), \
+    patch.object(service, "_test_cases", return_value=[{}]), \
+    patch.object(service.frappe, "enqueue") as enqueue:
+   result = service.submit_programming_exercise("EX-1", "print(1)", "queue-test-request")
+  doc.save.assert_called_once()
+  enqueue.assert_called_once_with("lms.lms.judge_service.dispatch_submission",
+   submission_name=doc.name, queue="short", enqueue_after_commit=True)
+  assert result["submission"] == doc.name
