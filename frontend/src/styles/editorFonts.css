@@ -1,0 +1,8 @@
+/* JetBrains Mono v2.304; license bundled with the font asset. */
+@font-face {
+	font-family: 'JetBrains Mono';
+	src: url('../assets/fonts/jetbrains-mono/JetBrainsMono-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}

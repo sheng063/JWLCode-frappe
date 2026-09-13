@@ -49,7 +49,7 @@ describe('Ace editor integration', () => {
 		wrapper.unmount()
 	})
 
-	it('applies preferences live and keeps formatting undoable', async () => {
+	it.each([['dark', 'twilight'], ['monaco', 'monaco']])('applies %s preferences live and keeps formatting undoable', async (theme, aceTheme) => {
 		const wrapper = mount(CodeEditor, {
 			attachTo: document.body,
 			props: {
@@ -65,7 +65,8 @@ describe('Ace editor integration', () => {
 		await wrapper.setProps({
 			preferences: {
 				...editorDefaults,
-				theme: 'dark',
+				theme,
+				fontFamily: 'Monaco, monospace',
 				fontSize: 20,
 				tabSize: 2,
 				wrap: false,
@@ -73,9 +74,14 @@ describe('Ace editor integration', () => {
 			},
 		})
 		expect(editor.getOption('fontSize')).toBe(20)
-		expect(editor.getTheme()).toBe('ace/theme/twilight')
+		expect(editor.getOption('fontFamily')).toBe('Monaco, monospace')
+		if (theme === 'monaco') {
+			expect(editor.container.classList.contains('ace-monaco')).toBe(true)
+			expect(ace.require('ace/theme/monaco').cssText).toContain('#a31515')
+		}
+		expect(editor.getTheme()).toBe(`ace/theme/${aceTheme}`)
 		await wrapper.setProps({ modelValue: 'x=2' })
-		expect(editor.getTheme()).toBe('ace/theme/twilight')
+		expect(editor.getTheme()).toBe(`ace/theme/${aceTheme}`)
 		await wrapper.setProps({ modelValue: 'x=1' })
 		expect(editor.session.getTabSize()).toBe(2)
 		expect(editor.session.getUseWrapMode()).toBe(false)

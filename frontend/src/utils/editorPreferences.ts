@@ -1,7 +1,7 @@
 export const editorDefaults = {
 	theme: 'light',
-	fontSize: 14,
-	fontFamily: 'monospace',
+	fontSize: 16,
+	fontFamily: 'JetBrains Mono, monospace',
 	fontLigatures: false,
 	tabSize: 4,
 	wrap: true,
@@ -31,12 +31,12 @@ export function readEditorPreferences(): EditorPreferences {
 			result.fontSize = saved.fontSize
 		if ([2, 4, 8].includes(saved.tabSize)) result.tabSize = saved.tabSize
 		if (
-			['monospace', 'Menlo, monospace', 'Consolas, monospace'].includes(
+			['monospace', 'Menlo, monospace', 'Consolas, monospace', 'Monaco, monospace', 'JetBrains Mono, monospace'].includes(
 				saved.fontFamily,
 			)
 		)
 			result.fontFamily = saved.fontFamily
-		if (['light', 'dark'].includes(saved.theme)) result.theme = saved.theme
+		if (['light', 'dark', 'monaco'].includes(saved.theme)) result.theme = saved.theme
 		if (['standard', 'vim', 'emacs'].includes(saved.keyboard))
 			result.keyboard = saved.keyboard
 	} catch {

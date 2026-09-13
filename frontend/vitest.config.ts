@@ -30,6 +30,8 @@ export default defineConfig({
 	plugins: [vue(), ...lucideIcons()],
 	test: {
 		environment: 'jsdom',
+		// Ace registers this inline CSS as its theme; tests must load its contents.
+		css: { include: [/aceMonacoTheme\.css/] },
 		globals: true,
 		include: ['src/tests/**/*.test.{ts,js}'],
 		// Registers v-safe-html the way main.js does, so a component test does

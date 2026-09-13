@@ -33,6 +33,8 @@
 </template>
 <script setup lang="ts">
 import ace from 'ace-builds'
+import '@/utils/aceMonacoTheme'
+import '@/styles/editorFonts.css'
 import 'ace-builds/src-min-noconflict/ext-searchbox'
 import 'ace-builds/src-noconflict/ext-language_tools'
 import 'ace-builds/src-noconflict/keybinding-vim'
@@ -237,7 +239,11 @@ function resetEditor(value: string, resetHistory = false) {
 
 function applyTheme() {
 	const dark = props.preferences ? props.preferences.theme === 'dark' : isDark.value
-	aceEditor?.setTheme(dark ? 'ace/theme/twilight' : 'ace/theme/chrome')
+	aceEditor?.setTheme(
+		props.preferences?.theme === 'monaco'
+			? 'ace/theme/monaco'
+			: dark ? 'ace/theme/twilight' : 'ace/theme/chrome',
+	)
 }
 watch(isDark, applyTheme)
 
@@ -278,6 +284,17 @@ function applyPreferences() {
 			? 'normal'
 			: 'none'
 	aceEditor.resize()
+	if (p.fontFamily === 'JetBrains Mono, monospace' && document.fonts?.load) {
+		const target = aceEditor
+		void document.fonts.load(`${p.fontSize}px "JetBrains Mono"`).then(() => {
+			if (aceEditor === target) {
+				target.renderer.updateFontSize()
+				target.resize(true)
+			}
+		}).catch(() => {
+			// Keep the monospace fallback if the font cannot be loaded.
+		})
+	}
 }
 watch(() => props.preferences, applyPreferences, { deep: true })
 function replaceCode(value: string) {

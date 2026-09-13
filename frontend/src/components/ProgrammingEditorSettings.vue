@@ -19,12 +19,15 @@
 						<label class="setting-row">主题<select v-model="preferences.theme" aria-label="主题">
 							<option value="light">明亮模式</option>
 							<option value="dark">暗黑模式</option>
+							<option value="monaco">Monaco 高亮（浅色）</option>
 						</select></label>
 						<label class="setting-row"
 							>字体<select v-model="preferences.fontFamily" aria-label="字体">
 								<option value="monospace">Default</option>
 								<option value="Menlo, monospace">Menlo</option>
 								<option value="Consolas, monospace">Consolas</option>
+								<option value="Monaco, monospace">Monaco</option>
+								<option value="JetBrains Mono, monospace">JetBrains Mono</option>
 							</select></label
 						>
 						<label class="setting-row"

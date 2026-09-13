@@ -1,0 +1,31 @@
+.ace-monaco { background: #ffffff; color: #000000; }
+.ace-monaco .ace_gutter { background: #ffffff; color: #237893; }
+.ace-monaco .ace_print-margin { width: 1px; background: #eeeeee; }
+.ace-monaco .ace_cursor { color: #000000; }
+.ace-monaco .ace_marker-layer .ace_selection { background: #add6ff; }
+.ace-monaco.ace_multiselect .ace_selection.ace_start { box-shadow: 0 0 3px 0 white; }
+.ace-monaco .ace_marker-layer .ace_active-line,
+.ace-monaco .ace_gutter-active-line { background: #f3f3f3; }
+.ace-monaco .ace_marker-layer .ace_selected-word { border: 1px solid #a0a0a0; }
+.ace-monaco .ace_marker-layer .ace_bracket { margin: -1px 0 0 -1px; border: 1px solid #b9b9b9; }
+.ace-monaco .ace_invisible { color: #aaaaaa; }
+.ace-monaco .ace_keyword,
+.ace-monaco .ace_storage,
+.ace-monaco .ace_constant.ace_language,
+.ace-monaco .ace_meta.ace_tag { color: #0000ff; }
+.ace-monaco .ace_keyword.ace_operator { color: #000000; }
+.ace-monaco .ace_string { color: #a31515; }
+.ace-monaco .ace_string.ace_regex { color: #811f3f; }
+.ace-monaco .ace_comment { color: #008000; }
+.ace-monaco .ace_constant.ace_numeric { color: #098658; }
+.ace-monaco .ace_support.ace_type,
+.ace-monaco .ace_support.ace_class,
+.ace-monaco .ace_entity.ace_name.ace_type { color: #267f99; }
+.ace-monaco .ace_entity.ace_name.ace_function,
+.ace-monaco .ace_support.ace_function { color: #795e26; }
+.ace-monaco .ace_variable,
+.ace-monaco .ace_entity.ace_other.ace_attribute-name { color: #001080; }
+.ace-monaco .ace_invalid { color: #cd3131; background: #fff0f0; }
+.ace-monaco .ace_fold { background: #808080; border-color: #000000; }
+.ace-monaco .ace_indent-guide { box-shadow: inset -1px 0 #d3d3d3; }
+.ace-monaco .ace_indent-guide-active { box-shadow: inset -1px 0 #939393; }

@@ -27,9 +27,9 @@ describe('programming editor preferences', () => {
 		)
 		expect(readEditorPreferences()).toEqual({ ...editorDefaults, wrap: false })
 	})
-	it('restores the selected theme and font after reload', () => {
-		localStorage.setItem(editorPreferencesKey, JSON.stringify({ theme: 'dark', fontSize: 24, fontFamily: 'Menlo, monospace' }))
-		expect(readEditorPreferences()).toMatchObject({ theme: 'dark', fontSize: 24, fontFamily: 'Menlo, monospace' })
+	it.each([['dark', 'Menlo, monospace'], ['monaco', 'Monaco, monospace'], ['monaco', 'JetBrains Mono, monospace']])('restores %s and %s after reload', (theme, fontFamily) => {
+		localStorage.setItem(editorPreferencesKey, JSON.stringify({ theme, fontSize: 24, fontFamily }))
+		expect(readEditorPreferences()).toMatchObject({ theme, fontSize: 24, fontFamily })
 	})
 	it('changes real model values and exposes only the two requested menus', async () => {
 		const model = { ...editorDefaults }
@@ -44,6 +44,12 @@ describe('programming editor preferences', () => {
 		expect(model.fontSize).toBe(20)
 		await wrapper.find('[aria-label="主题"]').setValue('dark')
 		expect(model.theme).toBe('dark')
+		await wrapper.find('[aria-label="主题"]').setValue('monaco')
+		expect(model.theme).toBe('monaco')
+		await wrapper.find('[aria-label="字体"]').setValue('Monaco, monospace')
+		expect(model.fontFamily).toBe('Monaco, monospace')
+		await wrapper.find('[aria-label="字体"]').setValue('JetBrains Mono, monospace')
+		expect(model.fontFamily).toBe('JetBrains Mono, monospace')
 		await wrapper.findAll('input')[1].setValue(false)
 		expect(model.wrap).toBe(false)
 		await wrapper.findAll('nav button')[1].trigger('click')
