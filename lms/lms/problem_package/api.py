@@ -20,7 +20,10 @@ PROTOCOL = "icpc-legacy-v1"
 
 
 def _json(value):
-	return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+	serialized = json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+	# Frappe sanitizes Long Text fields as HTML. Keep testcase text opaque while
+	# stored; JSON decoding restores the exact original input/output characters.
+	return serialized.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
 
 
 def _enabled():

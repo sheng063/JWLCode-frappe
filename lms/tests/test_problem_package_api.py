@@ -63,3 +63,24 @@ class TestPackageAPI(TestCase):
 		with self.assertRaises(Exception):
 			api.preview_statement("I1", "data/secret/01.in")
 		content.assert_not_called()
+
+
+class TestPackageSerialization(TestCase):
+	def test_testcase_text_survives_document_html_sanitization(self):
+		from frappe.utils.html_utils import sanitize_html
+
+		payload = {
+			"cases": [{
+				"input": '<a> 0 ### 1\n<liws> 50.878158 ### 90\n',
+				"expected_output": '<script>text, not markup</script> &amp; 中文\n',
+			}],
+		}
+		encoded = api._json(payload)
+		stored = sanitize_html(encoded)
+		self.assertEqual(stored, encoded)
+		self.assertEqual(json.loads(stored), payload)
+		self.assertEqual(api._json(json.loads(stored)), encoded)
+
+	def test_literal_unicode_escape_is_not_decoded_twice(self):
+		payload = {"input": r"\u003citem\u003e", "output": "<item> & >"}
+		self.assertEqual(json.loads(api._json(payload)), payload)

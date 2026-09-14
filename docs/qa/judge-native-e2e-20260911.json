@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-11",
+  "exercise": "kg44c3uvm5",
+  "title": "正数四舍五入的实现",
+  "memory_limit_kb": 131072,
+  "verification": "Deployed LMS APIs, real background queue and authenticated callback; no manual dispatch or result injection. Public runs accepted; all submission cases passed. Temporary submission records deleted afterward.",
+  "results": [
+    {
+      "language": "Python",
+      "submission": "1k8h2g65hc",
+      "status": "Passed",
+      "score": 100.0,
+      "passed_tests": 13,
+      "total_tests": 13,
+      "memory_kb": 7352,
+      "time_ms": 22,
+      "status_version": 1,
+      "event_id": "442f0a87-b659-411a-a2df-0f6410d036a1:1",
+      "judge_request_id": "442f0a87-b659-411a-a2df-0f6410d036a1"
+    },
+    {
+      "language": "C++",
+      "submission": "1nfgpgmrhr",
+      "status": "Passed",
+      "score": 100.0,
+      "passed_tests": 13,
+      "total_tests": 13,
+      "memory_kb": 3184,
+      "time_ms": 3,
+      "status_version": 1,
+      "event_id": "4088d3dc-8b1f-4a1e-a74c-91c1361f366d:1",
+      "judge_request_id": "4088d3dc-8b1f-4a1e-a74c-91c1361f366d"
+    }
+  ]
+}

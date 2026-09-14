@@ -369,3 +369,11 @@ class TestCourseAssetDiscovery(unittest.TestCase):
 		self.assertEqual(json.loads(result["content"])["blocks"][0]["data"]["url"], "/files/image.png")
 		self.assertEqual(result["external"], external)
 		self.assertIn(local, data["content"])
+
+
+	def test_code_resembling_malformed_url_is_preserved(self):
+		code = "answer = value //array[index]"
+		self.assertIsNone(transfer.local_asset_url("//array[index]"))
+		self.assertEqual(list(transfer.asset_references(code)), [])
+		self.assertEqual(transfer.portable_asset_urls(code), code)
+		self.assertEqual(transfer.local_asset_url("/files/valid.png"), "/files/valid.png")

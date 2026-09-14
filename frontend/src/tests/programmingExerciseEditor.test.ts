@@ -43,6 +43,6 @@ describe('programming exercise answer editor', () => {
 		expect(submissionSource).toContain('saveProgrammingCode(user.data?.name, props.exerciseID,')
 		expect(submissionSource).not.toContain('save_programming_exercise_code')
 		expect(submissionSource).toContain('msg.file || msg.stream || msg.channel')
-		expect(submissionSource).toContain("testCase.output || '—'")
+		expect(submissionSource).toContain("selectedTestResult.output || '—'")
 	})
 })

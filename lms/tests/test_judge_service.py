@@ -91,6 +91,18 @@ class TestJudgeService(TestCase):
 			"status": "Failed", "hidden": 1,
 		})
 
+	@patch("lms.lms.judge_service._test_cases")
+	@patch("lms.lms.judge_service.frappe.get_doc")
+	def test_public_failure_keeps_exact_input_and_runtime_error(self, get_doc, test_cases):
+		test_cases.return_value = [{"input": "0\n", "expected_output": "1", "hidden": False}]
+		doc = SimpleNamespace(judge_request_id=None, exercise="EX-1", set=Mock(), append=Mock(), save=Mock())
+		_apply_result(doc, {"status": "RUNTIME_ERROR", "cases": [
+			{"index": 1, "status": "Runtime Error", "stderr": 'File "main.py", line 2\nZeroDivisionError'}
+		]})
+		assert doc.append.call_args.args[1]["input"] == "0\n"
+		assert doc.append.call_args.args[1]["hidden"] == 0
+		assert "ZeroDivisionError" in doc.compiler_message
+
 	@patch("lms.lms.judge_service.requests.post")
 	@patch("lms.lms.judge_service.frappe.get_doc")
 	@patch("lms.lms.judge_service._get_settings")
@@ -149,6 +161,17 @@ class TestPackageJudgeService(TestCase):
 		assert doc.compiler_message is None
 		doc.append.assert_not_called()
 		doc.set.assert_called_once_with("test_cases", [])
+
+	@patch("lms.lms.judge_service.frappe.get_doc")
+	def test_package_failure_uses_versioned_case_id_and_keeps_one_input(self, get_doc):
+		get_doc.return_value = SimpleNamespace(cases='[{"case_id":"secret/01","input":"0\\n","expected_output":"private answer","hidden":true}]')
+		doc = self.make_doc()
+		_apply_result(doc, self.result())
+		doc.append.assert_called_once()
+		feedback = doc.append.call_args.args[1]
+		assert feedback["input"] == "0\n"
+		assert feedback["expected_output"] == ""
+		assert feedback["status"] == "Failed"
 
 	@patch("lms.lms.judge_service.frappe.get_doc")
 	def test_rejects_old_attempt_wrong_version_and_unknown_case(self, get_doc):

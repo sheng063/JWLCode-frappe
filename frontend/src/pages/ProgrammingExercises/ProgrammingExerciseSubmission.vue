@@ -201,64 +201,68 @@
 					<div v-if="activeTestPanel === 'cases'" class="p-5">
 					<div v-if="exercise.doc?.test_cases?.length">
 						<div class="case-tabs" aria-label="测试用例">
-							<button v-for="(testCase, index) in exercise.doc.test_cases" :key="testCase.name || index" class="case-tab" :class="{ 'case-tab-active': selectedCaseIndex === index }" :aria-pressed="selectedCaseIndex === index" @click="selectedCaseIndex = index">Case {{ index + 1 }}</button>
+							<button v-for="(testCase, index) in exercise.doc.test_cases" :key="testCase.name || index" class="case-tab" :class="{ 'case-tab-active': selectedCaseIndex === index }" :aria-pressed="selectedCaseIndex === index" @click="selectedCaseIndex = index">
+								<span v-if="publicCasePassed(index)" class="lucide-square-check case-passed-icon" role="img" aria-label="已通过" />
+								用例 {{ index + 1 }}
+							</button>
 						</div>
 						<div v-if="selectedCase" class="case-fields">
-							<div><div class="case-field-label">{{ __('Input') }}</div><pre class="test-case-value">{{ selectedCase.input || '—' }}</pre></div>
-							<div><div class="case-field-label">{{ __('Expected Output') }}</div><pre class="test-case-value">{{ selectedCase.expected_output }}</pre></div>
+							<div><div class="case-field-label">{{ __('输入') }}</div><pre class="test-case-value">{{ selectedCase.input || '—' }}</pre></div>
+							<div><div class="case-field-label">{{ __('样例输出') }}</div><pre class="test-case-value">{{ selectedCase.expected_output }}</pre></div>
 						</div>
 					</div>
-					<div v-else class="text-sm text-ink-gray-6">{{ __('No test cases available.') }}</div>
+					<div v-else class="text-sm text-ink-gray-6">{{ __('暂无测试用例。') }}</div>
 				</div>
 				<div v-else class="p-5">
 					<div v-if="resultMessage" class="result-notice mb-5" :class="`result-notice-${resultMessage.tone}`"><div class="font-semibold">{{ resultMessage.title }}</div><div v-if="resultMessage.detail" class="mt-2 whitespace-pre-wrap font-mono text-sm">{{ resultMessage.detail }}</div></div>
-					<div v-if="testCases.length" class="divide-y">
-					<div
-						v-for="(testCase, index) in testCases"
-						:key="testCase.input"
-						class="py-3 first:pt-0"
-					>
+					<ProgrammingErrorDiagnostic v-if="error" :message="errorMessage" :code="executedCode" />
+					<div v-if="testCases.length" class="test-results">
+					<div class="case-tabs" aria-label="测试结果用例">
+						<button v-for="(result, index) in testCases" :key="index" class="case-tab" :class="{ 'case-tab-active': selectedResultIndex === index }" :aria-pressed="selectedResultIndex === index" @click="selectedResultIndex = index">
+							<span v-if="!result.hidden && result.status === 'Passed'" class="lucide-square-check case-passed-icon" role="img" aria-label="已通过" />
+							{{ result.hidden ? __('失败用例') : __('用例 {0}').format(index + 1) }}
+						</button>
+					</div>
+					<div v-if="selectedTestResult">
 						<div class="flex items-center mb-3">
 							<span class="text-ink-gray-9">
-								{{ testCase.hidden ? __('Failed hidden test') : __('Test {0}').format(index + 1) }} -
+								{{ selectedTestResult.hidden ? __('失败用例') : __('测试用例 {0}').format(selectedResultIndex + 1) }} -
 							</span>
 							<span
 								class="font-semibold ms-2 me-1"
 								:class="
-									testCase.status === 'Passed'
+									selectedTestResult.status === 'Passed'
 										? 'text-ink-green-3'
 										: 'text-ink-red-3'
 								"
 							>
-								{{ testCase.status }}
+								{{ submissionStatusLabel(selectedTestResult.status) }}
 							</span>
 						</div>
-						<div class="grid gap-4 sm:grid-cols-3">
-							<div v-if="testCase.input" class="space-y-2">
+						<div class="case-fields test-result-fields">
+							<div v-if="selectedTestResult.input != null" class="space-y-2">
 								<div class="text-xs text-ink-gray-7">
-									{{ __('Input') }}
+									{{ __('输入') }}
 								</div>
-								<pre class="test-case-value">{{ testCase.input }}</pre>
+								<pre class="test-case-value">{{ selectedTestResult.input }}</pre>
 							</div>
 							<div class="space-y-2">
 								<div class="text-xs text-ink-gray-7">
-									{{ __('Your Output') }}
+									{{ __('我的输出') }}
 								</div>
-								<div class="text-ink-gray-9 whitespace-pre-wrap">
-									{{ testCase.output || '—' }}
-								</div>
+								<pre class="test-case-value">{{ selectedTestResult.output || '—' }}</pre>
 							</div>
 							<div class="space-y-2">
 								<div class="text-xs text-ink-gray-7">
-									{{ __('Expected Output') }}
+									{{ __('样例输出') }}
 								</div>
-								<pre class="test-case-value">{{ testCase.expected_output }}</pre>
+								<pre class="test-case-value">{{ selectedTestResult.expected_output }}</pre>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div v-else class="text-sm text-ink-gray-6 mt-4">
-					{{ __('Run or submit your code to view the test results.') }}
+				<div v-else-if="!resultMessage" class="text-sm text-ink-gray-6 mt-4">
+					{{ __('运行或提交代码以查看测试结果。') }}
 				</div>
 				</div>
 				</template>
@@ -269,7 +273,8 @@
 </template>
 <script setup lang="ts">
 import ProgrammingStatement from '@/components/ProgrammingStatement.vue'
-import { submissionStatusLabels } from '@/utils/programmingSubmissionStatus'
+import ProgrammingErrorDiagnostic from '@/components/ProgrammingErrorDiagnostic.vue'
+import { submissionStatusLabel, submissionStatusLabels } from '@/utils/programmingSubmissionStatus'
 import ProgrammingSubmissionDetail from '@/components/ProgrammingSubmissionDetail.vue'
 import ProgrammingSubmissionHistory from '@/components/ProgrammingSubmissionHistory.vue'
 import {
@@ -398,11 +403,22 @@ const codeLanguageOptions = [
 const output = ref<string | null>(null)
 const error = ref<boolean | null>(null)
 const errorMessage = ref<string | null>(null)
+const executedCode = ref('')
 const testCaseSection = ref<HTMLElement | null>(null)
 const testCases = ref<TestCase[]>([])
 const activeTestPanel = ref<'cases' | 'results'>('cases')
 const testPanelCollapsed = ref(false)
 const selectedCaseIndex = ref(0)
+const selectedResultIndex = ref(0)
+const selectedTestResult = computed(() => testCases.value[selectedResultIndex.value])
+watch(testCases, () => { selectedResultIndex.value = 0 })
+const publicCasePassed = (index: number) => {
+	const result = testCases.value[index]
+	const sample = exercise.doc?.test_cases?.[index]
+	return result?.status === 'Passed' && !result.hidden && sample
+		&& (result.input || '') === (sample.input || '')
+		&& result.expected_output === sample.expected_output
+}
 const selectTestPanel = (panel: 'cases' | 'results') => {
 	activeTestPanel.value = panel
 	testPanelCollapsed.value = false
@@ -796,6 +812,10 @@ const submitCode = async () => {
 		language: selectedLanguage.value,
 	})
 	submitting.value = true
+	executedCode.value = code.value || ''
+	error.value = false
+	errorMessage.value = null
+	resultMessage.value = null
 	try {
 		if (exercise.doc?.evaluation_mode === 'Judge Service') {
 			await createJudgeSubmission()
@@ -814,6 +834,7 @@ const runCodeOnly = async () => {
 	if (!exercise.doc || exerciseLoadError.value || running.value || submitting.value) return
 	code.value = codeEditor.value?.getValue() ?? code.value
 	running.value = true
+	executedCode.value = code.value || ''
 	error.value = false
 	errorMessage.value = null
 	try {
@@ -826,7 +847,7 @@ const runCodeOnly = async () => {
 	} catch (e: any) {
 		error.value = true
 		errorMessage.value = e?.messages?.[0] || e?.message || String(e)
-		showResult('error', __('Unable to run code'), errorMessage.value)
+		showResult('error', __('代码运行失败'), errorMessage.value)
 	} finally {
 		running.value = false
 	}
@@ -847,21 +868,26 @@ const runJudgeCode = async () => {
 	if (result.compiler_message) {
 		error.value = true
 		errorMessage.value = result.compiler_message
-		showResult('error', __('Compilation Error'), result.compiler_message)
+		showResult('error', submissionStatusLabel(result.status), result.compiler_message)
 	}
 	testCases.value = (result.cases || []).map((item: any) => {
 		const testCase = exercise.doc?.test_cases?.[item.index - 1]
 		return {
 			input: testCase?.input || '',
-			output: (item.stdout || '').trim(),
+			output: item.stdout || '',
 			expected_output: testCase?.expected_output || '',
-			status: item.status === 'Accepted' ? 'Passed' : 'Failed',
+			status: item.status === 'Accepted' ? 'Passed' : item.status,
 		}
 	})
 	if (!result.compiler_message) {
 		if (!testCases.value.length || !['ACCEPTED', 'WRONG_ANSWER'].includes(result.status)) {
-			const status = result.cases?.find((item: any) => item.status !== 'Accepted')?.status || result.status
-			showResult('error', __('Unable to run code'), submissionStatusLabels[status] || status)
+			const status = result.status
+			error.value = true
+			errorMessage.value = (result.cases || [])
+				.filter((item: any) => item.status !== 'Accepted' && (item.stderr || item.compile_output))
+				.map((item: any) => `测试用例 ${item.index}：\n${item.stderr || item.compile_output}`)
+				.join('\n\n') || null
+			showResult('error', submissionStatusLabel(status), errorMessage.value)
 		} else showTestCaseSummary()
 	}
 }
@@ -881,7 +907,7 @@ const createJudgeSubmission = async () => {
 	if (submissionName) openSubmission(submissionName)
 	fetchSubmission(submissionName)
 	pollJudgeStatus(submissionName)
-	showResult('info', __('Submission queued'), __('Your code is being evaluated.'))
+	showResult('info', __('提交已进入队列'), __('代码正在评测中。'))
 }
 
 const pollJudgeStatus = (submissionName: string) => {
@@ -896,12 +922,13 @@ const pollJudgeStatus = (submissionName: string) => {
 			if (result.compiler_message) {
 				error.value = true
 				errorMessage.value = result.compiler_message
-				showResult('error', __('Compilation Error'), result.compiler_message)
+				showResult('error', submissionStatusLabel(result.status), result.compiler_message)
 			}
 			if (['Queued', 'Compiling', 'Running'].includes(result.status)) {
 				pollJudgeStatus(submissionName)
 			} else if (!result.compiler_message) {
-				showResult(result.status === 'Passed' ? 'success' : 'error', result.status === 'Passed' ? __('All tests passed') : __('Submission failed'))
+				error.value = ['Runtime Error', 'Compilation Error'].includes(result.status)
+				showResult(result.status === 'Passed' ? 'success' : 'error', submissionStatusLabel(result.status))
 			}
 		} catch (e) {
 			console.error('Unable to refresh judge status', e)
@@ -918,9 +945,10 @@ const runCode = async () => {
 	}
 
 	for (const test_case of exercise.doc.test_cases) {
+		errorMessage.value = null
 		let result = await execute(test_case.input)
 		if (error.value) {
-			errorMessage.value = result
+			testCases.value.push({ input: test_case.input, output: result, expected_output: test_case.expected_output, status: 'Failed' })
 			break
 		} else {
 			output.value = result
@@ -934,13 +962,13 @@ const runCode = async () => {
 			status: status,
 		})
 	}
-	if (error.value) showResult('error', __('Execution Error'), errorMessage.value)
+	if (error.value) showResult('error', __('运行出错'), errorMessage.value)
 	else showTestCaseSummary()
 }
 
 const showTestCaseSummary = () => {
 	const passed = testCases.value.filter((testCase) => testCase.status === 'Passed').length
-	showResult(passed === testCases.value.length ? 'success' : 'error', passed === testCases.value.length ? __('All tests passed') : __('Some tests failed'), __('Passed {0} of {1} test cases.').format(passed, testCases.value.length))
+	showResult(passed === testCases.value.length ? 'success' : 'error', passed === testCases.value.length ? __('全部测试通过') : __('部分测试未通过'), __('通过 {0} / {1} 个测试用例。').format(passed, testCases.value.length))
 }
 
 const showResult = (tone: 'success' | 'error' | 'info', title: string, detail: string | null = null) => {
@@ -964,10 +992,10 @@ const createSubmission = async () => {
 		} else {
 			fetchSubmission(props.submissionID)
 		}
-		showTestCaseSummary()
+		if (!error.value) showTestCaseSummary()
 	} catch (error: any) {
 		console.error('Error creating submission:', error)
-		showResult('error', __('Unable to submit code'), String(error))
+		showResult('error', __('代码提交失败'), String(error))
 		throw error
 	}
 }
@@ -998,7 +1026,7 @@ const execute = (stdin = ''): Promise<string> => {
 				if (typeof msg.stdout !== 'undefined') finalOutput = messageText(msg.stdout)
 
 				if (msg.msgtype === 'stderr' || (msg.msgtype === 'write' && stream === 'stderr')) {
-					errorMessage.value = messageText(msg.data ?? msg.output)
+					errorMessage.value = (errorMessage.value || '') + messageText(msg.data ?? msg.output)
 				}
 
 				if (msg.msgtype === 'exitstatus') {
@@ -1013,8 +1041,8 @@ const execute = (stdin = ''): Promise<string> => {
 			if (!hasExited) {
 				running.value = false
 				error.value = true
-				errorMessage.value = 'Execution timed out.'
-				reject('Execution timed out.')
+				errorMessage.value = '执行超时。'
+				reject('执行超时。')
 			}
 		}, 20000)
 	})
@@ -1171,11 +1199,13 @@ usePageMeta(() => {
 .test-panel-tab-active { color: #262626; font-weight: 600; }
 .test-panel-tab span { color: #22c55e; }
 .case-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 22px; }
-.case-tab { padding: 9px 16px; border-radius: 8px; color: #666; font-size: 14px; font-weight: 500; white-space: nowrap; }
+.case-tab { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 8px; color: #666; font-size: 14px; font-weight: 500; white-space: nowrap; }
 .case-tab:hover, .case-tab-active { background: #f2f2f4; color: #262626; }
-.case-fields { display: grid; gap: 20px; }
+.case-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.test-result-fields > div { min-width: 0; width: 100%; }
+.case-passed-icon { color: #16a34a; font-size: 14px; flex-shrink: 0; }
 .case-field-label { color: #888; font-size: 13px; margin-bottom: 9px; }
-.test-case-value { border-radius: 9px; background: #f3f3f5; padding: 13px 16px; font-size: 14px; line-height: 1.6; }
+.test-case-value { min-height: 48px; border-radius: 9px; background: #f3f3f5; padding: 13px 16px; font-size: 14px; line-height: 1.6; }
 .programming-resizer { background: transparent; }
 .resizer-vertical { width: 8px; }
 .resizer-horizontal { height: 8px; }

@@ -1,0 +1,768 @@
+{
+ "summary": {
+  "course": "c1-2024",
+  "status": "committed",
+  "lessons_updated": 81,
+  "still_dangling": [],
+  "sample": [
+   {
+    "lesson": "1083 四位数中有偶数位吗",
+    "title": "四位数中有偶数位吗",
+    "old_exercise": "v6luk08po7",
+    "new_exercise": "kfhngbbas2",
+    "new_exercise_number": null,
+    "lesson_type_after": "Programming",
+    "match": "exact"
+   },
+   {
+    "lesson": "1082 苹果和虫子",
+    "title": "苹果和虫子",
+    "old_exercise": "utcaoqvpoe",
+    "new_exercise": "kf54nre2vv",
+    "new_exercise_number": null,
+    "lesson_type_after": "Programming",
+    "match": "exact"
+   },
+   {
+    "lesson": "1081 条件分支小结",
+    "title": "条件分支小结",
+    "old_exercise": "ute797c3bs",
+    "new_exercise": "kfo7327uc5",
+    "new_exercise_number": null,
+    "lesson_type_after": "Programming",
+    "match": "exact"
+   }
+  ]
+ },
+ "detail": [
+  {
+   "lesson": "1083 四位数中有偶数位吗",
+   "title": "四位数中有偶数位吗",
+   "old_exercise": "v6luk08po7",
+   "new_exercise": "kfhngbbas2",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1082 苹果和虫子",
+   "title": "苹果和虫子",
+   "old_exercise": "utcaoqvpoe",
+   "new_exercise": "kf54nre2vv",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1081 条件分支小结",
+   "title": "条件分支小结",
+   "old_exercise": "ute797c3bs",
+   "new_exercise": "kfo7327uc5",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1080 一个月有多少天",
+   "title": "一个月有多少天",
+   "old_exercise": "utcsivm7ur",
+   "new_exercise": "kfuifrpuj9",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1079 数字排序",
+   "title": "数字排序",
+   "old_exercise": "utccau7cm9",
+   "new_exercise": "kfgr6rf587",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1078 成绩判定问题",
+   "title": "成绩判定问题",
+   "old_exercise": "utdtt1mls2",
+   "new_exercise": "keendq2bij",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1077 长方形的周长",
+   "title": "长方形的周长",
+   "old_exercise": "utdb54oled",
+   "new_exercise": "kg33083fr6",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1076 输出保留3位小数的浮点数",
+   "title": "输出保留3位小数的浮点数",
+   "old_exercise": "utdoukrstp",
+   "new_exercise": "kfcg1ldbkf",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1075 五则计算器",
+   "title": "五则计算器",
+   "old_exercise": "ute1jfgagv",
+   "new_exercise": "kfqevcouae",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1074 数字的提取",
+   "title": "数字的提取",
+   "old_exercise": "utd63atnil",
+   "new_exercise": "kfgjfajes5",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1073 蒜头君上班",
+   "title": "蒜头君上班",
+   "old_exercise": "v6j7glb4mg",
+   "new_exercise": "kfljm17f2v",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1072 二月有多少天",
+   "title": "二月有多少天",
+   "old_exercise": "utd4fkgk4j",
+   "new_exercise": "kejmao60cm",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1071 肥胖问题",
+   "title": "肥胖问题",
+   "old_exercise": "utda9vjook",
+   "new_exercise": "kej1qhejvj",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1070 考试等级划分",
+   "title": "考试等级划分",
+   "old_exercise": "utdbt4cuei",
+   "new_exercise": "ker865nd0i",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1069 半价票问题",
+   "title": "半价票问题",
+   "old_exercise": "utduonlkn9",
+   "new_exercise": "kebflng8e4",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1068 试一试逻辑运算",
+   "title": "试一试逻辑运算",
+   "old_exercise": "uteklq4jju",
+   "new_exercise": "kfb2ip1dfv",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1067 约数还是倍数",
+   "title": "约数还是倍数",
+   "old_exercise": "utd430m9i3",
+   "new_exercise": "kg11d43p81",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1066 输出奇偶性",
+   "title": "输出奇偶性",
+   "old_exercise": "utdlhi217c",
+   "new_exercise": "kfdagu7f82",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1065 除法的正确运算",
+   "title": "除法的正确运算",
+   "old_exercise": "utd6ps5dfp",
+   "new_exercise": "kehot8p4r8",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1064 图灵测试的简单模拟",
+   "title": "图灵测试的简单模拟",
+   "old_exercise": "utee5opcdq",
+   "new_exercise": "kfpibidp3b",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1063 bool 类型",
+   "title": "bool 类型",
+   "old_exercise": "utdcs40k25",
+   "new_exercise": "kedgodlk0o",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1062 验一验关系表达式",
+   "title": "验一验关系表达式",
+   "old_exercise": "ute4j91n2u",
+   "new_exercise": "kft2ldmv91",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1061 买奶糖",
+   "title": "买奶糖",
+   "old_exercise": "v6ga8c0c1u",
+   "new_exercise": "ketd3kq9fj",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1060 数鸡兔",
+   "title": "数鸡兔",
+   "old_exercise": "utefsltlk3",
+   "new_exercise": "kfeq28895j",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1059 实现蜗牛爬树问题",
+   "title": "实现蜗牛爬树问题",
+   "old_exercise": "utd3vtjaer",
+   "new_exercise": "kfb1vm88lq",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1058 实现：角的个数",
+   "title": "实现：角的个数",
+   "old_exercise": "utej3pdb4o",
+   "new_exercise": "kfaaokhk4u",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1057 正数四舍五入的实现",
+   "title": "正数四舍五入的实现",
+   "old_exercise": "ute3m4hqoa",
+   "new_exercise": "kg44c3uvm5",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1056 用整型变量存储实数会怎么样呢",
+   "title": "用整型变量存储实数会怎么样呢",
+   "old_exercise": "utfiej43ns",
+   "new_exercise": "kg0hjpra6k",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "fuzzy"
+  },
+  {
+   "lesson": "1055 求和",
+   "title": "求和",
+   "old_exercise": "v6b6tafkil",
+   "new_exercise": "kf6bmdvj9g",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1054 程序改错",
+   "title": "程序改错",
+   "old_exercise": "v6bp54a5ve",
+   "new_exercise": "kefebbp3em",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1053 取数位",
+   "title": "取数位",
+   "old_exercise": "ute2dfl2ob",
+   "new_exercise": "kf85lacjie",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1052 四则运算小练",
+   "title": "四则运算小练",
+   "old_exercise": "utejugfq58",
+   "new_exercise": "kfhs376dfm",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1051 捡贝壳",
+   "title": "捡贝壳",
+   "old_exercise": "utemgtat7h",
+   "new_exercise": "keml8tmv8f",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1050 A + B 问题",
+   "title": "A + B 问题",
+   "old_exercise": "utfjb5kbnc",
+   "new_exercise": "kea6ld78i3",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1049 用变量实现更多运算",
+   "title": "用变量实现更多运算",
+   "old_exercise": "uteph80oss",
+   "new_exercise": "kfvsoi19nv",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1048 变量的声明与使用",
+   "title": "变量的声明与使用",
+   "old_exercise": "utehfga7i1",
+   "new_exercise": "ked1k239je",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1047 多组乘法计算",
+   "title": "多组乘法计算",
+   "old_exercise": "utfljv2rnp",
+   "new_exercise": "keiva42u92",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1046 再算运算结果",
+   "title": "再算运算结果",
+   "old_exercise": "uteeqevduu",
+   "new_exercise": "kg2ndlq4rl",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1045 绝对值排序",
+   "title": "绝对值排序",
+   "old_exercise": "v6loscddhc",
+   "new_exercise": "keprm7qpm1",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0699 计算简单除法",
+   "title": "计算简单除法",
+   "old_exercise": "v6720ji7qf",
+   "new_exercise": "keokrritn0",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1042 蒜头君的信息卡",
+   "title": "蒜头君的信息卡",
+   "old_exercise": "utfjeog1r1",
+   "new_exercise": "kfkqk69fl9",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1041 计算运算结果",
+   "title": "计算运算结果",
+   "old_exercise": "utfqfvvb28",
+   "new_exercise": "keo88kgfi0",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1040 你好小猫",
+   "title": "你好小猫",
+   "old_exercise": "utf6700tk8",
+   "new_exercise": "kf4d49lgsu",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "fuzzy"
+  },
+  {
+   "lesson": "1039 让我们一起说你好",
+   "title": "让我们一起说你好",
+   "old_exercise": "earuau38q7",
+   "new_exercise": "kfe4vr3359",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "fuzzy"
+  },
+  {
+   "lesson": "1038 程序设计 T3",
+   "title": "程序设计 T3",
+   "old_exercise": "v6ma4lm48b",
+   "new_exercise": "kehmnl0pgp",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1037 程序设计 T2",
+   "title": "程序设计 T2",
+   "old_exercise": "v6m4kv95cm",
+   "new_exercise": "kegq8kgs0k",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1025 邮费",
+   "title": "邮费",
+   "old_exercise": "v6l5sqdbsg",
+   "new_exercise": "kg0d571tdk",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1022 蒜头君当裁判",
+   "title": "蒜头君当裁判",
+   "old_exercise": "v6l1la2hvu",
+   "new_exercise": "kfjb2qa0nj",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1020 分段电费",
+   "title": "分段电费",
+   "old_exercise": "v6lbo68gir",
+   "new_exercise": "kek6of8227",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1003 求面积的问题",
+   "title": "求面积的问题",
+   "old_exercise": "v6k6i2n5q9",
+   "new_exercise": "kf8rj7u3cc",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1002 长方形的面积",
+   "title": "长方形的面积",
+   "old_exercise": "v6k6bukkuk",
+   "new_exercise": "kg3qgl3efq",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0997 蒜园门票",
+   "title": "蒜园门票",
+   "old_exercise": "v6kiiedccf",
+   "new_exercise": "kfm63fp78c",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0996 温度转换",
+   "title": "温度转换",
+   "old_exercise": "v6kvshhrdu",
+   "new_exercise": "kfprt0u9je",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0972 一个月有几天",
+   "title": "一个月有几天",
+   "old_exercise": "v6joshafrq",
+   "new_exercise": "kfua5ibpto",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0971 7 的奇倍数",
+   "title": "7 的奇倍数",
+   "old_exercise": "v6jfjj375r",
+   "new_exercise": "kf4ats9s3p",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0970 计算规则",
+   "title": "计算规则",
+   "old_exercise": "v6jsgpmmn4",
+   "new_exercise": "kenngq3gpi",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0969 包裹托运",
+   "title": "包裹托运",
+   "old_exercise": "v6jigmnn68",
+   "new_exercise": "kec10kmdr2",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0944 今天会下雨吗",
+   "title": "今天会下雨吗",
+   "old_exercise": "v6iv0i37if",
+   "new_exercise": "kemala86v4",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0943 是否为倍数关系",
+   "title": "是否为倍数关系",
+   "old_exercise": "v6ig5r2p5h",
+   "new_exercise": "kfavtt014a",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0942 求绝对值",
+   "title": "求绝对值",
+   "old_exercise": "v6h7ihrd1p",
+   "new_exercise": "kf7kc867kt",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0938 蒜头君想休息",
+   "title": "蒜头君想休息",
+   "old_exercise": "v6hamo72va",
+   "new_exercise": "kfmvju9a5v",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0937 数学考试",
+   "title": "数学考试",
+   "old_exercise": "v6hgasvmfk",
+   "new_exercise": "kffka4gbj6",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0912 整除与取模的应用",
+   "title": "整除与取模的应用",
+   "old_exercise": "v6gq2ia5o8",
+   "new_exercise": "kg4blsagv2",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0904 年龄的计算",
+   "title": "年龄的计算",
+   "old_exercise": "v6gfh5o0a6",
+   "new_exercise": "kf3oivnhrj",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0871 蒜头君吃苹果2",
+   "title": "蒜头君吃苹果2",
+   "old_exercise": "v6eh31soei",
+   "new_exercise": "kfjo4ciu2v",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0870 日历",
+   "title": "日历",
+   "old_exercise": "v6et6da6dv",
+   "new_exercise": "kf993k3hmv",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0749 卡车运输货物",
+   "title": "卡车运输货物",
+   "old_exercise": "v694d9r8me",
+   "new_exercise": "keqjvr582h",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1036 程序设计 T1",
+   "title": "程序设计 T1",
+   "old_exercise": "v6mghbjc15",
+   "new_exercise": "kege5fhh73",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1024 幸运的数字",
+   "title": "幸运的数字",
+   "old_exercise": "v6lbr0ocoa",
+   "new_exercise": "kfs6qm7vks",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1023 星期问题",
+   "title": "星期问题",
+   "old_exercise": "v6lvoo0vrt",
+   "new_exercise": "kfre4m6ivh",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "1001 按要求输出",
+   "title": "按要求输出",
+   "old_exercise": "v6kbgud1bd",
+   "new_exercise": "kebl97o9ru",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0966 固定差值判断",
+   "title": "固定差值判断",
+   "old_exercise": "v6j1e6fqpd",
+   "new_exercise": "kelrr9jcaf",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0945 选礼物",
+   "title": "选礼物",
+   "old_exercise": "v6i6nunh6h",
+   "new_exercise": "kftqbig2nv",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0914 求不同高度的大气压值",
+   "title": "求不同高度的大气压值",
+   "old_exercise": "v6gruc9131",
+   "new_exercise": "kf6qibso23",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0913 贪吃蛇吃苹果",
+   "title": "贪吃蛇吃苹果",
+   "old_exercise": "v6gu9rqbmn",
+   "new_exercise": "kfnojsnqle",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0911 开学典礼",
+   "title": "开学典礼",
+   "old_exercise": "v6gfbf3khd",
+   "new_exercise": "keq1dbi38g",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0872 蒜头君买文具",
+   "title": "蒜头君买文具",
+   "old_exercise": "v6e3gapu6b",
+   "new_exercise": "kfk8pth7kh",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0852 蒜头君吃苹果",
+   "title": "蒜头君吃苹果",
+   "old_exercise": "v6dq72tt7o",
+   "new_exercise": "kfid3jlp0a",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0843 小数的除法",
+   "title": "小数的除法",
+   "old_exercise": "v6d1ps7f4m",
+   "new_exercise": "kfr1vn8ht6",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0842 天花板上的小灯",
+   "title": "天花板上的小灯",
+   "old_exercise": "v6d068mb68",
+   "new_exercise": "kfn1hvj4qj",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  },
+  {
+   "lesson": "0819 复杂取数位",
+   "title": "复杂取数位",
+   "old_exercise": "v6cnjrro0t",
+   "new_exercise": "kek8n2c9lf",
+   "new_exercise_number": null,
+   "lesson_type_after": "Programming",
+   "match": "exact"
+  }
+ ]
+}

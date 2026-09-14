@@ -142,7 +142,11 @@ ASSET_URL = re.compile(r"(?:https?://|//)[^\s\"'<>\\]+|/(?:private/)?files/[^\s\
 
 
 def local_asset_url(url):
-	parts = urlsplit(url)
+	try:
+		parts = urlsplit(url)
+	except ValueError:
+		# Code examples can resemble scheme-relative URLs (e.g. //array[index]).
+		return None
 	if parts.scheme or parts.netloc:
 		if parts.scheme not in ("", "http", "https"):
 			return None

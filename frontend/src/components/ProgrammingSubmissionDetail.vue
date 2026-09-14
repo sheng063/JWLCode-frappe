@@ -10,7 +10,7 @@
     <div>执行用时<strong>{{ doc.time_ms == null ? '暂无数据' : `${doc.time_ms} ms` }}</strong></div>
     <div>消耗内存<strong>{{ doc.memory_kb == null ? '暂无数据' : `${(doc.memory_kb / 1024).toFixed(2)} MB` }}</strong></div>
    </div>
-   <template v-else><h3>关键报错信息</h3><pre class="error-message">{{ doc.compiler_message || labels[doc.status] || doc.status }}</pre><h3>最后执行的输入</h3><pre>{{ failedCase?.input ?? '暂无可展示的输入' }}</pre></template>
+   <template v-else><h3>关键报错信息</h3><pre class="error-message">{{ labels[doc.status] || doc.status }}</pre><ProgrammingErrorDiagnostic v-if="['Runtime Error', 'Compilation Error'].includes(doc.status) || doc.compiler_message" :message="doc.compiler_message" :code="doc.code || ''" /><h3>最后执行的输入</h3><pre>{{ failedCase?.input ?? '暂无可展示的输入' }}</pre></template>
    <div class="flex items-center justify-between gap-3 mt-6 mb-3"><span>代码 · {{ doc.language }}</span><div class="flex gap-3"><button aria-label="复制提交代码" @click="copy">{{ copied ? '已复制' : '复制' }}</button><button @click="emit('restore', doc)">复制到编辑器</button></div></div>
    <p v-if="copyError" role="alert">复制失败，请重试或手动选择代码复制。</p>
    <pre class="source"><code>{{ doc.code }}</code></pre>
@@ -18,6 +18,7 @@
  </section>
 </template>
 <script setup lang="ts">
+import ProgrammingErrorDiagnostic from '@/components/ProgrammingErrorDiagnostic.vue'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { submissionStatusLabels as labels } from '@/utils/programmingSubmissionStatus'
 import { call } from 'frappe-ui'

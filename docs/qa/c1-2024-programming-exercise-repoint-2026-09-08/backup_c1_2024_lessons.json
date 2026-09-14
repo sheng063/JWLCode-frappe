@@ -1,0 +1,650 @@
+[
+ {
+  "name": "0870 日历",
+  "title": "日历",
+  "chapter": "0865 奇妙的编程思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6et6da6dv\"}}]}",
+  "modified": "2026-09-05 11:53:01.673174"
+ },
+ {
+  "name": "1025 邮费",
+  "title": "邮费",
+  "chapter": "1021 switch 与分支综合练习思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6l5sqdbsg\"}}]}",
+  "modified": "2026-09-05 11:53:01.988431"
+ },
+ {
+  "name": "1055 求和",
+  "title": "求和",
+  "chapter": "0780 第三讲：编程的五则运算",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868405,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6b6tafkil\"},\"id\":\"iRwt6sLE\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.405355"
+ },
+ {
+  "name": "0945 选礼物",
+  "title": "选礼物",
+  "chapter": "0939 单路/双路分支思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6i6nunh6h\"}}]}",
+  "modified": "2026-09-05 10:34:22.618614"
+ },
+ {
+  "name": "1051 捡贝壳",
+  "title": "捡贝壳",
+  "chapter": "0721 第二讲：信息的存储",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868350,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utemgtat7h\"},\"id\":\"3TvQfZGV\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.350144"
+ },
+ {
+  "name": "1053 取数位",
+  "title": "取数位",
+  "chapter": "0780 第三讲：编程的五则运算",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868400,\"blocks\":[{\"id\":\"LAWtQMBP\",\"type\":\"program\",\"data\":{\"exercise\":\"ute2dfl2ob\"}}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.400522"
+ },
+ {
+  "name": "1060 数鸡兔",
+  "title": "数鸡兔",
+  "chapter": "0844 第四讲：奇妙的编程",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868450,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utefsltlk3\"},\"id\":\"WEOl2qYM\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.450965"
+ },
+ {
+  "name": "1061 买奶糖",
+  "title": "买奶糖",
+  "chapter": "0873 第五讲：算法与编程",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868499,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6ga8c0c1u\"},\"id\":\"wm2RjXEa\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.499224"
+ },
+ {
+  "name": "1063 bool 类型",
+  "title": "bool 类型",
+  "chapter": "0915 第六讲：单路/双路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868521,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utdcs40k25\"},\"id\":\"6gtWOieO\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.521503"
+ },
+ {
+  "name": "0911 开学典礼",
+  "title": "开学典礼",
+  "chapter": "0906 算法与编程思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6gfbf3khd\"}}]}",
+  "modified": "2026-09-05 10:34:22.465642"
+ },
+ {
+  "name": "0937 数学考试",
+  "title": "数学考试",
+  "chapter": "0915 第六讲：单路/双路分支",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6hgasvmfk\"}}]}",
+  "modified": "2026-09-05 11:53:01.772619"
+ },
+ {
+  "name": "0942 求绝对值",
+  "title": "求绝对值",
+  "chapter": "0939 单路/双路分支思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6h7ihrd1p\"}}]}",
+  "modified": "2026-09-05 11:53:01.789227"
+ },
+ {
+  "name": "0969 包裹托运",
+  "title": "包裹托运",
+  "chapter": "0967 多路分支思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6jigmnn68\"}}]}",
+  "modified": "2026-09-05 11:53:01.848609"
+ },
+ {
+  "name": "0970 计算规则",
+  "title": "计算规则",
+  "chapter": "0967 多路分支思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6jsgpmmn4\"}}]}",
+  "modified": "2026-09-05 11:53:01.855325"
+ },
+ {
+  "name": "0996 温度转换",
+  "title": "温度转换",
+  "chapter": "0973 第八讲：数据类型与类型转换",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6kvshhrdu\"}}]}",
+  "modified": "2026-09-05 11:53:01.900363"
+ },
+ {
+  "name": "0997 蒜园门票",
+  "title": "蒜园门票",
+  "chapter": "0973 第八讲：数据类型与类型转换",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6kiiedccf\"}}]}",
+  "modified": "2026-09-05 11:53:01.906964"
+ },
+ {
+  "name": "1020 分段电费",
+  "title": "分段电费",
+  "chapter": "1004 第九讲：switch 与分支综合练习",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6lbo68gir\"}}]}",
+  "modified": "2026-09-05 11:53:01.972357"
+ },
+ {
+  "name": "1023 星期问题",
+  "title": "星期问题",
+  "chapter": "1021 switch 与分支综合练习思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6lvoo0vrt\"}}]}",
+  "modified": "2026-09-05 10:34:22.962993"
+ },
+ {
+  "name": "1040 你好小猫",
+  "title": "你好小猫",
+  "chapter": "0677 第一讲：编程初探",
+  "lesson_type": "Programming",
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utf6700tk8\"}}]}",
+  "modified": "2026-09-06 11:40:22.707068"
+ },
+ {
+  "name": "1050 A + B 问题",
+  "title": "A + B 问题",
+  "chapter": "0721 第二讲：信息的存储",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868347,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utfjb5kbnc\"},\"id\":\"yd0JCZYT\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.347696"
+ },
+ {
+  "name": "1054 程序改错",
+  "title": "程序改错",
+  "chapter": "0780 第三讲：编程的五则运算",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868403,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6bp54a5ve\"},\"id\":\"vnU59r6G\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.403226"
+ },
+ {
+  "name": "1071 肥胖问题",
+  "title": "肥胖问题",
+  "chapter": "0946 第七讲：多路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868588,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utda9vjook\"},\"id\":\"llhmK1et\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.588895"
+ },
+ {
+  "name": "1079 数字排序",
+  "title": "数字排序",
+  "chapter": "1004 第九讲：switch 与分支综合练习",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868694,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utccau7cm9\"},\"id\":\"A8zqoJbA\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.694309"
+ },
+ {
+  "name": "0971 7 的奇倍数",
+  "title": "7 的奇倍数",
+  "chapter": "0967 多路分支思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6jfjj375r\"}}]}",
+  "modified": "2026-09-05 11:53:01.861460"
+ },
+ {
+  "name": "0819 复杂取数位",
+  "title": "复杂取数位",
+  "chapter": "0780 第三讲：编程的五则运算",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6cnjrro0t\"}}]}",
+  "modified": "2026-09-05 10:34:22.032840"
+ },
+ {
+  "name": "0843 小数的除法",
+  "title": "小数的除法",
+  "chapter": "0820 编程的五则运算思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6d1ps7f4m\"}}]}",
+  "modified": "2026-09-05 10:34:22.144327"
+ },
+ {
+  "name": "0904 年龄的计算",
+  "title": "年龄的计算",
+  "chapter": "0873 第五讲：算法与编程",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6gfh5o0a6\"}}]}",
+  "modified": "2026-09-05 11:53:01.714242"
+ },
+ {
+  "name": "1001 按要求输出",
+  "title": "按要求输出",
+  "chapter": "0998 数据类型与类型转换思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6kbgud1bd\"}}]}",
+  "modified": "2026-09-05 10:34:22.862813"
+ },
+ {
+  "name": "1024 幸运的数字",
+  "title": "幸运的数字",
+  "chapter": "1021 switch 与分支综合练习思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6lbr0ocoa\"}}]}",
+  "modified": "2026-09-05 10:34:22.968564"
+ },
+ {
+  "name": "1036 程序设计 T1",
+  "title": "程序设计 T1",
+  "chapter": "1027 第十讲：阶段测试",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6mghbjc15\"}}]}",
+  "modified": "2026-09-05 10:34:23.035412"
+ },
+ {
+  "name": "1037 程序设计 T2",
+  "title": "程序设计 T2",
+  "chapter": "1027 第十讲：阶段测试",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6m4kv95cm\"}}]}",
+  "modified": "2026-09-05 11:53:02.015527"
+ },
+ {
+  "name": "1038 程序设计 T3",
+  "title": "程序设计 T3",
+  "chapter": "1027 第十讲：阶段测试",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6ma4lm48b\"}}]}",
+  "modified": "2026-09-05 11:53:02.024264"
+ },
+ {
+  "name": "1045 绝对值排序",
+  "title": "绝对值排序",
+  "chapter": "1021 switch 与分支综合练习思维拓展",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770846737,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6loscddhc\"},\"id\":\"dhSAg7JV\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:26.738200"
+ },
+ {
+  "name": "1066 输出奇偶性",
+  "title": "输出奇偶性",
+  "chapter": "0915 第六讲：单路/双路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868528,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utdlhi217c\"},\"id\":\"leYlbo6X\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.529034"
+ },
+ {
+  "name": "1069 半价票问题",
+  "title": "半价票问题",
+  "chapter": "0946 第七讲：多路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868584,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utduonlkn9\"},\"id\":\"iCxoS4Tr\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.584129"
+ },
+ {
+  "name": "1073 蒜头君上班",
+  "title": "蒜头君上班",
+  "chapter": "0967 多路分支思维拓展",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868633,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6j7glb4mg\"},\"id\":\"xSKzPrEU\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.633421"
+ },
+ {
+  "name": "1074 数字的提取",
+  "title": "数字的提取",
+  "chapter": "0973 第八讲：数据类型与类型转换",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868648,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utd63atnil\"},\"id\":\"JK1soUfz\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.648286"
+ },
+ {
+  "name": "1075 五则计算器",
+  "title": "五则计算器",
+  "chapter": "0973 第八讲：数据类型与类型转换",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868650,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"ute1jfgagv\"},\"id\":\"ed1p6Dws\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.650659"
+ },
+ {
+  "name": "1082 苹果和虫子",
+  "title": "苹果和虫子",
+  "chapter": "1004 第九讲：switch 与分支综合练习",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868701,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utcaoqvpoe\"},\"id\":\"PAJZ3PkS\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.702004"
+ },
+ {
+  "name": "0699 计算简单除法",
+  "title": "计算简单除法",
+  "chapter": "0677 第一讲：编程初探",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788666117806,\"blocks\":[{\"id\":\"124JAB-l9H\",\"type\":\"program\",\"data\":{\"exercise\":\"v6720ji7qf\"}}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-06 11:41:58.620265"
+ },
+ {
+  "name": "0749 卡车运输货物",
+  "title": "卡车运输货物",
+  "chapter": "0721 第二讲：信息的存储",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v694d9r8me\"}}]}",
+  "modified": "2026-09-05 11:53:01.532880"
+ },
+ {
+  "name": "0852 蒜头君吃苹果",
+  "title": "蒜头君吃苹果",
+  "chapter": "0844 第四讲：奇妙的编程",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6dq72tt7o\"}}]}",
+  "modified": "2026-09-05 10:34:22.181036"
+ },
+ {
+  "name": "0872 蒜头君买文具",
+  "title": "蒜头君买文具",
+  "chapter": "0865 奇妙的编程思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6e3gapu6b\"}}]}",
+  "modified": "2026-09-05 10:34:22.280769"
+ },
+ {
+  "name": "0913 贪吃蛇吃苹果",
+  "title": "贪吃蛇吃苹果",
+  "chapter": "0906 算法与编程思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6gu9rqbmn\"}}]}",
+  "modified": "2026-09-05 10:34:22.476161"
+ },
+ {
+  "name": "0938 蒜头君想休息",
+  "title": "蒜头君想休息",
+  "chapter": "0915 第六讲：单路/双路分支",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6hamo72va\"}}]}",
+  "modified": "2026-09-05 11:53:01.778244"
+ },
+ {
+  "name": "0944 今天会下雨吗",
+  "title": "今天会下雨吗",
+  "chapter": "0939 单路/双路分支思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6iv0i37if\"}}]}",
+  "modified": "2026-09-05 11:53:01.801900"
+ },
+ {
+  "name": "0966 固定差值判断",
+  "title": "固定差值判断",
+  "chapter": "0946 第七讲：多路分支",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6j1e6fqpd\"}}]}",
+  "modified": "2026-09-05 10:34:22.705588"
+ },
+ {
+  "name": "0972 一个月有几天",
+  "title": "一个月有几天",
+  "chapter": "0967 多路分支思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6joshafrq\"}}]}",
+  "modified": "2026-09-05 11:53:01.867786"
+ },
+ {
+  "name": "1002 长方形的面积",
+  "title": "长方形的面积",
+  "chapter": "0998 数据类型与类型转换思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6k6bukkuk\"}}]}",
+  "modified": "2026-09-05 11:53:01.921609"
+ },
+ {
+  "name": "1003 求面积的问题",
+  "title": "求面积的问题",
+  "chapter": "0998 数据类型与类型转换思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6k6i2n5q9\"}}]}",
+  "modified": "2026-09-05 11:53:01.927234"
+ },
+ {
+  "name": "1022 蒜头君当裁判",
+  "title": "蒜头君当裁判",
+  "chapter": "1021 switch 与分支综合练习思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6l1la2hvu\"}}]}",
+  "modified": "2026-09-05 11:53:01.977776"
+ },
+ {
+  "name": "1041 计算运算结果",
+  "title": "计算运算结果",
+  "chapter": "0677 第一讲：编程初探",
+  "lesson_type": "Programming",
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utfqfvvb28\"}}]}",
+  "modified": "2026-09-06 11:41:03.262024"
+ },
+ {
+  "name": "1046 再算运算结果",
+  "title": "再算运算结果",
+  "chapter": "0700 编程初探思维拓展",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868292,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"uteeqevduu\"},\"id\":\"EWIJZLLe\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.294044"
+ },
+ {
+  "name": "1047 多组乘法计算",
+  "title": "多组乘法计算",
+  "chapter": "0721 第二讲：信息的存储",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868339,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utfljv2rnp\"},\"id\":\"6saUI82f\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.339680"
+ },
+ {
+  "name": "1052 四则运算小练",
+  "title": "四则运算小练",
+  "chapter": "0780 第三讲：编程的五则运算",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868397,\"blocks\":[{\"id\":\"Htv334OP\",\"type\":\"program\",\"data\":{\"exercise\":\"utejugfq58\"}}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.397464"
+ },
+ {
+  "name": "1067 约数还是倍数",
+  "title": "约数还是倍数",
+  "chapter": "0915 第六讲：单路/双路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868531,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utd430m9i3\"},\"id\":\"A6c15C9l\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.531418"
+ },
+ {
+  "name": "1070 考试等级划分",
+  "title": "考试等级划分",
+  "chapter": "0946 第七讲：多路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868586,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utdbt4cuei\"},\"id\":\"wFZUJhYB\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.586584"
+ },
+ {
+  "name": "1072 二月有多少天",
+  "title": "二月有多少天",
+  "chapter": "0946 第七讲：多路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868590,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utd4fkgk4j\"},\"id\":\"wy9Is1xl\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.591068"
+ },
+ {
+  "name": "1077 长方形的周长",
+  "title": "长方形的周长",
+  "chapter": "0973 第八讲：数据类型与类型转换",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868654,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utdb54oled\"},\"id\":\"3ch7sDKC\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.654949"
+ },
+ {
+  "name": "1078 成绩判定问题",
+  "title": "成绩判定问题",
+  "chapter": "1004 第九讲：switch 与分支综合练习",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868691,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utdtt1mls2\"},\"id\":\"b36C6RA9\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.691410"
+ },
+ {
+  "name": "1081 条件分支小结",
+  "title": "条件分支小结",
+  "chapter": "1004 第九讲：switch 与分支综合练习",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868699,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"ute797c3bs\"},\"id\":\"SoKSlccW\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.699710"
+ },
+ {
+  "name": "0871 蒜头君吃苹果2",
+  "title": "蒜头君吃苹果2",
+  "chapter": "0865 奇妙的编程思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6eh31soei\"}}]}",
+  "modified": "2026-09-05 11:53:01.679293"
+ },
+ {
+  "name": "0842 天花板上的小灯",
+  "title": "天花板上的小灯",
+  "chapter": "0820 编程的五则运算思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6d068mb68\"}}]}",
+  "modified": "2026-09-05 10:34:22.139400"
+ },
+ {
+  "name": "0943 是否为倍数关系",
+  "title": "是否为倍数关系",
+  "chapter": "0939 单路/双路分支思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6ig5r2p5h\"}}]}",
+  "modified": "2026-09-05 11:53:01.795535"
+ },
+ {
+  "name": "1042 蒜头君的信息卡",
+  "title": "蒜头君的信息卡",
+  "chapter": "0677 第一讲：编程初探",
+  "lesson_type": "Programming",
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utfjeog1r1\"}}]}",
+  "modified": "2026-09-06 11:41:40.691704"
+ },
+ {
+  "name": "1058 实现：角的个数",
+  "title": "实现：角的个数",
+  "chapter": "0844 第四讲：奇妙的编程",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868445,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utej3pdb4o\"},\"id\":\"G5d90LRY\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.445909"
+ },
+ {
+  "name": "1065 除法的正确运算",
+  "title": "除法的正确运算",
+  "chapter": "0915 第六讲：单路/双路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868526,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utd6ps5dfp\"},\"id\":\"YNZX6ArM\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.526669"
+ },
+ {
+  "name": "1068 试一试逻辑运算",
+  "title": "试一试逻辑运算",
+  "chapter": "0946 第七讲：多路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868581,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"uteklq4jju\"},\"id\":\"ZCSB2YM4\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.581279"
+ },
+ {
+  "name": "1080 一个月有多少天",
+  "title": "一个月有多少天",
+  "chapter": "1004 第九讲：switch 与分支综合练习",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868696,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utcsivm7ur\"},\"id\":\"vqHNmxnE\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.696822"
+ },
+ {
+  "name": "0912 整除与取模的应用",
+  "title": "整除与取模的应用",
+  "chapter": "0906 算法与编程思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6gq2ia5o8\"}}]}",
+  "modified": "2026-09-05 11:53:01.728782"
+ },
+ {
+  "name": "1039 让我们一起说你好",
+  "title": "让我们一起说你好",
+  "chapter": "0677 第一讲：编程初探",
+  "lesson_type": "Programming",
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"earuau38q7\"}}]}",
+  "modified": "2026-09-06 11:39:57.964793"
+ },
+ {
+  "name": "1048 变量的声明与使用",
+  "title": "变量的声明与使用",
+  "chapter": "0721 第二讲：信息的存储",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868342,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utehfga7i1\"},\"id\":\"nTWBdUtw\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.342609"
+ },
+ {
+  "name": "1059 实现蜗牛爬树问题",
+  "title": "实现蜗牛爬树问题",
+  "chapter": "0844 第四讲：奇妙的编程",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868448,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utd3vtjaer\"},\"id\":\"jr5gDYEQ\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.448569"
+ },
+ {
+  "name": "1062 验一验关系表达式",
+  "title": "验一验关系表达式",
+  "chapter": "0915 第六讲：单路/双路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868518,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"ute4j91n2u\"},\"id\":\"Nfl1E4Rz\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.518819"
+ },
+ {
+  "name": "1049 用变量实现更多运算",
+  "title": "用变量实现更多运算",
+  "chapter": "0721 第二讲：信息的存储",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868345,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"uteph80oss\"},\"id\":\"cr6fAZEz\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.345243"
+ },
+ {
+  "name": "1057 正数四舍五入的实现",
+  "title": "正数四舍五入的实现",
+  "chapter": "0844 第四讲：奇妙的编程",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868443,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"ute3m4hqoa\"},\"id\":\"U1lwISOz\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.443107"
+ },
+ {
+  "name": "1064 图灵测试的简单模拟",
+  "title": "图灵测试的简单模拟",
+  "chapter": "0915 第六讲：单路/双路分支",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868524,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utee5opcdq\"},\"id\":\"v2RhIO9w\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.524103"
+ },
+ {
+  "name": "1083 四位数中有偶数位吗",
+  "title": "四位数中有偶数位吗",
+  "chapter": "1004 第九讲：switch 与分支综合练习",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868703,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6luk08po7\"},\"id\":\"G6WJeiv9\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.704024"
+ },
+ {
+  "name": "0914 求不同高度的大气压值",
+  "title": "求不同高度的大气压值",
+  "chapter": "0906 算法与编程思维拓展",
+  "lesson_type": null,
+  "content": "{\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"v6gruc9131\"}}]}",
+  "modified": "2026-09-05 10:34:22.481101"
+ },
+ {
+  "name": "1076 输出保留3位小数的浮点数",
+  "title": "输出保留3位小数的浮点数",
+  "chapter": "0973 第八讲：数据类型与类型转换",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868652,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utdoukrstp\"},\"id\":\"Gl1E1bdO\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.652772"
+ },
+ {
+  "name": "1056 用整型变量存储实数会怎么样呢",
+  "title": "用整型变量存储实数会怎么样呢",
+  "chapter": "0844 第四讲：奇妙的编程",
+  "lesson_type": "Programming",
+  "content": "{\"time\":1788770868440,\"blocks\":[{\"type\":\"program\",\"data\":{\"exercise\":\"utfiej43ns\"},\"id\":\"5mXbBN8u\"}],\"version\":\"2.29.0\"}",
+  "modified": "2026-09-07 16:47:48.440359"
+ }
+]

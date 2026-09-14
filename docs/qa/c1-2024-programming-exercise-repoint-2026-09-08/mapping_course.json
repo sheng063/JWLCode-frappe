@@ -1,0 +1,834 @@
+{
+ "mapping": [
+  {
+   "lesson": "1083 四位数中有偶数位吗",
+   "title": "四位数中有偶数位吗",
+   "chapter": "1004 第九讲：switch 与分支综合练习",
+   "lesson_type": "Programming",
+   "old_exercise": "v6luk08po7",
+   "target": "kfhngbbas2",
+   "target_title": "四位数中有偶数位吗",
+   "match": "exact"
+  },
+  {
+   "lesson": "1082 苹果和虫子",
+   "title": "苹果和虫子",
+   "chapter": "1004 第九讲：switch 与分支综合练习",
+   "lesson_type": "Programming",
+   "old_exercise": "utcaoqvpoe",
+   "target": "kf54nre2vv",
+   "target_title": "苹果和虫子",
+   "match": "exact"
+  },
+  {
+   "lesson": "1081 条件分支小结",
+   "title": "条件分支小结",
+   "chapter": "1004 第九讲：switch 与分支综合练习",
+   "lesson_type": "Programming",
+   "old_exercise": "ute797c3bs",
+   "target": "kfo7327uc5",
+   "target_title": "条件分支小结",
+   "match": "exact"
+  },
+  {
+   "lesson": "1080 一个月有多少天",
+   "title": "一个月有多少天",
+   "chapter": "1004 第九讲：switch 与分支综合练习",
+   "lesson_type": "Programming",
+   "old_exercise": "utcsivm7ur",
+   "target": "kfuifrpuj9",
+   "target_title": "一个月有多少天",
+   "match": "exact"
+  },
+  {
+   "lesson": "1079 数字排序",
+   "title": "数字排序",
+   "chapter": "1004 第九讲：switch 与分支综合练习",
+   "lesson_type": "Programming",
+   "old_exercise": "utccau7cm9",
+   "target": "kfgr6rf587",
+   "target_title": "数字排序",
+   "match": "exact"
+  },
+  {
+   "lesson": "1078 成绩判定问题",
+   "title": "成绩判定问题",
+   "chapter": "1004 第九讲：switch 与分支综合练习",
+   "lesson_type": "Programming",
+   "old_exercise": "utdtt1mls2",
+   "target": "keendq2bij",
+   "target_title": "成绩判定问题",
+   "match": "exact"
+  },
+  {
+   "lesson": "1077 长方形的周长",
+   "title": "长方形的周长",
+   "chapter": "0973 第八讲：数据类型与类型转换",
+   "lesson_type": "Programming",
+   "old_exercise": "utdb54oled",
+   "target": "kg33083fr6",
+   "target_title": "长方形的周长",
+   "match": "exact"
+  },
+  {
+   "lesson": "1076 输出保留3位小数的浮点数",
+   "title": "输出保留3位小数的浮点数",
+   "chapter": "0973 第八讲：数据类型与类型转换",
+   "lesson_type": "Programming",
+   "old_exercise": "utdoukrstp",
+   "target": "kfcg1ldbkf",
+   "target_title": "输出保留3位小数的浮点数",
+   "match": "exact"
+  },
+  {
+   "lesson": "1075 五则计算器",
+   "title": "五则计算器",
+   "chapter": "0973 第八讲：数据类型与类型转换",
+   "lesson_type": "Programming",
+   "old_exercise": "ute1jfgagv",
+   "target": "kfqevcouae",
+   "target_title": "五则计算器",
+   "match": "exact"
+  },
+  {
+   "lesson": "1074 数字的提取",
+   "title": "数字的提取",
+   "chapter": "0973 第八讲：数据类型与类型转换",
+   "lesson_type": "Programming",
+   "old_exercise": "utd63atnil",
+   "target": "kfgjfajes5",
+   "target_title": "数字的提取",
+   "match": "exact"
+  },
+  {
+   "lesson": "1073 蒜头君上班",
+   "title": "蒜头君上班",
+   "chapter": "0967 多路分支思维拓展",
+   "lesson_type": "Programming",
+   "old_exercise": "v6j7glb4mg",
+   "target": "kfljm17f2v",
+   "target_title": "蒜头君上班",
+   "match": "exact"
+  },
+  {
+   "lesson": "1072 二月有多少天",
+   "title": "二月有多少天",
+   "chapter": "0946 第七讲：多路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "utd4fkgk4j",
+   "target": "kejmao60cm",
+   "target_title": "二月有多少天",
+   "match": "exact"
+  },
+  {
+   "lesson": "1071 肥胖问题",
+   "title": "肥胖问题",
+   "chapter": "0946 第七讲：多路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "utda9vjook",
+   "target": "kej1qhejvj",
+   "target_title": "肥胖问题",
+   "match": "exact"
+  },
+  {
+   "lesson": "1070 考试等级划分",
+   "title": "考试等级划分",
+   "chapter": "0946 第七讲：多路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "utdbt4cuei",
+   "target": "ker865nd0i",
+   "target_title": "考试等级划分",
+   "match": "exact"
+  },
+  {
+   "lesson": "1069 半价票问题",
+   "title": "半价票问题",
+   "chapter": "0946 第七讲：多路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "utduonlkn9",
+   "target": "kebflng8e4",
+   "target_title": "半价票问题",
+   "match": "exact"
+  },
+  {
+   "lesson": "1068 试一试逻辑运算",
+   "title": "试一试逻辑运算",
+   "chapter": "0946 第七讲：多路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "uteklq4jju",
+   "target": "kfb2ip1dfv",
+   "target_title": "试一试逻辑运算",
+   "match": "exact"
+  },
+  {
+   "lesson": "1067 约数还是倍数",
+   "title": "约数还是倍数",
+   "chapter": "0915 第六讲：单路/双路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "utd430m9i3",
+   "target": "kg11d43p81",
+   "target_title": "约数还是倍数",
+   "match": "exact"
+  },
+  {
+   "lesson": "1066 输出奇偶性",
+   "title": "输出奇偶性",
+   "chapter": "0915 第六讲：单路/双路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "utdlhi217c",
+   "target": "kfdagu7f82",
+   "target_title": "输出奇偶性",
+   "match": "exact"
+  },
+  {
+   "lesson": "1065 除法的正确运算",
+   "title": "除法的正确运算",
+   "chapter": "0915 第六讲：单路/双路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "utd6ps5dfp",
+   "target": "kehot8p4r8",
+   "target_title": "除法的正确运算",
+   "match": "exact"
+  },
+  {
+   "lesson": "1064 图灵测试的简单模拟",
+   "title": "图灵测试的简单模拟",
+   "chapter": "0915 第六讲：单路/双路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "utee5opcdq",
+   "target": "kfpibidp3b",
+   "target_title": "图灵测试的简单模拟",
+   "match": "exact"
+  },
+  {
+   "lesson": "1063 bool 类型",
+   "title": "bool 类型",
+   "chapter": "0915 第六讲：单路/双路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "utdcs40k25",
+   "target": "kedgodlk0o",
+   "target_title": "bool 类型",
+   "match": "exact"
+  },
+  {
+   "lesson": "1062 验一验关系表达式",
+   "title": "验一验关系表达式",
+   "chapter": "0915 第六讲：单路/双路分支",
+   "lesson_type": "Programming",
+   "old_exercise": "ute4j91n2u",
+   "target": "kft2ldmv91",
+   "target_title": "验一验关系表达式",
+   "match": "exact"
+  },
+  {
+   "lesson": "1061 买奶糖",
+   "title": "买奶糖",
+   "chapter": "0873 第五讲：算法与编程",
+   "lesson_type": "Programming",
+   "old_exercise": "v6ga8c0c1u",
+   "target": "ketd3kq9fj",
+   "target_title": "买奶糖",
+   "match": "exact"
+  },
+  {
+   "lesson": "1060 数鸡兔",
+   "title": "数鸡兔",
+   "chapter": "0844 第四讲：奇妙的编程",
+   "lesson_type": "Programming",
+   "old_exercise": "utefsltlk3",
+   "target": "kfeq28895j",
+   "target_title": "数鸡兔",
+   "match": "exact"
+  },
+  {
+   "lesson": "1059 实现蜗牛爬树问题",
+   "title": "实现蜗牛爬树问题",
+   "chapter": "0844 第四讲：奇妙的编程",
+   "lesson_type": "Programming",
+   "old_exercise": "utd3vtjaer",
+   "target": "kfb1vm88lq",
+   "target_title": "实现蜗牛爬树问题",
+   "match": "exact"
+  },
+  {
+   "lesson": "1058 实现：角的个数",
+   "title": "实现：角的个数",
+   "chapter": "0844 第四讲：奇妙的编程",
+   "lesson_type": "Programming",
+   "old_exercise": "utej3pdb4o",
+   "target": "kfaaokhk4u",
+   "target_title": "实现：角的个数",
+   "match": "exact"
+  },
+  {
+   "lesson": "1057 正数四舍五入的实现",
+   "title": "正数四舍五入的实现",
+   "chapter": "0844 第四讲：奇妙的编程",
+   "lesson_type": "Programming",
+   "old_exercise": "ute3m4hqoa",
+   "target": "kg44c3uvm5",
+   "target_title": "正数四舍五入的实现",
+   "match": "exact"
+  },
+  {
+   "lesson": "1056 用整型变量存储实数会怎么样呢",
+   "title": "用整型变量存储实数会怎么样呢",
+   "chapter": "0844 第四讲：奇妙的编程",
+   "lesson_type": "Programming",
+   "old_exercise": "utfiej43ns",
+   "target": "kg0hjpra6k",
+   "target_title": "用整型变量存储实数",
+   "match": "fuzzy"
+  },
+  {
+   "lesson": "1055 求和",
+   "title": "求和",
+   "chapter": "0780 第三讲：编程的五则运算",
+   "lesson_type": "Programming",
+   "old_exercise": "v6b6tafkil",
+   "target": "kf6bmdvj9g",
+   "target_title": "求和",
+   "match": "exact"
+  },
+  {
+   "lesson": "1054 程序改错",
+   "title": "程序改错",
+   "chapter": "0780 第三讲：编程的五则运算",
+   "lesson_type": "Programming",
+   "old_exercise": "v6bp54a5ve",
+   "target": "kefebbp3em",
+   "target_title": "程序改错",
+   "match": "exact"
+  },
+  {
+   "lesson": "1053 取数位",
+   "title": "取数位",
+   "chapter": "0780 第三讲：编程的五则运算",
+   "lesson_type": "Programming",
+   "old_exercise": "ute2dfl2ob",
+   "target": "kf85lacjie",
+   "target_title": "取数位",
+   "match": "exact"
+  },
+  {
+   "lesson": "1052 四则运算小练",
+   "title": "四则运算小练",
+   "chapter": "0780 第三讲：编程的五则运算",
+   "lesson_type": "Programming",
+   "old_exercise": "utejugfq58",
+   "target": "kfhs376dfm",
+   "target_title": "四则运算小练",
+   "match": "exact"
+  },
+  {
+   "lesson": "1051 捡贝壳",
+   "title": "捡贝壳",
+   "chapter": "0721 第二讲：信息的存储",
+   "lesson_type": "Programming",
+   "old_exercise": "utemgtat7h",
+   "target": "keml8tmv8f",
+   "target_title": "捡贝壳",
+   "match": "exact"
+  },
+  {
+   "lesson": "1050 A + B 问题",
+   "title": "A + B 问题",
+   "chapter": "0721 第二讲：信息的存储",
+   "lesson_type": "Programming",
+   "old_exercise": "utfjb5kbnc",
+   "target": "kea6ld78i3",
+   "target_title": "A + B 问题",
+   "match": "exact"
+  },
+  {
+   "lesson": "1049 用变量实现更多运算",
+   "title": "用变量实现更多运算",
+   "chapter": "0721 第二讲：信息的存储",
+   "lesson_type": "Programming",
+   "old_exercise": "uteph80oss",
+   "target": "kfvsoi19nv",
+   "target_title": "用变量实现更多运算",
+   "match": "exact"
+  },
+  {
+   "lesson": "1048 变量的声明与使用",
+   "title": "变量的声明与使用",
+   "chapter": "0721 第二讲：信息的存储",
+   "lesson_type": "Programming",
+   "old_exercise": "utehfga7i1",
+   "target": "ked1k239je",
+   "target_title": "变量的声明与使用",
+   "match": "exact"
+  },
+  {
+   "lesson": "1047 多组乘法计算",
+   "title": "多组乘法计算",
+   "chapter": "0721 第二讲：信息的存储",
+   "lesson_type": "Programming",
+   "old_exercise": "utfljv2rnp",
+   "target": "keiva42u92",
+   "target_title": "多组乘法计算",
+   "match": "exact"
+  },
+  {
+   "lesson": "1046 再算运算结果",
+   "title": "再算运算结果",
+   "chapter": "0700 编程初探思维拓展",
+   "lesson_type": "Programming",
+   "old_exercise": "uteeqevduu",
+   "target": "kg2ndlq4rl",
+   "target_title": "再算运算结果",
+   "match": "exact"
+  },
+  {
+   "lesson": "1045 绝对值排序",
+   "title": "绝对值排序",
+   "chapter": "1021 switch 与分支综合练习思维拓展",
+   "lesson_type": "Programming",
+   "old_exercise": "v6loscddhc",
+   "target": "keprm7qpm1",
+   "target_title": "绝对值排序",
+   "match": "exact"
+  },
+  {
+   "lesson": "0699 计算简单除法",
+   "title": "计算简单除法",
+   "chapter": "0677 第一讲：编程初探",
+   "lesson_type": "Programming",
+   "old_exercise": "v6720ji7qf",
+   "target": "keokrritn0",
+   "target_title": "计算简单除法",
+   "match": "exact"
+  },
+  {
+   "lesson": "1042 蒜头君的信息卡",
+   "title": "蒜头君的信息卡",
+   "chapter": "0677 第一讲：编程初探",
+   "lesson_type": "Programming",
+   "old_exercise": "utfjeog1r1",
+   "target": "kfkqk69fl9",
+   "target_title": "蒜头君的信息卡",
+   "match": "exact"
+  },
+  {
+   "lesson": "1041 计算运算结果",
+   "title": "计算运算结果",
+   "chapter": "0677 第一讲：编程初探",
+   "lesson_type": "Programming",
+   "old_exercise": "utfqfvvb28",
+   "target": "keo88kgfi0",
+   "target_title": "计算运算结果",
+   "match": "exact"
+  },
+  {
+   "lesson": "1040 你好小猫",
+   "title": "你好小猫",
+   "chapter": "0677 第一讲：编程初探",
+   "lesson_type": "Programming",
+   "old_exercise": "utf6700tk8",
+   "target": "kf4d49lgsu",
+   "target_title": "你好，小猫",
+   "match": "fuzzy"
+  },
+  {
+   "lesson": "1039 让我们一起说你好",
+   "title": "让我们一起说你好",
+   "chapter": "0677 第一讲：编程初探",
+   "lesson_type": "Programming",
+   "old_exercise": "earuau38q7",
+   "target": "kfe4vr3359",
+   "target_title": "说你好",
+   "match": "fuzzy"
+  },
+  {
+   "lesson": "1038 程序设计 T3",
+   "title": "程序设计 T3",
+   "chapter": "1027 第十讲：阶段测试",
+   "lesson_type": null,
+   "old_exercise": "v6ma4lm48b",
+   "target": "kehmnl0pgp",
+   "target_title": "程序设计 T3",
+   "match": "exact"
+  },
+  {
+   "lesson": "1037 程序设计 T2",
+   "title": "程序设计 T2",
+   "chapter": "1027 第十讲：阶段测试",
+   "lesson_type": null,
+   "old_exercise": "v6m4kv95cm",
+   "target": "kegq8kgs0k",
+   "target_title": "程序设计 T2",
+   "match": "exact"
+  },
+  {
+   "lesson": "1025 邮费",
+   "title": "邮费",
+   "chapter": "1021 switch 与分支综合练习思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6l5sqdbsg",
+   "target": "kg0d571tdk",
+   "target_title": "邮费",
+   "match": "exact"
+  },
+  {
+   "lesson": "1022 蒜头君当裁判",
+   "title": "蒜头君当裁判",
+   "chapter": "1021 switch 与分支综合练习思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6l1la2hvu",
+   "target": "kfjb2qa0nj",
+   "target_title": "蒜头君当裁判",
+   "match": "exact"
+  },
+  {
+   "lesson": "1020 分段电费",
+   "title": "分段电费",
+   "chapter": "1004 第九讲：switch 与分支综合练习",
+   "lesson_type": null,
+   "old_exercise": "v6lbo68gir",
+   "target": "kek6of8227",
+   "target_title": "分段电费",
+   "match": "exact"
+  },
+  {
+   "lesson": "1003 求面积的问题",
+   "title": "求面积的问题",
+   "chapter": "0998 数据类型与类型转换思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6k6i2n5q9",
+   "target": "kf8rj7u3cc",
+   "target_title": "求面积的问题",
+   "match": "exact"
+  },
+  {
+   "lesson": "1002 长方形的面积",
+   "title": "长方形的面积",
+   "chapter": "0998 数据类型与类型转换思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6k6bukkuk",
+   "target": "kg3qgl3efq",
+   "target_title": "长方形的面积",
+   "match": "exact"
+  },
+  {
+   "lesson": "0997 蒜园门票",
+   "title": "蒜园门票",
+   "chapter": "0973 第八讲：数据类型与类型转换",
+   "lesson_type": null,
+   "old_exercise": "v6kiiedccf",
+   "target": "kfm63fp78c",
+   "target_title": "蒜园门票",
+   "match": "exact"
+  },
+  {
+   "lesson": "0996 温度转换",
+   "title": "温度转换",
+   "chapter": "0973 第八讲：数据类型与类型转换",
+   "lesson_type": null,
+   "old_exercise": "v6kvshhrdu",
+   "target": "kfprt0u9je",
+   "target_title": "温度转换",
+   "match": "exact"
+  },
+  {
+   "lesson": "0972 一个月有几天",
+   "title": "一个月有几天",
+   "chapter": "0967 多路分支思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6joshafrq",
+   "target": "kfua5ibpto",
+   "target_title": "一个月有几天",
+   "match": "exact"
+  },
+  {
+   "lesson": "0971 7 的奇倍数",
+   "title": "7 的奇倍数",
+   "chapter": "0967 多路分支思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6jfjj375r",
+   "target": "kf4ats9s3p",
+   "target_title": "7 的奇倍数",
+   "match": "exact"
+  },
+  {
+   "lesson": "0970 计算规则",
+   "title": "计算规则",
+   "chapter": "0967 多路分支思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6jsgpmmn4",
+   "target": "kenngq3gpi",
+   "target_title": "计算规则",
+   "match": "exact"
+  },
+  {
+   "lesson": "0969 包裹托运",
+   "title": "包裹托运",
+   "chapter": "0967 多路分支思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6jigmnn68",
+   "target": "kec10kmdr2",
+   "target_title": "包裹托运",
+   "match": "exact"
+  },
+  {
+   "lesson": "0944 今天会下雨吗",
+   "title": "今天会下雨吗",
+   "chapter": "0939 单路/双路分支思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6iv0i37if",
+   "target": "kemala86v4",
+   "target_title": "今天会下雨吗",
+   "match": "exact"
+  },
+  {
+   "lesson": "0943 是否为倍数关系",
+   "title": "是否为倍数关系",
+   "chapter": "0939 单路/双路分支思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6ig5r2p5h",
+   "target": "kfavtt014a",
+   "target_title": "是否为倍数关系",
+   "match": "exact"
+  },
+  {
+   "lesson": "0942 求绝对值",
+   "title": "求绝对值",
+   "chapter": "0939 单路/双路分支思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6h7ihrd1p",
+   "target": "kf7kc867kt",
+   "target_title": "求绝对值",
+   "match": "exact"
+  },
+  {
+   "lesson": "0938 蒜头君想休息",
+   "title": "蒜头君想休息",
+   "chapter": "0915 第六讲：单路/双路分支",
+   "lesson_type": null,
+   "old_exercise": "v6hamo72va",
+   "target": "kfmvju9a5v",
+   "target_title": "蒜头君想休息",
+   "match": "exact"
+  },
+  {
+   "lesson": "0937 数学考试",
+   "title": "数学考试",
+   "chapter": "0915 第六讲：单路/双路分支",
+   "lesson_type": null,
+   "old_exercise": "v6hgasvmfk",
+   "target": "kffka4gbj6",
+   "target_title": "数学考试",
+   "match": "exact"
+  },
+  {
+   "lesson": "0912 整除与取模的应用",
+   "title": "整除与取模的应用",
+   "chapter": "0906 算法与编程思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6gq2ia5o8",
+   "target": "kg4blsagv2",
+   "target_title": "整除与取模的应用",
+   "match": "exact"
+  },
+  {
+   "lesson": "0904 年龄的计算",
+   "title": "年龄的计算",
+   "chapter": "0873 第五讲：算法与编程",
+   "lesson_type": null,
+   "old_exercise": "v6gfh5o0a6",
+   "target": "kf3oivnhrj",
+   "target_title": "年龄的计算",
+   "match": "exact"
+  },
+  {
+   "lesson": "0871 蒜头君吃苹果2",
+   "title": "蒜头君吃苹果2",
+   "chapter": "0865 奇妙的编程思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6eh31soei",
+   "target": "kfjo4ciu2v",
+   "target_title": "蒜头君吃苹果2",
+   "match": "exact"
+  },
+  {
+   "lesson": "0870 日历",
+   "title": "日历",
+   "chapter": "0865 奇妙的编程思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6et6da6dv",
+   "target": "kf993k3hmv",
+   "target_title": "日历",
+   "match": "exact"
+  },
+  {
+   "lesson": "0749 卡车运输货物",
+   "title": "卡车运输货物",
+   "chapter": "0721 第二讲：信息的存储",
+   "lesson_type": null,
+   "old_exercise": "v694d9r8me",
+   "target": "keqjvr582h",
+   "target_title": "卡车运输货物",
+   "match": "exact"
+  },
+  {
+   "lesson": "1036 程序设计 T1",
+   "title": "程序设计 T1",
+   "chapter": "1027 第十讲：阶段测试",
+   "lesson_type": null,
+   "old_exercise": "v6mghbjc15",
+   "target": "kege5fhh73",
+   "target_title": "程序设计 T1",
+   "match": "exact"
+  },
+  {
+   "lesson": "1024 幸运的数字",
+   "title": "幸运的数字",
+   "chapter": "1021 switch 与分支综合练习思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6lbr0ocoa",
+   "target": "kfs6qm7vks",
+   "target_title": "幸运的数字",
+   "match": "exact"
+  },
+  {
+   "lesson": "1023 星期问题",
+   "title": "星期问题",
+   "chapter": "1021 switch 与分支综合练习思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6lvoo0vrt",
+   "target": "kfre4m6ivh",
+   "target_title": "星期问题",
+   "match": "exact"
+  },
+  {
+   "lesson": "1001 按要求输出",
+   "title": "按要求输出",
+   "chapter": "0998 数据类型与类型转换思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6kbgud1bd",
+   "target": "kebl97o9ru",
+   "target_title": "按要求输出",
+   "match": "exact"
+  },
+  {
+   "lesson": "0966 固定差值判断",
+   "title": "固定差值判断",
+   "chapter": "0946 第七讲：多路分支",
+   "lesson_type": null,
+   "old_exercise": "v6j1e6fqpd",
+   "target": "kelrr9jcaf",
+   "target_title": "固定差值判断",
+   "match": "exact"
+  },
+  {
+   "lesson": "0945 选礼物",
+   "title": "选礼物",
+   "chapter": "0939 单路/双路分支思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6i6nunh6h",
+   "target": "kftqbig2nv",
+   "target_title": "选礼物",
+   "match": "exact"
+  },
+  {
+   "lesson": "0914 求不同高度的大气压值",
+   "title": "求不同高度的大气压值",
+   "chapter": "0906 算法与编程思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6gruc9131",
+   "target": "kf6qibso23",
+   "target_title": "求不同高度的大气压值",
+   "match": "exact"
+  },
+  {
+   "lesson": "0913 贪吃蛇吃苹果",
+   "title": "贪吃蛇吃苹果",
+   "chapter": "0906 算法与编程思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6gu9rqbmn",
+   "target": "kfnojsnqle",
+   "target_title": "贪吃蛇吃苹果",
+   "match": "exact"
+  },
+  {
+   "lesson": "0911 开学典礼",
+   "title": "开学典礼",
+   "chapter": "0906 算法与编程思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6gfbf3khd",
+   "target": "keq1dbi38g",
+   "target_title": "开学典礼",
+   "match": "exact"
+  },
+  {
+   "lesson": "0872 蒜头君买文具",
+   "title": "蒜头君买文具",
+   "chapter": "0865 奇妙的编程思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6e3gapu6b",
+   "target": "kfk8pth7kh",
+   "target_title": "蒜头君买文具",
+   "match": "exact"
+  },
+  {
+   "lesson": "0852 蒜头君吃苹果",
+   "title": "蒜头君吃苹果",
+   "chapter": "0844 第四讲：奇妙的编程",
+   "lesson_type": null,
+   "old_exercise": "v6dq72tt7o",
+   "target": "kfid3jlp0a",
+   "target_title": "蒜头君吃苹果",
+   "match": "exact"
+  },
+  {
+   "lesson": "0843 小数的除法",
+   "title": "小数的除法",
+   "chapter": "0820 编程的五则运算思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6d1ps7f4m",
+   "target": "kfr1vn8ht6",
+   "target_title": "小数的除法",
+   "match": "exact"
+  },
+  {
+   "lesson": "0842 天花板上的小灯",
+   "title": "天花板上的小灯",
+   "chapter": "0820 编程的五则运算思维拓展",
+   "lesson_type": null,
+   "old_exercise": "v6d068mb68",
+   "target": "kfn1hvj4qj",
+   "target_title": "天花板上的小灯",
+   "match": "exact"
+  },
+  {
+   "lesson": "0819 复杂取数位",
+   "title": "复杂取数位",
+   "chapter": "0780 第三讲：编程的五则运算",
+   "lesson_type": null,
+   "old_exercise": "v6cnjrro0t",
+   "target": "kek8n2c9lf",
+   "target_title": "复杂取数位",
+   "match": "exact"
+  }
+ ],
+ "summary": {
+  "program_lessons": 81,
+  "mapped": 81,
+  "unmapped": 0,
+  "unmapped_details": [],
+  "lessons_with_duplicate_titles": {},
+  "targets_referenced_by_multiple_lessons": {},
+  "unused_existing_exercises": [
+   {
+    "name": "kesrirri8l",
+    "title": "课前任务：打字练习",
+    "exercise_number": "P-000112"
+   },
+   {
+    "name": "kf2mqti88b",
+    "title": "最大连续子段和",
+    "exercise_number": "P-000114"
+   }
+  ]
+ }
+}

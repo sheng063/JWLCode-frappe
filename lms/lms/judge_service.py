@@ -296,47 +296,48 @@ def _apply_result(doc, payload: dict):
 	doc.score = flt(payload.get("score"))
 	doc.time_ms = cint(payload.get("time_ms"))
 	doc.memory_kb = cint(payload.get("memory_kb"))
-	doc.compiler_message = payload.get("compiler_message")
+	doc.compiler_message = payload.get("compiler_message") or next(
+		(case.get("stderr") or case.get("compile_output") for case in payload.get("cases", [])
+		 if case.get("status") != "Accepted" and (case.get("stderr") or case.get("compile_output"))), None
+	)
 	if getattr(doc, "package_version", None):
 		doc.score = 100 if payload["status"] == "ACCEPTED" else 0
-		# Never copy service diagnostics into student-readable package submissions.
-		doc.compiler_message = None
-	_record_first_failed_hidden_case(doc, payload)
+		if payload["status"] not in {"COMPILE_ERROR", "RUNTIME_ERROR"}:
+			doc.compiler_message = None
+	_record_first_failed_case(doc, payload)
 	if getattr(doc, "package_version", None):
 		doc.flags.package_service = INTERNAL_WRITE
 	doc.save(ignore_permissions=True)
 
 
-def _record_first_failed_hidden_case(doc, payload: dict):
-	"""Persist only one failed hidden case as feedback for its submitter.
-
-	The complete hidden suite stays in ``LMS Judge Test Case``. Submission
-	children are readable by their owner, so retaining every failed case here
-	would disclose the suite over repeated submissions.
-	"""
+def _record_first_failed_case(doc, payload: dict):
+	"""Keep the first failing execution as feedback, including package inputs."""
 	doc.set("test_cases", [])
-	if getattr(doc, "package_version", None) or payload.get("status") == "ACCEPTED":
+	if payload.get("status") == "ACCEPTED" or not payload.get("cases"):
 		return
-
-	exercise = frappe.get_doc("LMS Programming Exercise", doc.exercise)
-	all_cases = _test_cases(exercise)
-	for result in payload.get("cases") or []:
+	if getattr(doc, "package_version", None):
+		version = frappe.get_doc("LMS Problem Package Version", doc.package_version)
+		by_id = {case["case_id"]: case for case in json.loads(version.cases)}
+		all_cases = []
+	else:
+		all_cases = _test_cases(frappe.get_doc("LMS Programming Exercise", doc.exercise))
+		by_id = {}
+	for result in payload["cases"]:
+		if result.get("status") in {"Accepted", "Compilation Error", "Queued", "Running"}:
+			continue
 		index = cint(result.get("index")) - 1
-		if not 0 <= index < len(all_cases):
-			continue
-		case = all_cases[index]
-		if not case["hidden"] or result.get("status") == "Accepted":
-			continue
-		doc.append(
-			"test_cases",
-			{
-				"input": case["input"],
-				"expected_output": case["expected_output"],
-				"output": result.get("stdout") or "",
-				"status": "Failed",
-				"hidden": 1,
-			},
+		case = by_id.get(result.get("case_id")) if by_id else (
+			all_cases[index] if 0 <= index < len(all_cases) else None
 		)
+		if case is None or "input" not in case:
+			continue
+		doc.append("test_cases", {
+			"input": case["input"],
+			"expected_output": case.get("expected_output", "") if not by_id or not case.get("hidden") else "",
+			"output": result.get("stdout") or "",
+			"status": "Failed",
+			"hidden": int(bool(case.get("hidden"))),
+		})
 		return
 
 
