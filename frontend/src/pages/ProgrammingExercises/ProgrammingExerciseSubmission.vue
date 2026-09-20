@@ -287,6 +287,7 @@ import {
 	usePageMeta,
 } from 'frappe-ui'
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { createJudgeStatusPoller } from '@/utils/judgeStatusPoller'
 import PageHeader from '@/components/Layouts/PageHeader.vue'
 import CodeEditor from '@/components/Controls/CodeEditor.vue'
 import { sessionStore } from '@/stores/session'
@@ -434,8 +435,8 @@ const falconURL = ref<string>('https://falcon.frappe.io')
 const falconError = ref<string | null>(null)
 const running = ref<boolean>(false)
 const submitting = ref<boolean>(false)
+let pageDisposed = false
 let workspaceObserver: ResizeObserver | null = null
-let statusTimer: ReturnType<typeof setTimeout> | null = null
 
 // Resizable panes: the divider between the problem-statement pane and the
 // editor pane (horizontal split), and the divider between the editor pane and
@@ -587,8 +588,9 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+	pageDisposed = true
 	workspaceObserver?.disconnect()
-	if (statusTimer) clearTimeout(statusTimer)
+	judgeStatusPoller.stop()
 	window.removeEventListener('resize', reflowPanes)
 	workspace.value?.removeEventListener('keydown', handleEditorShortcut, true)
 })
@@ -634,6 +636,9 @@ const submission = createDocumentResource({
 	doctype: 'LMS Programming Exercise Submission',
 	name: props.submissionID,
 	auto: false,
+	onSuccess(doc: any) {
+		if (!pageDisposed && doc?.name === submission.name && ['Queued', 'Compiling', 'Running'].includes(doc?.status)) pollJudgeStatus(doc.name)
+	},
 	onError(error: any) {
 		if (error.messages?.[0].includes('not found')) {
 			router.push({
@@ -775,7 +780,7 @@ watch(isSolved, (solved) => {
 
 // The page is reused when browser history changes only the submission ID.
 watch(() => props.submissionID, (name) => {
- if (statusTimer) clearTimeout(statusTimer)
+ judgeStatusPoller.stop()
  testCases.value = []
  resultMessage.value = null
  if (name === 'new') {
@@ -910,31 +915,29 @@ const createJudgeSubmission = async () => {
 	showResult('info', __('提交已进入队列'), __('代码正在评测中。'))
 }
 
-const pollJudgeStatus = (submissionName: string) => {
-	if (statusTimer) clearTimeout(statusTimer)
-	statusTimer = setTimeout(async () => {
-		try {
-			const result = await call(
-				'lms.lms.judge_service.get_programming_submission_status',
-				{ submission: submissionName }
-			)
-			await submission.reload()
-			if (result.compiler_message) {
-				error.value = true
-				errorMessage.value = result.compiler_message
-				showResult('error', submissionStatusLabel(result.status), result.compiler_message)
-			}
-			if (['Queued', 'Compiling', 'Running'].includes(result.status)) {
-				pollJudgeStatus(submissionName)
-			} else if (!result.compiler_message) {
-				error.value = ['Runtime Error', 'Compilation Error'].includes(result.status)
-				showResult(result.status === 'Passed' ? 'success' : 'error', submissionStatusLabel(result.status))
-			}
-		} catch (e) {
-			console.error('Unable to refresh judge status', e)
+const judgeStatusPoller = createJudgeStatusPoller({
+	fetchStatus: (name: string) => call('lms.lms.judge_service.get_programming_submission_status', { submission: name }),
+	async onStatus(result: any, name: string, isCurrent: () => boolean) {
+		if (submission.doc?.name === name) Object.assign(submission.doc, result)
+		if (['Queued', 'Compiling', 'Running'].includes(result.status)) return
+		const details = await call('frappe.client.get', {
+			doctype: 'LMS Programming Exercise Submission', name,
+		})
+		if (!isCurrent()) return
+		submission.setDoc(details)
+		if (result.compiler_message) {
+			error.value = true
+			errorMessage.value = result.compiler_message
+			showResult('error', submissionStatusLabel(result.status), result.compiler_message)
+		} else {
+			error.value = ['Runtime Error', 'Compilation Error'].includes(result.status)
+			showResult(result.status === 'Passed' ? 'success' : 'error', submissionStatusLabel(result.status))
 		}
-	}, 1500)
-}
+	},
+	onError: (error: unknown) => console.error('Unable to refresh judge status', error),
+})
+
+const pollJudgeStatus = (name: string) => judgeStatusPoller.start(name)
 
 const runCode = async () => {
 	if (!exercise.doc?.test_cases?.length) return

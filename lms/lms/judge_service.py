@@ -4,6 +4,7 @@ import json
 import time
 import uuid
 from urllib.parse import urlparse
+from contextlib import contextmanager
 
 import frappe
 import requests
@@ -27,6 +28,19 @@ STATUS_LABELS = {
 	"SYSTEM_ERROR": "System Error", "CANCELED": "Canceled",
 	"OUTPUT_LIMIT_EXCEEDED": "Output Limit Exceeded", "CONNECTION_TIMEOUT": "Connection Timeout",
 }
+
+
+@contextmanager
+def _judge_timing(event, **identity):
+	started = time.monotonic()
+	try:
+		yield
+	finally:
+		if frappe.conf.get("judge_timing_enabled"):
+			frappe.logger("judge_performance").info({
+				"event": event, "wall_time": time.time(),
+				"elapsed_ms": (time.monotonic() - started) * 1000, **identity,
+			})
 
 
 def _get_settings():
@@ -147,18 +161,22 @@ def run_programming_exercise(exercise: str, code: str, language: str = "Python")
 def _apply_submission_language(payload, language):
 	"""Treat stored time limits as the C++ baseline for every execution path."""
 	payload["language"] = language
-	payload["time_limit_seconds"] = flt(payload["time_limit_seconds"]) * (1 if language == "C++" else 2)
+	payload["time_limit_seconds"] = min(
+		30, flt(payload["time_limit_seconds"]) * (1 if language == "C++" else 2)
+	)
 
 
 def _package_payload(version, public_only=False):
-	config = json.loads(version.judge_config)
-	cases = json.loads(version.cases)
-	return {key: config[key] for key in (
-		"protocol_version", "comparison_mode", "validator_flags", "scoring_mode",
-		"language", "time_limit_seconds", "memory_limit_kb"
-	)} | {"output_limit_bytes": config.get("output_limit_bytes", 256000), "package_version": version.name, "config_digest": version.config_digest,
-		"test_cases": [{key: c[key] for key in ("case_id", "input", "expected_output", "hidden")}
-			for c in cases if not public_only or not c["hidden"]]}
+	with _judge_timing("package_json", package_version=version.name):
+		config = json.loads(version.judge_config)
+		cases = json.loads(version.cases)
+	with _judge_timing("package_build", package_version=version.name):
+		return {key: config[key] for key in (
+			"protocol_version", "comparison_mode", "validator_flags", "scoring_mode",
+			"language", "time_limit_seconds", "memory_limit_kb"
+		)} | {"output_limit_bytes": config.get("output_limit_bytes", 256000), "package_version": version.name, "config_digest": version.config_digest,
+			"test_cases": [{key: c[key] for key in ("case_id", "input", "expected_output", "hidden")}
+				for c in cases if not public_only or not c["hidden"]]}
 
 
 def _test_cases(exercise):
@@ -180,6 +198,9 @@ def _test_cases(exercise):
 
 def dispatch_submission(submission_name: str):
 	doc = frappe.get_doc("LMS Programming Exercise Submission", submission_name)
+	attempt_id = doc.attempt_id
+	status_version = doc.status_version
+	initial_status = doc.status
 	if doc.status not in {"Queued", "System Error"}:
 		return
 	settings = _get_settings()
@@ -198,7 +219,8 @@ def dispatch_submission(submission_name: str):
 		"callback_url": settings.callback_url or get_url("/api/method/lms.lms.judge_service.judge_callback"),
 	}
 	if doc.get("package_version"):
-		version = frappe.get_doc("LMS Problem Package Version", doc.package_version)
+		with _judge_timing("package_read", submission_id=doc.name, package_version=doc.package_version):
+			version = frappe.get_doc("LMS Problem Package Version", doc.package_version)
 		payload.update(_package_payload(version))
 		payload["attempt_id"] = doc.attempt_id
 	_apply_submission_language(payload, doc.language or "Python")
@@ -206,23 +228,31 @@ def dispatch_submission(submission_name: str):
 		if doc.get("package_version"):
 			from lms.lms.problem_package.api import require_capability
 			require_capability()
-		response = requests.post(
-			f"{settings.service_url.rstrip('/')}/internal/v1/judge-requests",
-			json=payload,
-			headers={"Authorization": f"Bearer {settings.get_password('api_token')}"},
-			timeout=max(cint(settings.request_timeout_seconds), 5),
-		)
+		with _judge_timing("dispatch_http", submission_id=doc.name):
+			response = requests.post(
+				f"{settings.service_url.rstrip('/')}/internal/v1/judge-requests",
+				json=payload,
+				headers={"Authorization": f"Bearer {settings.get_password('api_token')}"},
+				timeout=max(cint(settings.request_timeout_seconds), 5),
+			)
 		response.raise_for_status()
 		result = response.json()
+		_lock_submission(doc)
+		if (doc.attempt_id != attempt_id or doc.status_version != status_version
+			or (doc.status in {STATUS_LABELS[s] for s in TERMINAL_STATUSES}
+				and not (initial_status == doc.status == "System Error"))):
+			return
 		frappe.db.set_value(
 			"LMS Programming Exercise Submission", doc.name,
 			{"judge_request_id": result["judge_request_id"], "status": STATUS_LABELS.get(result["status"], "Queued")},
 		)
 	except Exception as exc:
-		frappe.db.set_value(
-			"LMS Programming Exercise Submission", doc.name,
-			{"status": "System Error", "compiler_message": None if doc.get("package_version") else str(exc)[:2000]},
-		)
+		_lock_submission(doc)
+		if doc.attempt_id == attempt_id and doc.status not in {STATUS_LABELS[s] for s in TERMINAL_STATUSES}:
+			frappe.db.set_value(
+				"LMS Programming Exercise Submission", doc.name,
+				{"status": "System Error", "compiler_message": None if doc.get("package_version") else str(exc)[:2000]},
+			)
 		frappe.log_error(title="Judge Service dispatch failed", message=frappe.get_traceback())
 
 
@@ -262,17 +292,29 @@ def judge_callback():
 	return {"ok": True, "terminal": status in TERMINAL_STATUSES}
 
 
+def _lock_submission(doc):
+	frappe.db.get_value("LMS Programming Exercise Submission", doc.name, "name", for_update=True)
+	doc.reload()
+
+
 def _apply_result(doc, payload: dict):
+	package_cases = None
+	_lock_submission(doc)
+	if doc.judge_request_id and doc.judge_request_id != payload.get("judge_request_id"):
+		frappe.throw("Judge request does not match submission.", frappe.PermissionError)
+	if cint(payload.get("status_version")) <= cint(doc.status_version):
+		return
+	if getattr(doc, "status", None) in {STATUS_LABELS[status] for status in TERMINAL_STATUSES}:
+		return
 	if getattr(doc, "package_version", None):
-		frappe.db.get_value("LMS Programming Exercise Submission", doc.name, "name", for_update=True)
-		doc.reload()
 		version = frappe.get_doc("LMS Problem Package Version", doc.package_version)
 		if (payload.get("package_version") != doc.package_version
 			or payload.get("config_digest") != doc.config_digest
 			or payload.get("attempt_id") != doc.attempt_id
 			or payload.get("judge_request_id") != doc.judge_request_id):
 			frappe.throw("Package result does not match this attempt.", frappe.PermissionError)
-		known = {c["case_id"] for c in json.loads(version.cases)}
+		package_cases = json.loads(version.cases)
+		known = {c["case_id"] for c in package_cases}
 		returned = [c.get("case_id") for c in payload.get("cases", [])]
 		if len(returned) != len(set(returned)) or not set(returned) <= known:
 			frappe.throw("Unknown or duplicate case IDs in result.")
@@ -304,20 +346,22 @@ def _apply_result(doc, payload: dict):
 		doc.score = 100 if payload["status"] == "ACCEPTED" else 0
 		if payload["status"] not in {"COMPILE_ERROR", "RUNTIME_ERROR"}:
 			doc.compiler_message = None
-	_record_first_failed_case(doc, payload)
+	_record_first_failed_case(doc, payload, package_cases=package_cases)
 	if getattr(doc, "package_version", None):
 		doc.flags.package_service = INTERNAL_WRITE
 	doc.save(ignore_permissions=True)
 
 
-def _record_first_failed_case(doc, payload: dict):
+def _record_first_failed_case(doc, payload: dict, package_cases=None):
 	"""Keep the first failing execution as feedback, including package inputs."""
 	doc.set("test_cases", [])
 	if payload.get("status") == "ACCEPTED" or not payload.get("cases"):
 		return
 	if getattr(doc, "package_version", None):
-		version = frappe.get_doc("LMS Problem Package Version", doc.package_version)
-		by_id = {case["case_id"]: case for case in json.loads(version.cases)}
+		if package_cases is None:
+			version = frappe.get_doc("LMS Problem Package Version", doc.package_version)
+			package_cases = json.loads(version.cases)
+		by_id = {case["case_id"]: case for case in package_cases}
 		all_cases = []
 	else:
 		all_cases = _test_cases(frappe.get_doc("LMS Programming Exercise", doc.exercise))
@@ -358,6 +402,15 @@ def _refresh_from_judge_service(doc):
 			payload.setdefault("event_id", f"poll:{doc.judge_request_id}:{payload['status_version']}")
 			_apply_result(doc, payload)
 		elif payload.get("status") in STATUS_LABELS:
+			_lock_submission(doc)
+			if (doc.status not in {"Queued", "Compiling", "Running"}
+				or payload.get("judge_request_id") != doc.judge_request_id
+				or payload.get("submission_id") != doc.name):
+				return
+			# 进度只允许向前推进，不占用最终结果的版本号。
+			progress = {"Queued": 0, "Compiling": 1, "Running": 2}
+			if progress[STATUS_LABELS[payload["status"]]] < progress[doc.status]:
+				return
 			frappe.db.set_value(
 				"LMS Programming Exercise Submission",
 				doc.name,
@@ -373,10 +426,51 @@ def _refresh_from_judge_service(doc):
 def get_programming_submission_status(submission: str):
 	doc = frappe.get_doc("LMS Programming Exercise Submission", submission)
 	doc.check_permission("read")
-	_refresh_from_judge_service(doc)
-	doc.reload()
+	_queue_status_refresh(doc)
 	return {
 		"name": doc.name, "status": doc.status, "score": doc.score,
 		"time_ms": doc.time_ms, "memory_kb": doc.memory_kb,
 		"compiler_message": doc.compiler_message,
+		"passed_tests": doc.passed_tests, "total_tests": doc.total_tests,
+		"status_version": doc.status_version,
 	}
+
+
+def _queue_status_refresh(doc):
+	if not doc.judge_request_id or doc.status not in {"Queued", "Compiling", "Running"}:
+		return
+	cache = frappe.cache
+	key = f"judge-refresh:{doc.judge_request_id}"
+	lock = cache.lock(cache.make_key(key + ":lock"), timeout=10, blocking_timeout=0)
+	if not lock.acquire(blocking=False):
+		return
+	try:
+		if cache.get_value(key):
+			return
+		frappe.enqueue(
+			"lms.lms.judge_service.refresh_submission_status", queue="short",
+			submission_name=doc.name, job_id=key, deduplicate=True,
+		)
+		cache.set_value(key, 1, expires_in_sec=3)
+	finally:
+		lock.release()
+
+
+def refresh_submission_status(submission_name):
+	# 独立于浏览器请求执行，先完成网络请求，再获取数据库行锁。
+	doc = frappe.get_doc("LMS Programming Exercise Submission", submission_name)
+	_refresh_from_judge_service(doc)
+
+
+def reconcile_pending_submissions():
+	# 使用游标分页，避免执行节点暂时不可用的旧任务长期阻塞后续提交。
+	cursor = frappe.cache.get_value("judge-reconcile-cursor") or ""
+	rows = frappe.get_all(
+		"LMS Programming Exercise Submission",
+		filters={"status": ["in", ["Queued", "Compiling", "Running"]],
+			"judge_request_id": ["is", "set"], "name": [">", cursor]},
+		fields=["name", "status", "judge_request_id"], order_by="name asc", limit_page_length=100,
+	)
+	for row in rows:
+		_queue_status_refresh(row)
+	frappe.cache.set_value("judge-reconcile-cursor", rows[-1].name if len(rows) == 100 else "")

@@ -3248,7 +3248,7 @@ def export_course_as_zip(course_name: str):
 	if not can_modify_course(course_name):
 		frappe.throw(_("You do not have permission to export this course."), frappe.PermissionError)
 
-	export_course_zip(course_name)
+	return export_course_zip(course_name)
 
 
 @frappe.whitelist()

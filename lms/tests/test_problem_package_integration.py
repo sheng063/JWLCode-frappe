@@ -91,6 +91,38 @@ class TestProblemPackageIntegration(TestCase):
 		with self.assertRaises(frappe.ValidationError):
 			exercise.save()
 
+	def test_empty_and_redacted_outputs_do_not_block_terminal_result(self):
+		from lms.lms.judge_service import _apply_result, submit_programming_exercise
+
+		import_id, _ = self.imported(package(sample=True))
+		version = self.confirm(import_id)
+		exercise = api.publish_version(version)["exercise"]
+		cases = json.loads(frappe.get_doc(api.VERSION, version).cases)
+		for hidden_failure in (False, True):
+			with self.subTest(hidden_failure=hidden_failure):
+				created = submit_programming_exercise(exercise, "pass", uuid4().hex)
+				doc = frappe.get_doc("LMS Programming Exercise Submission", created["submission"])
+				request_id = "REQ-EMPTY-" + uuid4().hex
+				frappe.db.set_value(doc.doctype, doc.name, "judge_request_id", request_id)
+				doc.reload()
+				_apply_result(doc, {
+					"package_version": version, "config_digest": doc.config_digest,
+					"attempt_id": doc.attempt_id, "judge_request_id": request_id,
+					"status_version": 1, "event_id": request_id + ":1",
+					"status": "WRONG_ANSWER", "score": 0,
+					"cases": [{
+						"case_id": case["case_id"],
+						"status": "Accepted" if hidden_failure and not case["hidden"] else "Wrong Answer",
+						"stdout": None if case["hidden"] else "",
+					} for case in cases],
+				})
+				doc.reload()
+				assert doc.status == "Failed" and doc.status_version == 1
+				assert len(doc.test_cases) == 1 and not doc.test_cases[0].output
+				assert bool(doc.test_cases[0].hidden) == hidden_failure
+				if hidden_failure:
+					assert not doc.test_cases[0].expected_output
+
 	def test_concurrent_target_version_does_not_overwrite(self):
 		first, _ = self.imported()
 		v1 = self.confirm(first)

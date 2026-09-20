@@ -11,6 +11,11 @@ from lms.lms.judge_service import (
 
 
 class TestJudgeService(TestCase):
+	def setUp(self):
+		lock = patch("lms.lms.judge_service._lock_submission")
+		lock.start()
+		self.addCleanup(lock.stop)
+
 	@patch("lms.lms.judge_service.frappe.get_all")
 	def test_combines_visible_and_protected_test_cases(self, get_all):
 		exercise = SimpleNamespace(
@@ -95,8 +100,8 @@ class TestJudgeService(TestCase):
 	@patch("lms.lms.judge_service.frappe.get_doc")
 	def test_public_failure_keeps_exact_input_and_runtime_error(self, get_doc, test_cases):
 		test_cases.return_value = [{"input": "0\n", "expected_output": "1", "hidden": False}]
-		doc = SimpleNamespace(judge_request_id=None, exercise="EX-1", set=Mock(), append=Mock(), save=Mock())
-		_apply_result(doc, {"status": "RUNTIME_ERROR", "cases": [
+		doc = SimpleNamespace(judge_request_id=None, status_version=0, exercise="EX-1", set=Mock(), append=Mock(), save=Mock())
+		_apply_result(doc, {"status": "RUNTIME_ERROR", "status_version": 1, "cases": [
 			{"index": 1, "status": "Runtime Error", "stderr": 'File "main.py", line 2\nZeroDivisionError'}
 		]})
 		assert doc.append.call_args.args[1]["input"] == "0\n"
@@ -139,6 +144,11 @@ class TestJudgeService(TestCase):
 
 
 class TestPackageJudgeService(TestCase):
+	def setUp(self):
+		lock = patch("lms.lms.judge_service._lock_submission")
+		lock.start()
+		self.addCleanup(lock.stop)
+
 	def make_doc(self):
 		return SimpleNamespace(
 			name="SUB-1", package_version="V1", config_digest="digest", attempt_id="attempt",
@@ -291,3 +301,113 @@ class TestInteractiveDispatchQueue(TestCase):
   enqueue.assert_called_once_with("lms.lms.judge_service.dispatch_submission",
    submission_name=doc.name, queue="short", enqueue_after_commit=True)
   assert result["submission"] == doc.name
+
+
+class TestLanguageTimeLimitCap(TestCase):
+	def test_python_multiplier_respects_service_limit(self):
+		from lms.lms import judge_service
+		for baseline, expected in ((2, 4), (15, 30), (30, 30)):
+			payload = {"time_limit_seconds": baseline}
+			judge_service._apply_submission_language(payload, "Python")
+			self.assertEqual(payload["time_limit_seconds"], expected)
+
+
+class TestStatusReconciliation(TestCase):
+	def make_doc(self):
+		return SimpleNamespace(name="SUB-1", judge_request_id="REQ-1", status="Running",
+			status_version=0, event_id=None, reload=Mock(), save=Mock(), score=0,
+			time_ms=0, memory_kb=0, compiler_message=None, passed_tests=0, total_tests=30,
+			check_permission=Mock())
+
+	def test_status_returns_local_summary_without_waiting_for_executor(self):
+		from lms.lms import judge_service as service
+		doc = self.make_doc()
+		with patch.object(service.frappe, "get_doc", return_value=doc), \
+			patch.object(service, "_queue_status_refresh") as enqueue, \
+			patch.object(service.requests, "get") as get:
+			result = service.get_programming_submission_status(doc.name)
+		doc.check_permission.assert_called_once_with("read")
+		enqueue.assert_called_once_with(doc)
+		get.assert_not_called()
+		doc.reload.assert_not_called()
+		self.assertEqual(result["total_tests"], 30)
+
+	def test_shared_lock_and_interval_coalesce_refreshes(self):
+		from lms.lms import judge_service as service
+		cache = Mock()
+		cache.lock.return_value.acquire.return_value = True
+		cache.get_value.side_effect = [None, 1]
+		with patch.object(service.frappe, "cache", cache), \
+			patch.object(service.frappe, "enqueue") as enqueue:
+			service._queue_status_refresh(self.make_doc())
+			service._queue_status_refresh(self.make_doc())
+		enqueue.assert_called_once()
+		self.assertTrue(enqueue.call_args.kwargs["deduplicate"])
+		cache.set_value.assert_called_once_with("judge-refresh:REQ-1", 1, expires_in_sec=3)
+		self.assertEqual(cache.lock.return_value.release.call_count, 2)
+
+	def test_refresh_does_not_overwrite_concurrently_completed_result(self):
+		from lms.lms import judge_service as service
+		doc = self.make_doc()
+		settings = SimpleNamespace(service_url="http://judge", request_timeout_seconds=5,
+			get_password=lambda _: "token")
+		def callback_won(_doc):
+			doc.status = "Passed"
+			doc.status_version = 1
+		with patch.object(service, "_get_settings", return_value=settings), \
+			patch.object(service.requests, "get") as get, \
+			patch.object(service, "_lock_submission", side_effect=callback_won), \
+			patch.object(service.frappe.db, "set_value") as update:
+			get.return_value.json.return_value = {"status": "RUNNING",
+				"judge_request_id": "REQ-1", "submission_id": "SUB-1"}
+			service._refresh_from_judge_service(doc)
+		update.assert_not_called()
+		self.assertEqual(doc.status, "Passed")
+
+	def test_legacy_terminal_result_is_protected_after_row_lock(self):
+		from lms.lms import judge_service as service
+		doc = self.make_doc()
+		def reload():
+			doc.status = "Passed"
+			doc.status_version = 1
+		doc.reload.side_effect = reload
+		with patch.object(service.frappe.db, "get_value") as get:
+			service._apply_result(doc, {"judge_request_id": "REQ-1", "status": "WRONG_ANSWER",
+				"status_version": 2, "event_id": "later"})
+		get.assert_called_once_with("LMS Programming Exercise Submission", doc.name, "name", for_update=True)
+		doc.save.assert_not_called()
+		self.assertEqual(doc.status, "Passed")
+
+	def test_reconciler_enqueues_pending_work_without_browser(self):
+		from lms.lms import judge_service as service
+		cache = Mock()
+		cache.get_value.return_value = ""
+		doc = self.make_doc()
+		with patch.object(service.frappe, "cache", cache), \
+			patch.object(service.frappe, "get_all", return_value=[doc]), \
+			patch.object(service, "_queue_status_refresh") as enqueue:
+			service.reconcile_pending_submissions()
+		enqueue.assert_called_once_with(doc)
+
+	def test_dispatch_response_cannot_replace_an_early_callback(self):
+		from lms.lms import judge_service as service
+		doc = Mock(status="Queued", attempt_id="attempt", status_version=0,
+			client_request_id="key", language="Python", code="source", exercise="EX-1")
+		doc.name = "SUB-1"
+		doc.get.return_value = None
+		exercise = SimpleNamespace(time_limit_seconds=2, memory_limit_kb=128000)
+		settings = SimpleNamespace(service_url="http://judge", request_timeout_seconds=5,
+			callback_url="http://callback", get_password=lambda _: "token")
+		def callback_won(_doc):
+			doc.status = "Passed"
+			doc.status_version = 1
+		with patch.object(service.frappe, "get_doc", side_effect=[doc, exercise]), \
+			patch.object(service, "_get_settings", return_value=settings), \
+			patch.object(service, "_test_cases", return_value=[{}]), \
+			patch.object(service.requests, "post") as post, \
+			patch.object(service, "_lock_submission", side_effect=callback_won), \
+			patch.object(service.frappe.db, "set_value") as update:
+			post.return_value.json.return_value = {"judge_request_id": "REQ-1", "status": "QUEUED"}
+			service.dispatch_submission(doc.name)
+		update.assert_not_called()
+		self.assertEqual(doc.status, "Passed")

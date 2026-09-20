@@ -75,5 +75,7 @@ bench --site "${SITE_NAME}" set-config host_name "http://${SITE_NAME}:8000"
 bench --site "${SITE_NAME}" clear-cache
 bench use "${SITE_NAME}"
 
+"${BENCH_DIR}/env/bin/python" "${LMS_SOURCE}/docker/enable_media_ranges.py" "${BENCH_DIR}"
+
 echo "[init] Learning is available at http://${SITE_NAME}:8000/lms"
 bench start

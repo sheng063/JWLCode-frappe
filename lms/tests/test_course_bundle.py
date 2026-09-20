@@ -377,3 +377,68 @@ class TestCourseAssetDiscovery(unittest.TestCase):
 		self.assertEqual(list(transfer.asset_references(code)), [])
 		self.assertEqual(transfer.portable_asset_urls(code), code)
 		self.assertEqual(transfer.local_asset_url("/files/valid.png"), "/files/valid.png")
+
+
+class TestCourseMediaStreaming(unittest.TestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def archive(self, payload=b"local video data", private=0):
+		out = io.BytesIO()
+		with zipfile.ZipFile(out, "w") as archive:
+			archive.writestr("assets/video.mp4", payload)
+			archive.writestr("assets.json", json.dumps([{
+				"file": "assets/video.mp4", "file_name": "video.mp4",
+				"url": "/files/video.mp4", "is_private": private,
+			}]))
+			archive.writestr("course.json", json.dumps({"name": "media", "chapters": []}))
+		out.seek(0)
+		return zipfile.ZipFile(out)
+
+	def test_media_budget_is_opt_in_and_does_not_expand_document_budget(self):
+		with self.archive(b"x" * 500) as archive:
+			with patch.object(bundle, "MAX_BYTES", 300), patch.dict(frappe.conf, {"lms_course_media_max_bytes": 0}):
+				with self.assertRaises(frappe.ValidationError):
+					bundle._validate(archive)
+			with patch.object(bundle, "MAX_BYTES", 300), patch.dict(frappe.conf, {"lms_course_media_max_bytes": 500}):
+				self.assertEqual(bundle._validate(archive)[0]["name"], "media")
+			with patch.object(bundle, "MAX_BYTES", 10), patch.dict(frappe.conf, {"lms_course_media_max_bytes": 500}):
+				with self.assertRaises(frappe.ValidationError):
+					bundle._validate(archive)
+
+	def test_private_media_streams_without_archive_read_and_rolls_back_blob(self):
+		frappe.set_user("Administrator")
+		payload = b"local movie bytes" * 1000
+		with self.archive(payload, private=1) as archive:
+			original_read = archive.read
+
+			def guarded_read(name, *args, **kwargs):
+				self.assertNotEqual(name, "assets/video.mp4")
+				return original_read(name, *args, **kwargs)
+
+			with patch.object(bundle, "STREAM_THRESHOLD", 1), patch.object(archive, "read", side_effect=guarded_read):
+				mapping = bundle._import_assets(archive)
+		file = frappe.get_doc("File", {"file_url": mapping["/files/video.mp4"]})
+		self.assertTrue(file.is_private)
+		self.assertEqual(file.file_size, len(payload))
+		self.assertEqual(file.content_hash, hashlib.md5(payload).hexdigest())
+		path = file.get_full_path()
+		with open(path, "rb") as stream:
+			self.assertEqual(stream.read(), payload)
+		frappe.db.rollback()
+		self.assertFalse(os.path.exists(path))
+
+	def test_large_download_returns_stream_and_closes_file(self):
+		import tempfile
+		from werkzeug.wrappers import Response
+
+		with tempfile.NamedTemporaryFile() as file:
+			file.write(b"zip payload")
+			file.flush()
+			with patch.object(transfer.os.path, "getsize", return_value=65 * 1024 * 1024):
+				response = transfer.serve_zip(file.name, "course.zip")
+			self.assertIsInstance(response, Response)
+			self.assertTrue(response.direct_passthrough)
+			self.assertEqual(b"".join(response.response), b"zip payload")
+			response.close()
+			self.assertTrue(response.response.file.closed)

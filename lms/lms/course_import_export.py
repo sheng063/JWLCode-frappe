@@ -29,7 +29,7 @@ def export_course_zip(course_name):
 	assets = get_course_assets(course, lessons, instructors, evaluator, assessments + questions)
 	safe_time = frappe.utils.now_datetime().strftime("%Y%m%d_%H%M%S")
 	zip_filename = f"{course.name}_{safe_time}_{secrets.token_hex(4)}.zip"
-	create_course_zip(
+	return create_course_zip(
 		zip_filename,
 		course,
 		chapters,
@@ -228,7 +228,7 @@ def create_course_zip(
 		)
 		final_path = move_zip_to_private(tmp_path, zip_filename)
 		schedule_file_deletion(final_path, delay_seconds=600)  # 10 minutes
-		serve_zip(final_path, zip_filename)
+		return serve_zip(final_path, zip_filename)
 	except Exception as e:
 		frappe.throw(
 			_("Could not create the course ZIP file. Please try again later. Error: {0}").format(str(e))
@@ -324,7 +324,10 @@ def write_assets(zip_file, assets):
 		if not is_safe_path(file_path):
 			frappe.throw(_("Unsafe asset path detected."))
 		path = "assets/" + hashlib.sha256(asset.encode()).hexdigest() + "/" + os.path.basename(asset)
-		zip_file.write(file_path, path)
+		from lms.lms.course_bundle import MEDIA_EXTENSIONS
+
+		compression = zipfile.ZIP_STORED if os.path.splitext(file_path)[1].lower() in MEDIA_EXTENSIONS else zipfile.ZIP_DEFLATED
+		zip_file.write(file_path, path, compress_type=compression)
 		manifest.append(
 			{"url": asset, "file": path, "file_name": file_doc.file_name, "is_private": file_doc.is_private}
 		)
@@ -356,6 +359,20 @@ def serve_zip(final_path, zip_filename):
 	safe_filename = sanitize_string(zip_filename)
 
 	try:
+		if os.path.getsize(final_path) > 64 * 1024 * 1024:
+			from werkzeug.wsgi import wrap_file
+			from werkzeug.wrappers import Response
+
+			file = open(final_path, "rb")
+			request = getattr(frappe.local, "request", None)
+			response = Response(
+				wrap_file(request.environ if request else {}, file),
+				mimetype="application/zip", direct_passthrough=True,
+			)
+			response.content_length = os.path.getsize(final_path)
+			response.headers.set("Content-Disposition", "attachment", filename=safe_filename)
+			response.call_on_close(file.close)
+			return response
 		with open(final_path, "rb") as f:
 			frappe.local.response.filename = safe_filename
 			frappe.local.response.filecontent = f.read()

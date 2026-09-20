@@ -2,6 +2,9 @@
 
 import hashlib
 import json
+import os
+import tempfile
+from pathlib import PurePosixPath
 import zipfile
 
 import frappe
@@ -14,6 +17,12 @@ from lms.lms.problem_package.parser import preflight
 FORMAT = "lms-course"
 VERSION = 2
 MAX_BYTES = 512 * 1024 * 1024
+STREAM_THRESHOLD = 8 * 1024 * 1024
+MEDIA_EXTENSIONS = {".mp4", ".webm", ".ogg", ".mp3", ".wav", ".m4a", ".mov"}
+
+
+def _is_media(item):
+	return PurePosixPath(str(item.get("file_name", ""))).suffix.lower() in MEDIA_EXTENSIONS
 
 
 def write_programming_packages(archive, assessments):
@@ -124,8 +133,19 @@ def _assessment_refs(content):
 def _validate(archive):
 	from lms.lms.course_import_export import export_lesson_type, get_assessment_map
 
-	if sum(info.file_size for info in archive.infolist()) > MAX_BYTES:
-		frappe.throw("Course ZIP exceeds 512 MiB uncompressed capacity.")
+	media_limit = max(0, int(frappe.conf.get("lms_course_media_max_bytes") or 0))
+	media_paths = set()
+	if media_limit:
+		assets = _json(archive, "assets.json", optional=True) or []
+		if not isinstance(assets, list):
+			frappe.throw("Invalid asset manifest.")
+		media_paths = {
+			item.get("file") for item in assets if isinstance(item, dict) and _is_media(item)
+		}
+	media_bytes = sum(info.file_size for info in archive.infolist() if info.filename in media_paths)
+	other_bytes = sum(info.file_size for info in archive.infolist() if info.filename not in media_paths)
+	if other_bytes > MAX_BYTES or media_bytes > media_limit:
+		frappe.throw("Course ZIP exceeds the configured uncompressed capacity.")
 	course = _json(archive, "course.json")
 	if not isinstance(course, dict):
 		frappe.throw("Invalid course.json.")
@@ -288,16 +308,54 @@ def _import_assets(archive):
 	for item in manifest:
 		if not isinstance(item, dict) or not item.get("file", "").startswith("assets/"):
 			frappe.throw("Invalid asset manifest.")
-		doc = _insert(
-			"File",
-			{
-				"file_name": item["file_name"],
-				"is_private": int(bool(item.get("is_private"))),
-				"content": archive.read(item["file"]),
-			},
-		)
+		if _is_media(item) and archive.getinfo(item["file"]).file_size > STREAM_THRESHOLD:
+			doc = _import_media(archive, item)
+		else:
+			doc = _insert(
+				"File",
+				{
+					"file_name": item["file_name"],
+					"is_private": int(bool(item.get("is_private"))),
+					"content": archive.read(item["file"]),
+				},
+			)
 		mapping[item["url"]] = doc.file_url
 	return mapping
+
+
+def _import_media(archive, item):
+	"""分块写入大媒体文件以控制内存占用，事务回滚时同步删除新文件。"""
+	private = int(bool(item.get("is_private")))
+	directory = frappe.get_site_path("private" if private else "public", "files")
+	suffix = PurePosixPath(item["file_name"]).suffix.lower()
+	fd, path = tempfile.mkstemp(prefix="course-media-", suffix=suffix, dir=directory)
+
+	def remove_blob():
+		if os.path.exists(path):
+			os.remove(path)
+
+	try:
+		digest, size = hashlib.md5(), 0
+		with os.fdopen(fd, "wb") as target, archive.open(item["file"]) as source:
+			while chunk := source.read(1024 * 1024):
+				target.write(chunk)
+				digest.update(chunk)
+				size += len(chunk)
+		os.chmod(path, 0o600 if private else 0o644)
+		url = ("/private/files/" if private else "/files/") + os.path.basename(path)
+		doc = frappe.get_doc({
+			"doctype": "File", "file_name": item["file_name"], "file_url": url,
+			"is_private": private, "file_size": size, "content_hash": digest.hexdigest(),
+		})
+		# 保留 File 生命周期对路径、访问权限及扩展名的校验，
+		# 避免将已写入的文件重新读入内存并重复保存。
+		doc.flags.copy_from_existing_file = True
+		doc.insert(ignore_permissions=True)
+		frappe.db.after_rollback.add(remove_blob)
+		return doc
+	except Exception:
+		remove_blob()
+		raise
 
 
 def _asset_urls(value, mapping):
