@@ -25,7 +25,7 @@
    "fieldtype": "Long Text",
    "in_list_view": 1,
    "label": "Expected Output",
-   "reqd": 1
+   "reqd": 0
   },
   {
    "fieldname": "column_break_bsjs",
@@ -36,7 +36,7 @@
    "fieldtype": "Long Text",
    "in_list_view": 1,
    "label": "Output",
-   "reqd": 1
+   "reqd": 0
   },
   {
    "fieldname": "status",
