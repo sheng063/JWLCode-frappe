@@ -10258,3 +10258,15 @@ msgstr "题目已发生变化，请刷新后再保存。"
 
 msgid "Preview limited to 2000 characters per field. Download for complete data."
 msgstr "每个字段最多预览 2000 个字符，完整数据请下载查看。"
+
+#: lms/lms/api.py
+msgid "Username must be text."
+msgstr "用户名必须为文本。"
+
+#: lms/lms/api.py
+msgid "Username must contain at least 4 characters and no spaces."
+msgstr "用户名至少需要 4 个字符，且不能包含空格。"
+
+#: lms/lms/api.py
+msgid "Username {0} already exists."
+msgstr "用户名 {0} 已存在。"

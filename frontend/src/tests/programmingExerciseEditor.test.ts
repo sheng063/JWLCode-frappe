@@ -31,7 +31,7 @@ describe('programming exercise answer editor', () => {
 	it('offers Python and C++ templates and restores saved code', () => {
 		expect(submissionSource).toContain('#include <bits/stdc++.h>')
 		expect(submissionSource).toContain('using namespace std;')
-		expect(submissionSource).toContain('def solve() -> None:')
+		expect(submissionSource).toContain("return 'import sys\\n\\n'")
 		expect(submissionSource).toContain('data-testid="submission-language"')
 		expect(submissionSource).toContain('language: selectedLanguage.value')
 		expect(submissionSource).toContain('code.value = saved?.code ?? starterCode.value')

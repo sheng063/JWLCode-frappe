@@ -28,9 +28,9 @@
 						class="w-full"
 					/>
 					<FormControl
-						v-model="member.last_name"
-						:label="__('Last Name')"
-						placeholder="Doe"
+						v-model="member.username"
+						:label="__('Username')"
+						placeholder="zhangsan"
 						type="text"
 						class="w-full"
 					/>
@@ -119,7 +119,7 @@ type MemberRow = {
 	name: string
 	email?: string
 	first_name?: string
-	last_name?: string
+	username?: string
 	phone?: string
 	mobile_no?: string
 	roles?: string[]
@@ -171,7 +171,7 @@ const ROLE_MAP: Record<string, string> = {
 const member = reactive({
 	email: isEdit.value ? props.memberID : '',
 	first_name: '',
-	last_name: '',
+	username: '',
 	phone: '',
 	mobile_no: '',
 	new_password: '',
@@ -219,7 +219,7 @@ watch(
 		if (!isEdit.value || !found) return
 		member.email = found.email ?? found.name
 		member.first_name = found.first_name ?? ''
-		member.last_name = found.last_name ?? ''
+		member.username = found.username ?? ''
 		member.phone = found.phone ?? ''
 		member.mobile_no = found.mobile_no ?? ''
 		const current = found.roles ?? []
@@ -267,7 +267,7 @@ const addMember = async () => {
 		await call('lms.lms.api.create_member', {
 			email: member.email.trim(),
 			first_name: member.first_name.trim(),
-			last_name: member.last_name.trim(),
+			username: member.username.trim(),
 			phone: member.phone.trim(),
 			mobile_no: member.mobile_no.trim(),
 			new_password: member.new_password,
@@ -298,7 +298,7 @@ const updateMember = async () => {
 		await call('lms.lms.api.update_member', {
 			member: props.memberID,
 			first_name: member.first_name.trim(),
-			last_name: member.last_name.trim(),
+			username: member.username.trim(),
 			phone: member.phone.trim(),
 			mobile_no: member.mobile_no.trim(),
 			new_password: member.new_password,

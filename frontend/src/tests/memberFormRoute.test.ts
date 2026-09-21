@@ -303,7 +303,7 @@ describe('the member form route', () => {
 				name: MEMBER,
 				email: MEMBER,
 				first_name: 'Jane',
-				last_name: 'Doe',
+				username: 'janedoe',
 				phone: '021-5555-1234',
 				mobile_no: '13800138000',
 				roles: ['LMS Student', 'Course Creator'],
@@ -345,6 +345,8 @@ describe('the member form route', () => {
 			await wrapper
 				.find('[data-testid="field-Email"] input')
 				.setValue('  jane@doe.com  ')
+			await wrapper.find('[data-testid="field-Username"] input').setValue(' newstudent ')
+			expect(wrapper.find('[data-testid="field-Last Name"]').exists()).toBe(false)
 			await save(wrapper).trigger('click')
 			await flushPromises()
 
@@ -352,7 +354,7 @@ describe('the member form route', () => {
 			expect(callMock).toHaveBeenCalledWith('lms.lms.api.create_member', {
 				email: MEMBER,
 				first_name: '',
-				last_name: '',
+				username: 'newstudent',
 				phone: '',
 				mobile_no: '',
 				new_password: '',
@@ -420,13 +422,16 @@ describe('the member form route', () => {
 			name: MEMBER,
 			email: MEMBER,
 			first_name: 'Jane',
-			last_name: 'Doe',
+			username: 'janedoe',
 			phone: '021-1111-2222',
 			mobile_no: '13900139000',
 			roles: ['LMS Student'],
 		}
 		await flushPromises()
 
+		expect((wrapper.find('[data-testid="field-Username"] input').element as HTMLInputElement).value).toBe('janedoe')
+		expect(wrapper.find('[data-testid="field-Last Name"]').exists()).toBe(false)
+		await wrapper.find('[data-testid="field-Username"] input').setValue(' updatedstudent ')
 		await wrapper.find('[data-testid="role-Moderator"]').trigger('click')
 		callMock.mockResolvedValue(true)
 		await save(wrapper).trigger('click')
@@ -436,7 +441,7 @@ describe('the member form route', () => {
 		expect(callMock).toHaveBeenCalledWith('lms.lms.api.update_member', {
 			member: MEMBER,
 			first_name: 'Jane',
-			last_name: 'Doe',
+			username: 'updatedstudent',
 			phone: '021-1111-2222',
 			mobile_no: '13900139000',
 			new_password: '',

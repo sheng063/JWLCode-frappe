@@ -676,17 +676,7 @@ int main() {
 	return 0;
 }`
 	}
-	return `import sys
-
-
-def solve() -> None:
-	data = sys.stdin.read().strip()
-	# Write your solution here.
-
-
-if __name__ == "__main__":
-	solve()
-`
+	return 'import sys\n\n'
 })
 
 const restoreExerciseCode = () => {

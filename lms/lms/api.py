@@ -1071,6 +1071,19 @@ def member_roles(member: str) -> list[str]:
 	return [role for role in LMS_ROLES if role in roles]
 
 
+def validate_member_username(username: str, member: str | None = None) -> str:
+	if not isinstance(username, str):
+		frappe.throw(_("Username must be text."), frappe.ValidationError)
+	username = username.strip().strip(" @").lower()
+	if not username and member is None:
+		return ""
+	if len(username) < 4 or any(character.isspace() for character in username):
+		frappe.throw(_("Username must contain at least 4 characters and no spaces."), frappe.ValidationError)
+	if frappe.db.exists("User", {"username": username, "name": ("!=", member or "")}):
+		frappe.throw(_("Username {0} already exists.").format(username), frappe.DuplicateEntryError)
+	return username
+
+
 @frappe.whitelist()
 def create_member(
 	email: str,
@@ -1080,6 +1093,7 @@ def create_member(
 	mobile_no: str = "",
 	new_password: str = "",
 	roles: list[str] | None = None,
+	username: str | None = None,
 ):
 	"""Create an LMS website user and assign the selected LMS roles atomically."""
 	frappe.only_for("Moderator")
@@ -1106,6 +1120,8 @@ def create_member(
 	last_name = last_name.strip()
 	user = frappe.new_doc("User")
 	user.email = email
+	if username is not None:
+		user.username = validate_member_username(username)
 	user.first_name = first_name
 	user.last_name = last_name
 	user.full_name = f"{first_name} {last_name}".strip()
@@ -1134,11 +1150,12 @@ def create_member(
 def update_member(
 	member: str,
 	first_name: str,
-	last_name: str = "",
+	last_name: str | None = None,
 	phone: str = "",
 	mobile_no: str = "",
 	new_password: str = "",
 	roles: list[str] | None = None,
+	username: str | None = None,
 ):
 	"""Update an LMS member profile, password and LMS roles in one request."""
 	frappe.only_for("Moderator")
@@ -1148,7 +1165,9 @@ def update_member(
 	member = member.strip()
 	if not member or member in ["Administrator", "Guest"] or not frappe.db.exists("User", member):
 		frappe.throw(_("Invalid member."), frappe.ValidationError)
-	if any(not isinstance(value, str) for value in [first_name, last_name, phone, mobile_no, new_password]):
+	if any(not isinstance(value, str) for value in [first_name, phone, mobile_no, new_password]):
+		frappe.throw(_("Member details must be text."), frappe.ValidationError)
+	if last_name is not None and not isinstance(last_name, str):
 		frappe.throw(_("Member details must be text."), frappe.ValidationError)
 	first_name = first_name.strip()
 	if not first_name:
@@ -1162,7 +1181,10 @@ def update_member(
 
 	user = frappe.get_doc("User", member)
 	user.first_name = first_name
-	user.last_name = last_name.strip()
+	if last_name is not None:
+		user.last_name = last_name.strip()
+	if username is not None:
+		user.username = validate_member_username(username, member)
 	user.phone = phone.strip()
 	user.mobile_no = mobile_no.strip()
 	if new_password:

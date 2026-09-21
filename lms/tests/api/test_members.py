@@ -50,6 +50,38 @@ class TestCreateMember(BaseTestUtils):
 		self.assertIn("Course Creator", updated.roles)
 		self.assertNotIn("new_password", updated)
 
+	def test_creates_member_with_explicit_username(self):
+		created = create_member("username-student@example.com", first_name="Student", username=" Student2026 ")
+		self.cleanup_items.append(("User", created["name"]))
+		self.assertEqual(created["username"], "student2026")
+		self.assertEqual(frappe.get_doc("User", created["name"]).username, "student2026")
+
+	def test_updates_username_without_erasing_hidden_surname(self):
+		student = self._create_user("username-edit@example.com", "Jane", "Doe", ["LMS Student"])
+		updated = update_member(student.name, first_name="Jane", username="janedoe2026", roles=["LMS Student"])
+		self.assertEqual(updated.username, "janedoe2026")
+		self.assertEqual(updated.last_name, "Doe")
+		self.assertEqual(updated.full_name, "Jane Doe")
+		# 保持原用户名时，不应误判为用户名重复。
+		updated = update_member(student.name, first_name="Jane", username="janedoe2026", roles=["LMS Student"])
+		self.assertEqual(updated.username, "janedoe2026")
+
+	def test_rejects_duplicate_username_on_create_and_update(self):
+		existing = self._create_user("username-owner@example.com", "Username", "Owner", ["LMS Student"])
+		student = self._create_user("username-other@example.com", "Other", "Student", ["LMS Student"])
+		with self.assertRaises(frappe.DuplicateEntryError):
+			create_member("duplicate-username@example.com", username=existing.username)
+		self.assertFalse(frappe.db.exists("User", "duplicate-username@example.com"))
+		with self.assertRaises(frappe.DuplicateEntryError):
+			update_member(student.name, first_name="Changed", username=existing.username)
+		self.assertEqual(frappe.get_doc("User", student.name).first_name, "Other")
+
+	def test_rejects_usernames_that_would_be_silently_rewritten(self):
+		for username in ["abc", "student name"]:
+			with self.subTest(username=username), self.assertRaises(frappe.ValidationError):
+				create_member("invalid-username@example.com", username=username)
+		self.assertFalse(frappe.db.exists("User", "invalid-username@example.com"))
+
 	def test_rejects_non_lms_roles_without_creating_a_user(self):
 		email = "forbidden-role@example.com"
 		with self.assertRaises(frappe.PermissionError):
