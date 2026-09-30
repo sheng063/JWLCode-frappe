@@ -218,7 +218,7 @@ const student = {
 
 // Every field the exercise form is meant to collect. Pin the set: a field lost
 // in the modal→route move is otherwise invisible to the rest of the suite.
-const FIELD_LABELS = ['Title', 'Public samples', 'Problem Statement']
+const FIELD_LABELS = ['Title', '时间限制（秒）', '内存限制（MiB）', 'Public samples', 'Problem Statement']
 
 describe('ProgrammingExerciseForm as a route', () => {
 	beforeEach(() => {
@@ -433,6 +433,26 @@ describe('ProgrammingExerciseForm as a route', () => {
 			.trigger('click')
 		expect(insertSubmit).toHaveBeenCalledTimes(1)
 		expect(setValueSubmit).not.toHaveBeenCalled()
+	})
+
+	it('loads limits and sends independent edits in seconds and KiB', async () => {
+		createDocumentResourceMock.mockImplementation(documentResourceStub({
+			name: 'EX-0001', title: 'T', language: 'Python', problem_statement: '',
+			time_limit_seconds: 1.5, memory_limit_kb: 131072, modified: 'now',
+		}))
+		const router = makeRouter()
+		await router.push('/programming-exercises/edit/EX-0001')
+		await router.isReady()
+		const wrapper = await mountForm(router, moderator)
+		const inputs = wrapper.find('[data-testid="execution-limits"]').findAll('input')
+		expect((inputs[0].element as HTMLInputElement).value).toBe('1.5')
+		expect((inputs[1].element as HTMLInputElement).value).toBe('128')
+		await inputs[1].setValue('256')
+		await wrapper.find('[data-testid="programming-exercise-save"]').trigger('click')
+		await flushPromises()
+		expect(call).toHaveBeenCalledWith(expect.stringContaining('save_exercise'), expect.objectContaining({
+			time_limit_seconds: 1.5, memory_limit_kb: 262144,
+		}))
 	})
 
 	it('saves through the version-aware endpoint and refreshes the list', async () => {

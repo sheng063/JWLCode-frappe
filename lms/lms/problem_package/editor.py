@@ -4,6 +4,7 @@ import copy
 import hashlib
 import io
 import json
+import math
 import zipfile
 
 import frappe
@@ -81,13 +82,15 @@ def parse_hidden_zip(content):
 	return validate_cases(cases)
 
 
-def rebuild_package(content, title, samples, hidden, statement_source=None, description=None):
+def rebuild_package(content, title, samples, hidden, statement_source=None, description=None, limits=None):
 	"""Preserve unrelated source files and executable modes when replacing data."""
 	validate_cases(samples + hidden)
 	files = read_archive(content)
 	root = "" if "problem.yaml" in files else next(iter(files)).split("/")[0] + "/"
 	metadata = yaml.safe_load(files[root + "problem.yaml"].decode("utf-8"))
 	metadata["name"] = title
+	if limits and "memory_limit_kb" in limits:
+		metadata.setdefault("limits", {})["memory"] = limits["memory_limit_kb"] / 1024
 	replacements = {root + "problem.yaml": yaml.safe_dump(metadata, allow_unicode=True).encode()}
 	if description is not None:
 		replacements[root + "lms/statement.html"] = description.encode("utf-8")
@@ -111,16 +114,17 @@ def rebuild_package(content, title, samples, hidden, statement_source=None, desc
 	return output.getvalue()
 
 
-def _save_package(doc, title, samples, hidden, statement_source, description):
+def _save_package(doc, title, samples, hidden, statement_source, description, limits=None):
 	api._enabled()
 	previous = frappe.get_doc(api.VERSION, doc.active_package_version)
 	record = frappe.get_doc(api.IMPORT, previous.import_record)
 	content = rebuild_package(api._content(record), title, samples, hidden, statement_source,
-		description if statement_source is None and previous.statement_path.endswith(".pdf") else None)
+		description if statement_source is None and previous.statement_path.endswith(".pdf") else None, limits)
 	report = preflight(content, allow_flat=bool(record.allow_flat))
 	if report["errors"]:
 		frappe.throw("; ".join(report["errors"]))
 	config = json.loads(previous.judge_config)
+	config.update(limits or {})
 	api.require_capability(config, report["cases"])
 	file = frappe.get_doc({"doctype": "File", "file_name": "edited-problem.zip", "is_private": 1,
 		"content": content}).save(ignore_permissions=True)
@@ -137,8 +141,23 @@ def _save_package(doc, title, samples, hidden, statement_source, description):
 
 @frappe.whitelist(methods=["POST"])
 def save_exercise(exercise: str, modified: str, title: str, problem_statement: str,
-		test_cases: list | str, statement_source: str | None = None):
+		test_cases: list | str, statement_source: str | None = None,
+		time_limit_seconds: float | None = None, memory_limit_kb: float | None = None):
 	doc = _exercise(exercise, modified)
+	limits = {}
+	try:
+		if time_limit_seconds is not None:
+			seconds = float(time_limit_seconds)
+			if not math.isfinite(seconds) or not 0 < seconds <= 30:
+				raise ValueError
+			limits["time_limit_seconds"] = seconds
+		if memory_limit_kb is not None:
+			memory = float(memory_limit_kb)
+			if not math.isfinite(memory) or not memory.is_integer() or not 16000 <= memory <= 1048576:
+				raise ValueError
+			limits["memory_limit_kb"] = int(memory)
+	except (TypeError, ValueError, OverflowError):
+		frappe.throw("时间限制须大于 0 且不超过 30 秒，内存限制须为 16000–1048576 KiB 的整数。")
 	if not isinstance(problem_statement, str) or len(problem_statement.encode("utf-8")) > DEFAULT_LIMITS.file_bytes:
 		frappe.throw("Invalid or oversized problem statement.")
 	if statement_source is not None and (not isinstance(statement_source, str) or len(statement_source.encode("utf-8")) > DEFAULT_LIMITS.file_bytes):
@@ -147,9 +166,10 @@ def save_exercise(exercise: str, modified: str, title: str, problem_statement: s
 	if not isinstance(title, str) or not title.strip():
 		frappe.throw("Title is required.")
 	if doc.source_type == "icpc":
-		_save_package(doc, title.strip(), samples, _cases(doc), statement_source, problem_statement)
+		_save_package(doc, title.strip(), samples, _cases(doc), statement_source, problem_statement, limits)
 	else:
 		doc.title, doc.problem_statement = title.strip(), problem_statement
+		doc.update(limits)
 		doc.set("test_cases", samples)
 		doc.save()
 	return {"exercise": doc.name}

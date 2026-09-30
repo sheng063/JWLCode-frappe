@@ -22,6 +22,13 @@
 						:label="__('Title')"
 						:required="true"
 					/>
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-testid="execution-limits">
+						<FormControl v-model="exercise.time_limit_seconds" type="number"
+							:label="__('时间限制（秒）')" :min="0.001" :max="30" step="any" :required="true" />
+						<FormControl v-model="memoryLimitMiB" type="number"
+							:label="__('内存限制（MiB）')" :min="15.625" :max="1024" step="any" :required="true" />
+					</div>
+					<p class="text-sm text-ink-gray-6">{{ __('时间限制以 C++ 为基准，Python 按 2 倍执行，最高 30 秒。1 MiB = 1024 KiB。') }}</p>
 					<ChildTable
 						v-model="testCases.data"
 						:label="__('Public samples')"
@@ -289,6 +296,8 @@ type ExerciseForm = {
 	title: string
 	language: 'Python' | 'JavaScript' | 'C++'
 	problem_statement: string
+	time_limit_seconds: number
+	memory_limit_kb: number
 	test_cases: { input: string; expected_output: string; idx: number }[]
 }
 
@@ -296,10 +305,16 @@ const emptyExercise = (): ExerciseForm => ({
 	title: '',
 	language: 'Python',
 	problem_statement: '',
+	time_limit_seconds: 2,
+	memory_limit_kb: 131072,
 	test_cases: [],
 })
 
 const exercise = ref<ExerciseForm>(emptyExercise())
+const memoryLimitMiB = computed({
+	get: () => exercise.value.memory_limit_kb / 1024,
+	set: (value: number | string) => { exercise.value.memory_limit_kb = Number(value) * 1024 },
+})
 
 // C4 — edit mode used to be seeded from the list page's in-memory rows, which
 // are empty when this route is opened cold. Fetch the record instead, following
@@ -331,6 +346,8 @@ watch(
 			title: doc.title,
 			language: doc.language,
 			problem_statement: doc.problem_statement || '',
+			time_limit_seconds: doc.time_limit_seconds ?? 2,
+			memory_limit_kb: doc.memory_limit_kb ?? 131072,
 			test_cases: [],
 		}
 		isDirty.value = false
@@ -409,6 +426,14 @@ const updateTestCasesInExercise = () => {
 
 const saveExercise = () => {
 	if (!canManageExercise.value || saving.value || uploadingHidden.value) return
+	const seconds = Number(exercise.value.time_limit_seconds)
+	const memory = Number(exercise.value.memory_limit_kb)
+	if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 30 ||
+		!Number.isInteger(memory) || memory < 16000 || memory > 1048576) {
+		toast.warning(__('时间限制须大于 0 且不超过 30 秒，内存限制须为 15.625–1024 MiB，且能换算为整数 KiB。'))
+		return
+	}
+	exercise.value.time_limit_seconds = seconds
 	validateTitle()
 	updateTestCasesInExercise()
 	if (props.exerciseID == 'new') createNewExercise()
@@ -447,6 +472,8 @@ const updateExercise = async () => {
 			exercise: props.exerciseID, modified: exerciseDoc.doc.modified,
 			title: exercise.value.title, problem_statement: exercise.value.problem_statement,
 			test_cases: exercise.value.test_cases,
+			time_limit_seconds: exercise.value.time_limit_seconds,
+			memory_limit_kb: exercise.value.memory_limit_kb,
 			statement_source: exerciseDoc.doc.source_type === 'icpc' ? extractStatementSource(exercise.value.problem_statement) : null,
 		})
 		isDirty.value = false

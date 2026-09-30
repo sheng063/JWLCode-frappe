@@ -4,6 +4,8 @@ export interface ProgrammingExercise {
     language: 'Python' | 'JavaScript' | 'C++';
     test_cases_count: number;
     problem_statement: string;
+    time_limit_seconds?: number;
+    memory_limit_kb?: number;
     test_cases: [TestCase];
 }
 

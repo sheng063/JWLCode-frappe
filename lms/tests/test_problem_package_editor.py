@@ -82,6 +82,43 @@ class TestEditorIntegration(TestProblemPackageIntegration):
 		self.assertEqual(replacement["exercise"], doc.name)
 		self.assertEqual(replacement["exercise_number"], published["exercise_number"])
 
+	def test_limits_can_be_edited_independently_and_preserve_history(self):
+		import_id, _ = self.imported(package(sample=True))
+		v1 = self.confirm(import_id)
+		doc = frappe.get_doc(api.EXERCISE, api.publish_version(v1)["exercise"])
+		samples = [{"input": c.input, "expected_output": c.expected_output} for c in doc.test_cases]
+		editor.save_exercise(doc.name, str(doc.modified), doc.title, doc.problem_statement, samples,
+			time_limit_seconds=1.5)
+		doc.reload()
+		self.assertEqual(doc.time_limit_seconds, 1.5)
+		self.assertEqual(doc.memory_limit_kb, 131072)
+		editor.save_exercise(doc.name, str(doc.modified), doc.title, doc.problem_statement, samples,
+			memory_limit_kb=262144)
+		doc.reload()
+		config = json.loads(frappe.get_doc(api.VERSION, doc.active_package_version).judge_config)
+		self.assertEqual(config["time_limit_seconds"], 1.5)
+		self.assertEqual(config["memory_limit_kb"], 262144)
+		self.assertEqual(doc.memory_limit_kb, 262144)
+		self.assertEqual(json.loads(frappe.get_doc(api.VERSION, v1).judge_config)["memory_limit_kb"], 131072)
+		version = frappe.get_doc(api.VERSION, doc.active_package_version)
+		report = preflight(api._content(frappe.get_doc(api.IMPORT, version.import_record)))
+		self.assertEqual(report["metadata"]["limits"]["memory"], 256)
+
+	def test_manual_limits_and_invalid_values(self):
+		samples = [{"input": "", "expected_output": "yes"}]
+		doc = frappe.get_doc({"doctype": api.EXERCISE, "title": "Limits fixture", "language": "Python",
+			"problem_statement": "Test", "test_cases": samples}).insert()
+		editor.save_exercise(doc.name, str(doc.modified), doc.title, doc.problem_statement, samples,
+			time_limit_seconds=2.5, memory_limit_kb=262144)
+		doc.reload()
+		self.assertEqual(doc.time_limit_seconds, 2.5)
+		self.assertEqual(doc.memory_limit_kb, 262144)
+		for limits in ({"time_limit_seconds": 0}, {"time_limit_seconds": 31},
+			{"time_limit_seconds": float("nan")}, {"memory_limit_kb": 15999},
+			{"memory_limit_kb": 1048577}, {"memory_limit_kb": 16000.5}):
+			with self.subTest(limits=limits), self.assertRaises(frappe.ValidationError):
+				editor.save_exercise(doc.name, str(doc.modified), doc.title, doc.problem_statement, samples, **limits)
+
 	def test_pdf_description_survives_version_and_export(self):
 		i1, _ = self.imported(package(sample=True))
 		published = api.publish_version(self.confirm(i1))
