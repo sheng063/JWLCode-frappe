@@ -526,6 +526,27 @@ const getSidebarItems = (forMobile = false) => {
 			hideLabel: true,
 			items: [
 				{
+					label: 'Code Creation',
+					icon: 'Code',
+					to: 'Creation',
+					activeFor: ['Creation'],
+					condition: () => !!userResource?.data,
+				},
+				{
+					label: 'My Creations',
+					icon: 'FolderOpen',
+					to: 'MyCreations',
+					activeFor: ['MyCreations', 'CreationDetail'],
+					condition: () => !!userResource?.data,
+				},
+				{
+					label: 'Game',
+					icon: 'Gamepad2',
+					to: 'Game',
+					activeFor: ['Game', 'GameDetail'],
+					condition: () => !!userResource?.data,
+				},
+				{
 					label: 'Courses',
 					icon: 'BookOpen',
 					to: 'Courses',

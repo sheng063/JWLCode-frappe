@@ -1,0 +1,71 @@
+{
+	"doctype": "DocType",
+	"name": "LMS Game",
+	"module": "LMS",
+	"engine": "InnoDB",
+	"autoname": "hash",
+	"title_field": "title",
+	"field_order": [
+		"title",
+		"filename",
+		"html_base64",
+		"description",
+		"cover_image",
+		"entry_file"
+	],
+	"fields": [
+		{
+			"fieldname": "title",
+			"label": "Title",
+			"fieldtype": "Data",
+			"reqd": 1
+		},
+		{
+			"fieldname": "filename",
+			"label": "Filename",
+			"fieldtype": "Data",
+			"reqd": 1
+		},
+		{
+			"fieldname": "html_base64",
+			"label": "HTML Content (Base64)",
+			"fieldtype": "Long Text",
+			"hidden": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "description",
+			"label": "Description",
+			"fieldtype": "Small Text"
+		},
+		{
+			"fieldname": "cover_image",
+			"label": "Cover Image",
+			"fieldtype": "Long Text",
+			"hidden": 1
+		},
+		{
+			"fieldname": "entry_file",
+			"fieldtype": "Data",
+			"label": "ZIP Entry File",
+			"read_only": 1,
+			"length": 512
+		}
+	],
+	"permissions": [
+		{
+			"role": "System Manager",
+			"read": 1
+		},
+		{
+			"role": "Moderator",
+			"read": 1
+		},
+		{
+			"role": "Course Creator",
+			"read": 1
+		}
+	],
+	"sort_field": "creation",
+	"sort_order": "DESC"
+}

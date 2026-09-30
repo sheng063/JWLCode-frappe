@@ -72,6 +72,10 @@ export default defineConfig(async ({ mode }) => {
 			// Host header, so we must forward to http://<site>:8000; a bare 127.0.0.1
 			// target makes Frappe 404 with "127.0.0.1 does not exist". (Backend :8000.)
 			proxy: {
+				'/game-assets': {
+					target: 'http://127.0.0.1:8000',
+					router: (req) => `http://${req.headers.host.split(':')[0]}:8000`,
+				},
 				'/scorm': {
 					target: 'http://127.0.0.1:8000',
 					router: (req) =>

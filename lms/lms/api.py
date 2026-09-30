@@ -850,7 +850,9 @@ def get_sidebar_settings():
 	if frappe.session.user == "Guest" and not lms_settings.allow_guest_access:
 		return []
 
-	sidebar_items = frappe._dict()
+	from lms.lms.game import game_visible
+
+	sidebar_items = frappe._dict(game=int(game_visible()))
 	items = [
 		"courses",
 		"batches",

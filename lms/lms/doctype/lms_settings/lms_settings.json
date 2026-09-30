@@ -50,6 +50,7 @@
 		"certified_members",
 		"certifications",
 		"programming_exercises",
+		"game_enabled",
 		"column_break_exdz",
 		"jobs",
 		"statistics",
@@ -546,6 +547,12 @@
 			"fieldname": "enforce_assignment_completion",
 			"fieldtype": "Check",
 			"label": "Enforce Assignment Completion"
+		},
+		{
+			"fieldname": "game_enabled",
+			"fieldtype": "Check",
+			"label": "Show Game to Students",
+			"default": "0"
 		}
 	],
 	"grid_page_length": 50,

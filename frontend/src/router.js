@@ -43,6 +43,10 @@ router.beforeEach(async (to, from, next) => {
 	}
 
 	if (!isLoggedIn) {
+		if (to.meta.requiresAuth) {
+			window.location.href = '/login'
+			return
+		}
 		if (to.name == 'Home') router.push({ name: 'Courses' })
 
 		await settings.promise

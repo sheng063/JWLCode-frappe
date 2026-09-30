@@ -6,6 +6,35 @@
 // actually registers.
 export const routes = [
 	{
+		path: '/create',
+		name: 'Creation',
+		component: () => import('@/pages/Creation.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/my-creations',
+		name: 'MyCreations',
+		component: () => import('@/pages/MyCreations.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/my-creations/:creationId',
+		name: 'CreationDetail',
+		component: () => import('@/pages/Creation.vue'),
+		meta: { requiresAuth: true },
+	},
+	{
+		path: '/game/:gameId',
+		name: 'GameDetail',
+		component: () => import('@/pages/GameDetail.vue'),
+		props: true,
+	},
+	{
+		path: '/game',
+		name: 'Game',
+		component: () => import('@/pages/Game.vue'),
+	},
+	{
 		path: '/',
 		name: 'Home',
 		component: () => import('@/pages/Home/Home.vue'),

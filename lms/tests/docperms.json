@@ -531,6 +531,14 @@
 			"export"
 		]
 	},
+	"LMS Game": {
+		"Course Creator#0": [
+			"read"
+		],
+		"Moderator#0": [
+			"read"
+		]
+	},
 	"LMS Google Meet Settings": {
 		"Batch Evaluator#0#if_owner": [
 			"read",

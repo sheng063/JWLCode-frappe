@@ -10300,3 +10300,9 @@ msgstr "包含视频导出"
 
 msgid "Export without videos"
 msgstr "不含视频导出"
+
+msgid "Code Creation"
+msgstr "创作"
+
+msgid "My Creations"
+msgstr "我的作品"

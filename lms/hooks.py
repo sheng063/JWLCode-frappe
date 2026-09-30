@@ -275,6 +275,7 @@ lms_markdown_macro_renderers = {
 }
 
 page_renderer = [
+	"lms.lms.game_package.GamePackageRenderer",
 	"lms.page_renderers.SCORMRenderer",
 ]
 
@@ -316,4 +317,4 @@ raven_membership_providers = ["lms.raven_provider.get_provider"]
 raven_integration_manager_roles = ["Moderator"]
 
 # Export jobs remain valid across ordinary site cache clears, until their TTL expires.
-persistent_cache_keys = ["course-export:", "course-export-active:"]
+persistent_cache_keys = ["course-export:", "course-export-active:", "game-package:"]

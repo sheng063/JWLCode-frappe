@@ -7,6 +7,7 @@ import dayjs from '@/utils/dayjs'
 import { createDialog } from '@/utils/dialogs'
 import translationPlugin from './translation'
 import { usersStore } from './stores/user'
+import { useSettings } from './stores/settings'
 import { initSocket } from './socket'
 import { FrappeUI, setConfig, frappeRequest, pageMetaPlugin } from 'frappe-ui'
 import { telemetryPlugin } from 'frappe-ui/frappe'
@@ -23,7 +24,13 @@ app.use(translationPlugin)
 app.use(pageMetaPlugin)
 registerDirectives(app)
 app.provide('$dayjs', dayjs)
-app.provide('$socket', initSocket())
+const socket = initSocket()
+app.provide('$socket', socket)
+socket.on('lms_game_visibility_changed', () => {
+	useSettings()
+		.loadSidebarSettings(true)
+		.catch(() => {})
+})
 app.mount('#app')
 
 const { userResource, allUsers } = usersStore()

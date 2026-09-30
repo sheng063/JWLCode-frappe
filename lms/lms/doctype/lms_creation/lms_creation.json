@@ -1,0 +1,42 @@
+{
+	"doctype": "DocType",
+	"name": "LMS Creation",
+	"module": "LMS",
+	"engine": "InnoDB",
+	"autoname": "hash",
+	"title_field": "title",
+	"field_order": [
+		"title",
+		"language",
+		"code",
+		"stdin"
+	],
+	"fields": [
+		{
+			"fieldname": "title",
+			"label": "Title",
+			"fieldtype": "Data",
+			"reqd": 1
+		},
+		{
+			"fieldname": "language",
+			"label": "Language",
+			"fieldtype": "Select",
+			"options": "Python\nC++",
+			"reqd": 1
+		},
+		{
+			"fieldname": "code",
+			"label": "Code",
+			"fieldtype": "Long Text"
+		},
+		{
+			"fieldname": "stdin",
+			"label": "Standard Input",
+			"fieldtype": "Long Text"
+		}
+	],
+	"permissions": [],
+	"sort_field": "modified",
+	"sort_order": "DESC"
+}

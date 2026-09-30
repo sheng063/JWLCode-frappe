@@ -162,12 +162,11 @@ let loaded: Promise<void> | null = null
  * case the first load's promise comes back and nothing is fetched again. Both
  * phone surfaces call this: the bar's layout, and the You page on mount.
  *
- * Keyed on the viewer alone, so a change to the admin's sidebar flags does not
- * re-run it — no phone surface can change them. Add a second key if that stops
- * being true.
+ * Include Game visibility because teachers can change it from the phone and
+ * other sessions receive its updated flag through realtime notifications.
  */
 export function ensureMobileNavLinks(viewer: MobileNavViewer): Promise<void> {
-	const key = viewerKey(viewer)
+	const key = `${viewerKey(viewer)}:${Number(useSettings().sidebarSettings.data?.game || 0)}`
 	if (loaded && loadedFor === key) return loaded
 
 	const forget = (): void => {

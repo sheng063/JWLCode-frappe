@@ -30,6 +30,7 @@ vi.mock('@/stores/settings', () => ({
 
 import {
 	loadMobileNavLinks,
+	ensureMobileNavLinks,
 	otherLinks,
 	sidebarLinks,
 } from '@/stores/mobileNavLinks'
@@ -173,4 +174,19 @@ describe('loadMobileNavLinks', () => {
 		expect(labels(otherLinks).filter((l) => l === 'Quizzes')).toHaveLength(1)
 		expect(labels(sidebarLinks).filter((l) => l === 'Programs')).toHaveLength(1)
 	})
+})
+
+it('rebuilds cached mobile links when Game is enabled and disabled', async () => {
+	getSidebarLinks.mockReturnValue([
+		{ items: [{ label: 'Game', icon: 'Gamepad2', to: 'Game' }] },
+	])
+	settings.data = { game: 0 }
+	await ensureMobileNavLinks(LEARNER)
+	expect(labels(sidebarLinks)).not.toContain('Game')
+	settings.data = { game: 1 }
+	await ensureMobileNavLinks(LEARNER)
+	expect(labels(sidebarLinks)).toContain('Game')
+	settings.data = { game: 0 }
+	await ensureMobileNavLinks(LEARNER)
+	expect(labels(sidebarLinks)).not.toContain('Game')
 })
