@@ -150,6 +150,7 @@ scheduler_events = {
 		"lms.lms.judge_service.reconcile_pending_submissions",
 	],
 	"hourly": [
+		"lms.lms.course_export_jobs.cleanup_exports",
 		"lms.lms.doctype.lms_certificate_request.lms_certificate_request.schedule_evals",
 		"lms.lms.doctype.lms_course.lms_course.update_course_statistics",
 		"lms.lms.doctype.lms_certificate_request.lms_certificate_request.mark_eval_as_completed",
@@ -313,3 +314,6 @@ raven_membership_providers = ["lms.raven_provider.get_provider"]
 # on System Manager plus whatever this hook names, and grants the named roles the
 # permissions its own doctypes need on install/migrate.
 raven_integration_manager_roles = ["Moderator"]
+
+# Export jobs remain valid across ordinary site cache clears, until their TTL expires.
+persistent_cache_keys = ["course-export:", "course-export-active:"]

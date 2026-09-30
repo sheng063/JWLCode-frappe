@@ -38,7 +38,7 @@ import {
 	useKeyboardShortcuts,
 	saveShortcut,
 } from '@/composables/useKeyboardShortcuts'
-import { exportCourseAsZip } from '@/utils/exportCourse'
+import { confirmCourseExport } from '@/utils/exportCourse'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import CourseDetailsSection from '@/components/Courses/CourseDetailsSection.vue'
 import CourseOverviewSection from '@/components/Courses/CourseOverviewSection.vue'
@@ -285,7 +285,7 @@ const courseMenu = computed<CourseMenuItem[]>(() => [
 	{
 		label: __('Export'),
 		icon: 'lucide-download',
-		onClick: () => exportCourseAsZip(courseResource.doc?.name),
+		onClick: () => confirmCourseExport(courseResource.doc?.name),
 	},
 	{
 		label: __('Delete'),

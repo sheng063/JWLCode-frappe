@@ -10270,3 +10270,33 @@ msgstr "用户名至少需要 4 个字符，且不能包含空格。"
 #: lms/lms/api.py
 msgid "Username {0} already exists."
 msgstr "用户名 {0} 已存在。"
+
+msgid "Preparing course export. Large courses may take several minutes."
+msgstr "正在后台打包课程，大课程可能需要几分钟，请稍候。"
+
+msgid "Course export is ready. Download started."
+msgstr "课程打包完成，已开始下载。"
+
+msgid "Course export timed out. Please retry."
+msgstr "课程导出超时，请重试。"
+
+msgid "Course export failed. Please retry or contact the administrator."
+msgstr "课程导出失败，请重试或联系管理员。"
+
+msgid "Export not found or expired."
+msgstr "导出任务不存在或已过期。"
+
+msgid "Export expired. Please export the course again."
+msgstr "导出文件已过期，请重新导出课程。"
+
+msgid "Export is not ready."
+msgstr "课程尚未打包完成。"
+
+msgid "Include course videos in the export? Without videos, video links are kept, but video files must be transferred separately. External videos are linked only."
+msgstr "是否一并导出课程内视频？不含视频时会保留视频链接，但视频文件需要单独迁移。外部视频仅保留链接。"
+
+msgid "Export with videos"
+msgstr "包含视频导出"
+
+msgid "Export without videos"
+msgstr "不含视频导出"

@@ -1,5 +1,6 @@
 import hashlib
 import json
+import mimetypes
 import os
 import re
 import secrets
@@ -8,6 +9,8 @@ import tempfile
 import zipfile
 from datetime import date, datetime, timedelta
 from urllib.parse import unquote, urlsplit
+
+from werkzeug.exceptions import HTTPException
 
 import frappe
 from frappe import _
@@ -19,7 +22,7 @@ from lms.lms.utils import create_user as create_lms_user
 from lms.lms.utils import get_editorjs_blocks
 
 
-def export_course_zip(course_name):
+def export_course_zip(course_name, download=True, include_videos=True):
 	course = frappe.get_doc("LMS Course", course_name)
 	chapters = get_chapters_for_export(course.chapters)
 	lessons = get_lessons_for_export(course_name)
@@ -40,6 +43,8 @@ def export_course_zip(course_name):
 		test_cases,
 		instructors,
 		evaluator,
+		download=download,
+		include_videos=bool(frappe.utils.cint(include_videos)),
 	)
 
 
@@ -211,9 +216,14 @@ def create_course_zip(
 	test_cases,
 	instructors,
 	evaluator,
+	download=True,
+	include_videos=True,
 ):
+	from lms.lms.course_export_jobs import export_directory
+
+	final_path = os.path.join(export_directory(), zip_filename)
+	tmp_path = final_path + ".partial"
 	try:
-		tmp_path = os.path.join(tempfile.gettempdir(), zip_filename)
 		build_course_zip(
 			tmp_path,
 			course,
@@ -225,19 +235,23 @@ def create_course_zip(
 			test_cases,
 			instructors,
 			evaluator,
+			include_videos=include_videos,
 		)
-		final_path = move_zip_to_private(tmp_path, zip_filename)
-		schedule_file_deletion(final_path, delay_seconds=600)  # 10 minutes
-		return serve_zip(final_path, zip_filename)
+		os.replace(tmp_path, final_path)
+		return serve_zip(final_path, zip_filename) if download else final_path
 	except Exception as e:
 		frappe.throw(
 			_("Could not create the course ZIP file. Please try again later. Error: {0}").format(str(e))
 		)
 		return None
+	finally:
+		if os.path.exists(tmp_path):
+			os.remove(tmp_path)
 
 
 def build_course_zip(
-	tmp_path, course, chapters, lessons, assets, assessments, questions, test_cases, instructors, evaluator
+	tmp_path, course, chapters, lessons, assets, assessments, questions, test_cases, instructors, evaluator,
+	include_videos=True,
 ):
 	with zipfile.ZipFile(tmp_path, "w", compression=zipfile.ZIP_DEFLATED) as zip_file:
 		from lms.lms.course_bundle import write_programming_packages
@@ -247,7 +261,7 @@ def build_course_zip(
 		write_chapters_json(zip_file, chapters)
 		write_lessons_json(zip_file, lessons)
 		write_assessments_json(zip_file, assessments, questions, test_cases)
-		write_assets(zip_file, assets)
+		write_assets(zip_file, assets, include_videos=include_videos)
 		write_instructors_json(zip_file, instructors)
 		write_evaluator_json(zip_file, evaluator)
 
@@ -309,10 +323,21 @@ def write_assessments_json(zip_file, assessments, questions, test_cases):
 		zip_file.writestr(f"assessments/{doctype}_{safe_name}.json", assessment_json)
 
 
-def write_assets(zip_file, assets):
+VIDEO_EXTENSIONS = {".mp4", ".webm", ".mov", ".m4v", ".avi", ".mkv", ".ogv", ".mpeg", ".mpg", ".wmv", ".flv", ".3gp", ".ts", ".m2ts"}
+
+
+def is_video_asset(value):
+	path = unquote(urlsplit(str(value or "")).path).lower()
+	mime_type = mimetypes.guess_type(path)[0] or ""
+	return os.path.splitext(path)[1] in VIDEO_EXTENSIONS or mime_type.startswith("video/")
+
+
+def write_assets(zip_file, assets, include_videos=True):
 	manifest = []
 	for asset in dict.fromkeys(assets):
 		if not isinstance(asset, str) or not asset.startswith(("/files/", "/private/files/")):
+			continue
+		if not include_videos and is_video_asset(asset):
 			continue
 		file_name = frappe.db.get_value("File", {"file_url": asset}, "name")
 		if not file_name:
@@ -320,6 +345,10 @@ def write_assets(zip_file, assets):
 		if not file_name:
 			frappe.throw(_("Course asset is missing: {0}").format(asset))
 		file_doc = frappe.get_doc("File", file_name)
+		if not include_videos and (
+			is_video_asset(file_doc.file_name) or is_video_asset("file." + str(file_doc.get("file_type") or ""))
+		):
+			continue
 		file_path = os.path.abspath(file_doc.get_full_path())
 		if not is_safe_path(file_path):
 			frappe.throw(_("Unsafe asset path detected."))
@@ -332,12 +361,6 @@ def write_assets(zip_file, assets):
 			{"url": asset, "file": path, "file_name": file_doc.file_name, "is_private": file_doc.is_private}
 		)
 	zip_file.writestr("assets.json", frappe_json_dumps(manifest))
-
-
-def move_zip_to_private(tmp_path, zip_filename):
-	final_path = os.path.join(frappe.get_site_path("private", "files"), zip_filename)
-	shutil.move(tmp_path, final_path)
-	return final_path
 
 
 def write_instructors_json(zip_file, instructors):
@@ -359,47 +382,31 @@ def serve_zip(final_path, zip_filename):
 	safe_filename = sanitize_string(zip_filename)
 
 	try:
-		if os.path.getsize(final_path) > 64 * 1024 * 1024:
-			from werkzeug.wsgi import wrap_file
-			from werkzeug.wrappers import Response
+		request = getattr(frappe.local, "request", None)
+		if request:
+			from werkzeug.utils import send_file
 
-			file = open(final_path, "rb")
-			request = getattr(frappe.local, "request", None)
-			response = Response(
-				wrap_file(request.environ if request else {}, file),
-				mimetype="application/zip", direct_passthrough=True,
+			response = send_file(
+				os.path.abspath(final_path), request.environ,
+				mimetype="application/zip", as_attachment=True,
+				download_name=safe_filename, conditional=True, max_age=0,
 			)
-			response.content_length = os.path.getsize(final_path)
-			response.headers.set("Content-Disposition", "attachment", filename=safe_filename)
-			response.call_on_close(file.close)
+			response.headers["Cache-Control"] = "private, no-cache"
 			return response
-		with open(final_path, "rb") as f:
-			frappe.local.response.filename = safe_filename
-			frappe.local.response.filecontent = f.read()
-			frappe.local.response.type = "download"
-			frappe.local.response.content_type = "application/zip"
+		from werkzeug.wsgi import wrap_file
+		from werkzeug.wrappers import Response
+
+		file = open(final_path, "rb")
+		response = Response(wrap_file({}, file), mimetype="application/zip", direct_passthrough=True)
+		response.content_length = os.path.getsize(final_path)
+		response.headers.set("Content-Disposition", "attachment", filename=safe_filename)
+		response.call_on_close(file.close)
+		return response
+	except HTTPException:
+		raise
 	except Exception as e:
 		frappe.log_error(f"Error serving ZIP file: {str(e)}")
 		frappe.throw(_("Error downloading file"))
-
-
-def schedule_file_deletion(file_path, delay_seconds=600):
-	frappe.enqueue(
-		delete_file,
-		file_path=file_path,
-		queue="long",
-		timeout=delay_seconds,
-		at_front=False,
-		enqueue_after_commit=True,
-	)
-
-
-def delete_file(file_path):
-	try:
-		if os.path.exists(file_path):
-			os.remove(file_path)
-	except Exception as e:
-		frappe.log_error(f"Error deleting exported file {file_path}: {e}")
 
 
 def frappe_json_dumps(data):

@@ -1,0 +1,22 @@
+[
+  {
+    "course": "l4",
+    "bytes": 28995671399,
+    "videos": 43,
+    "assets": 116,
+    "preparation_seconds": 50.41,
+    "crc_valid": true,
+    "range_valid": true,
+    "guest_denied": true
+  },
+  {
+    "course": "l5",
+    "bytes": 5431891972,
+    "videos": 12,
+    "assets": 126,
+    "preparation_seconds": 15.08,
+    "crc_valid": true,
+    "range_valid": true,
+    "guest_denied": true
+  }
+]
