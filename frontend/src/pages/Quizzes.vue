@@ -45,7 +45,7 @@
 			<div v-else-if="column.key == 'modified'" class="text-sm text-ink-gray-5">
 				{{ value }}
 			</div>
-			<div v-else>{{ value }}</div>
+			<div v-else>{{ column.key === 'title' ? quizText(value) : value }}</div>
 		</template>
 
 		<template #selection-actions="{ selections }">
@@ -69,6 +69,7 @@
 	</ListPage>
 </template>
 <script setup>
+import { quizText } from '@/utils/quizText'
 import {
 	Button,
 	call,
@@ -137,6 +138,7 @@ const quizzes = createListResource({
 		return data.map((quiz) => {
 			return {
 				...quiz,
+				title: quizText(quiz.title),
 				modified: dayjs(quiz.modified).format('DD MMM YYYY'),
 			}
 		})

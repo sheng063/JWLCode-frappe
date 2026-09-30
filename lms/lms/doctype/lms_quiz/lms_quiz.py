@@ -524,7 +524,12 @@ def process_results(results: list, quiz_details: dict):
 		result["question_type"] = question_details.type
 
 		if question_details.type != "Open Ended":
-			if question_details.type == "User Input":
+			if question_details.type in ("Ordering", "Matching"):
+				from lms.lms.quiz_interactions import grade_answer
+
+				correct, readable = grade_answer(question_details.question, result["answer"])
+				result["answer"] = [readable]
+			elif question_details.type == "User Input":
 				correct = bool(check_input_answers(question_details.question, result["answer"][0]))
 			else:
 				correct = verify_answer(question_details.question, result["answer"])
@@ -687,6 +692,12 @@ def check_answer(quiz: str, question: str, question_type: str, answers: str):
 	answers = _parse_json_arg(answers, _("answers")) if answers else []
 	if not isinstance(answers, list):
 		frappe.throw(_("Invalid answers submitted."), frappe.ValidationError)
+
+	question_type = frappe.db.get_value("LMS Question", question, "type")
+	if question_type in ("Ordering", "Matching"):
+		from lms.lms.quiz_interactions import grade_answer
+
+		return int(grade_answer(question, answers)[0])
 
 	if question_type == "Choices":
 		return check_choice_answers(question, answers)

@@ -363,7 +363,7 @@ describe('QuizQuestionForm as a route', () => {
 
 		const update = findResource('frappe.client.set_value', 'LMS Question')
 		const payload = update.options.makeParams({}).fieldname
-		expect(payload.question).toBe('<p>What is 2 + 2?</p>')
+		expect(payload.question).toBe('What is 2 + 2?')
 		expect(payload.option_3).toBe('five')
 		expect(payload.is_correct_2).toBe(true)
 		expect(payload.marks).toBe(7)

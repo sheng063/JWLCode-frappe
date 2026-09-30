@@ -12,6 +12,7 @@
   "question",
   "type",
   "multiple",
+  "interactive_items",
   "section_break_ytxi",
   "option_1",
   "is_correct_1",
@@ -87,7 +88,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",
-   "options": "Choices\nUser Input\nOpen Ended"
+   "options": "Choices\nUser Input\nOpen Ended\nOrdering\nMatching"
   },
   {
    "default": "0",
@@ -407,6 +408,13 @@
    "fieldname": "possibility_10",
    "fieldtype": "Small Text",
    "label": "Possible Answer 10"
+  },
+  {
+   "fieldname": "interactive_items",
+   "fieldtype": "Code",
+   "options": "JSON",
+   "label": "Interactive Items",
+   "depends_on": "eval:['Ordering', 'Matching'].includes(doc.type)"
   }
  ],
  "grid_page_length": 50,

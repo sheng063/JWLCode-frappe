@@ -18,6 +18,9 @@ QUESTION_POSSIBILITY_FIELDS = [f"possibility_{i}" for i in range(1, 11)]
 
 class LMSQuestion(Document):
 	def validate(self):
+		from lms.lms.quiz_interactions import validate_items
+
+		validate_items(self)
 		validate_correct_answers(self)
 		update_question_title(self)
 
@@ -68,7 +71,7 @@ def update_question_title(question):
 		question_rows = frappe.get_all("LMS Quiz Question", {"question": question.name}, pluck="name")
 
 		for row in question_rows:
-			frappe.db.set_value("LMS Quiz Question", row, "question_detail", question.question)
+			frappe.db.set_value("LMS Quiz Question", row, {"question_detail": question.question, "type": question.type})
 
 
 def get_correct_options(question):

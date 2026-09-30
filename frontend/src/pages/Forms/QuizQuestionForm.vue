@@ -16,12 +16,10 @@
 				<div v-if="!chooseFromExisting || editMode">
 					<div class="space-y-1.5">
 						<InputLabel :id="questionLabelId" :label="__('Question')" />
-						<RichTextEditor
-							:content="question.question"
-							@change="(val) => (question.question = val)"
-							:editable="true"
-							:fixedMenu="true"
-							editorClass="prose-sm max-w-none border-b border-x border-outline-elevation-2 bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
+						<FormControl
+							type="textarea"
+							v-model="question.question"
+							:aria-labelledby="questionLabelId"
 						/>
 					</div>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
@@ -34,10 +32,61 @@
 							:label="__('Type')"
 							v-model="question.type"
 							type="select"
-							:options="['Choices', 'User Input', 'Open Ended']"
+							:options="[
+								{ label: __('Choices'), value: 'Choices' },
+								{ label: __('User Input'), value: 'User Input' },
+								{ label: __('Open Ended'), value: 'Open Ended' },
+								{ label: '排序题', value: 'Ordering' },
+								{ label: '连线题', value: 'Matching' },
+							]"
 							class="pb-2"
 							:required="true"
 						/>
+					</div>
+					<div
+						v-if="['Ordering', 'Matching'].includes(question.type)"
+						class="space-y-3 mt-4"
+					>
+						<p class="text-sm text-ink-gray-6">
+							{{
+								question.type === 'Ordering'
+									? '按正确顺序填写条目，作答时会随机打乱。'
+									: '每行填写一对匹配内容，作答时左右两列分别打乱。'
+							}}
+						</p>
+						<div
+							v-for="(item, index) in interactiveItems"
+							:key="index"
+							class="flex items-end gap-2"
+						>
+							<FormControl
+								class="flex-1"
+								type="textarea"
+								v-model="item.text"
+								:label="
+									question.type === 'Ordering'
+										? '条目 ' + (index + 1)
+										: '左侧 ' + (index + 1)
+								"
+							/>
+							<FormControl
+								v-if="question.type === 'Matching'"
+								class="flex-1"
+								type="textarea"
+								v-model="item.right"
+								:label="'右侧 ' + (index + 1)"
+							/>
+							<Button
+								:disabled="interactiveItems.length <= 2"
+								@click="interactiveItems.splice(index, 1)"
+								>删除</Button
+							>
+						</div>
+						<Button
+							v-if="interactiveItems.length < 20"
+							@click="interactiveItems.push({ text: '', right: '' })"
+							>添加条目</Button
+						>
 					</div>
 					<div
 						v-if="question.type == 'Choices'"
@@ -182,7 +231,7 @@ import { computed, watch, reactive, ref, inject, useId } from 'vue'
 import Link from '@/components/Controls/Link.vue'
 import { InputLabel } from '@/components/Form/labeling'
 import { useOnboarding } from 'frappe-ui/frappe'
-import RichTextEditor from '@/components/RichTextEditor.vue'
+import { quizText } from '@/utils/quizText'
 import FormShell from '@/components/FormShell.vue'
 import HeaderButton from '@/components/HeaderButton.vue'
 import { useFormRoute } from '@/composables/useFormRoute'
@@ -216,7 +265,7 @@ const { close, saveAndReplace } = useFormRoute({
 const editMode = computed(() => props.questionName !== 'new')
 
 const title = computed(() =>
-	editMode.value ? __('Edit Question') : __('Add Question')
+	editMode.value ? __('Edit Question') : __('Add Question'),
 )
 
 // Copied from the openers on QuizForm.vue: the "New Question" button is gated on
@@ -239,6 +288,10 @@ const question = reactive({
 	marks: 1,
 })
 
+const interactiveItems = ref([
+	{ text: '', right: '' },
+	{ text: '', right: '' },
+])
 const MAX_OPTIONS = 10
 const visibleOptionCount = ref(2)
 const visiblePossibilityCount = ref(1)
@@ -292,6 +345,10 @@ const questionData = createResource({
 	},
 	auto: false,
 	onSuccess(data) {
+		interactiveItems.value = JSON.parse(data.interactive_items || 'null') || [
+			{ text: '', right: '' },
+			{ text: '', right: '' },
+		]
 		Object.keys(data).forEach((key) => {
 			if (Object.hasOwn(question, key)) question[key] = data[key]
 		})
@@ -300,17 +357,22 @@ const questionData = createResource({
 				? true
 				: false
 		}
+		question.question = quizText(question.question)
+		for (const prefix of ['option', 'explanation', 'possibility']) {
+			for (let i = 1; i <= MAX_OPTIONS; i++)
+				question[`${prefix}_${i}`] = quizText(question[`${prefix}_${i}`])
+		}
 		visibleOptionCount.value = Math.max(
 			2,
 			...Array.from({ length: MAX_OPTIONS }, (_, i) =>
-				data[`option_${i + 1}`] ? i + 1 : 0
-			)
+				data[`option_${i + 1}`] ? i + 1 : 0,
+			),
 		)
 		visiblePossibilityCount.value = Math.max(
 			1,
 			...Array.from({ length: MAX_OPTIONS }, (_, i) =>
-				data[`possibility_${i + 1}`] ? i + 1 : 0
-			)
+				data[`possibility_${i + 1}`] ? i + 1 : 0,
+			),
 		)
 		// marks belongs to the ROW, not to the shared LMS Question, so read it back
 		// off the row after the loop above has run.
@@ -329,7 +391,7 @@ watch(
 		question.marks = doc.marks
 		if (doc.question) questionData.fetch()
 	},
-	{ immediate: true }
+	{ immediate: true },
 )
 
 const quizQuestionInsert = createResource({
@@ -354,6 +416,7 @@ const questionCreation = createResource({
 			doc: {
 				doctype: 'LMS Question',
 				...question,
+				interactive_items: JSON.stringify(interactiveItems.value),
 			},
 		}
 	},
@@ -368,6 +431,7 @@ const questionUpdate = createResource({
 			name: questionData.data?.name,
 			fieldname: {
 				...question,
+				interactive_items: JSON.stringify(interactiveItems.value),
 			},
 		}
 	},
@@ -393,7 +457,7 @@ const saving = computed(
 		quizQuestionInsert.loading ||
 		questionCreation.loading ||
 		questionUpdate.loading ||
-		marksUpdate.loading
+		marksUpdate.loading,
 )
 
 const addPossibility = () => {
@@ -454,7 +518,7 @@ const addQuestion = () => {
 				onError(err) {
 					toast.error(err.messages?.[0] || err)
 				},
-			}
+			},
 		)
 	}
 }
@@ -483,7 +547,7 @@ const addQuestionRow = (values) => {
 			onError(err) {
 				toast.error(err.messages?.[0] || err)
 			},
-		}
+		},
 	)
 }
 
@@ -505,13 +569,13 @@ const updateQuestion = () => {
 								params: { quizID: props.quizID },
 							})
 						},
-					}
+					},
 				)
 			},
 			onError(err) {
 				toast.error(err.messages?.[0] || err)
 			},
-		}
+		},
 	)
 }
 </script>

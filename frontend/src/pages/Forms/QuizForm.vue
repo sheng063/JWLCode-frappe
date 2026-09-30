@@ -75,7 +75,7 @@
 					<div
 						v-if="column.key === 'question_detail'"
 						class="text-xs [&>*]:inline"
-						v-safe-html:rich="value"
+						v-text="value"
 					></div>
 					<div v-else class="text-xs">
 						{{ value }}
@@ -240,6 +240,7 @@
 	<router-view :key="route.params.questionName" />
 </template>
 <script setup>
+import { quizText } from '@/utils/quizText'
 import {
 	createResource,
 	FormControl,
@@ -322,7 +323,7 @@ const props = defineProps({
 })
 
 const questions = computed(() => {
-	return quizDetails.doc?.questions || []
+	return (quizDetails.doc?.questions || []).map(row => ({ ...row, question_detail: quizText(row.question_detail) }))
 })
 
 onMounted(() => {

@@ -48,7 +48,7 @@
 			<div class="border rounded-xl overflow-hidden">
 				<div class="px-5 pt-5 pb-4 space-y-3 text-center">
 					<h2 class="text-xl font-semibold text-ink-gray-9 leading-snug">
-						{{ quiz.data.title }}
+						{{ quizText(quiz.data.title) }}
 					</h2>
 					<div class="flex flex-wrap gap-1.5 justify-center">
 						<span
@@ -413,8 +413,8 @@
 						</div>
 					</div>
 					<div
-						class="text-ink-gray-9 font-semibold mt-2 leading-5 break-words [&_img]:h-auto [&_img]:max-w-full"
-						v-safe-html:rich="questionDetails.data.question"
+						class="whitespace-pre-wrap text-ink-gray-9 font-semibold mt-2 leading-5 break-words [&_img]:h-auto [&_img]:max-w-full"
+						v-text="quizText(questionDetails.data.question)"
 					></div>
 					<div
 						v-if="questionDetails.data.type == 'Choices'"
@@ -465,8 +465,8 @@
 								</div>
 							</div>
 							<span
-								class="ms-2 min-w-0 flex-1 break-words text-ink-gray-9 [&_img]:h-auto [&_img]:max-w-full"
-								v-safe-html:rich="questionDetails.data[`option_${index}`]"
+								class="whitespace-pre-wrap ms-2 min-w-0 flex-1 break-words text-ink-gray-9 [&_img]:h-auto [&_img]:max-w-full"
+								v-text="quizText(questionDetails.data[`option_${index}`])"
 							>
 							</span>
 						</label>
@@ -475,7 +475,7 @@
 							class="mt-2 break-words text-xs text-ink-gray-7"
 							v-show="showAnswers.length"
 						>
-							{{ questionDetails.data[`explanation_${index}`] }}
+							{{ quizText(questionDetails.data[`explanation_${index}`]) }}
 						</div>
 					</div>
 					<div v-else-if="questionDetails.data.type == 'User Input'">
@@ -499,6 +499,10 @@
 								</template>
 							</Badge>
 						</div>
+					</div>
+					<div v-else-if="isInteractive">
+						<InteractiveQuestion :key="currentQuestion" :question="questionDetails.data" :quiz="quiz.data.name" v-model="interactiveAnswer" :disabled="!!showAnswers.length || quizSubmission.loading" />
+						<Badge v-if="showAnswers.length" :label="showAnswers[0] ? __('Correct') : __('Incorrect')" :theme="showAnswers[0] ? 'green' : 'red'" />
 					</div>
 					<div v-else>
 						<RichTextEditor
@@ -909,6 +913,8 @@
 	</Dialog>
 </template>
 <script setup>
+import InteractiveQuestion from '@/components/InteractiveQuestion.vue'
+import { quizText } from '@/utils/quizText'
 import {
 	Badge,
 	Button,
@@ -1197,6 +1203,16 @@ const quizSubmission = createResource({
 // template refs (questionDetails.data.option_X, etc.) keep working. We
 // just pull the row from the pre-fetched map instead of an API call.
 const questionDetails = reactive({ data: null })
+const interactiveAnswer = ref([])
+const isInteractive = computed(() => ['Ordering', 'Matching'].includes(questionDetails.data?.type))
+watch(interactiveAnswer, () => {
+	if (isInteractive.value && activeQuestion.value > 0) {
+		addToLocalStorage()
+		if (questionDetails.data.type === 'Matching' && quiz.data.show_answers && interactiveAnswer.value.length === questionDetails.data.items.length) {
+			showAnswers.splice(0, showAnswers.length, 1)
+		}
+	}
+}, { deep: true })
 
 watch(activeQuestion, (value) => {
 	if (value <= 0) return
@@ -1208,20 +1224,25 @@ watch(activeQuestion, (value) => {
 	if (!row?.question) return
 	currentQuestion.value = row.question
 	questionDetails.data = questionsByName.value[currentQuestion.value] || null
+	interactiveAnswer.value = questionDetails.data?.type === 'Ordering' ? questionDetails.data.items.map(item => item.id) : []
 	if (!quiz.data?.show_answers) {
 		loadSavedAnswers()
 	}
 })
 
 const switchQuestion = (questionNumber) => {
+	if (questionNumber === activeQuestion.value) return
+	if (questionNumber < 1 || questionNumber > questions.value.length) return
 	let answers = getAnswers()
 	if (answers.length) {
 		if (!attemptedQuestions.value.includes(activeQuestion.value)) {
 			attemptedQuestions.value.push(activeQuestion.value)
 		}
 		addToLocalStorage()
-		resetQuestion()
 	}
+	selectedOptions.value.fill(0)
+	possibleAnswer.value = null
+	showAnswers.length = 0
 
 	if (questionNumber < 1 || questionNumber > questions.value.length) return
 	activeQuestion.value = questionNumber
@@ -1236,7 +1257,9 @@ const loadSavedAnswers = () => {
 		if (localQuestion) {
 			let localAnswers = localQuestion.answer
 			if (localAnswers.length) {
-				if (questionDetails.data.type == 'Choices') {
+				if (isInteractive.value) {
+					interactiveAnswer.value = [...localAnswers]
+				} else if (questionDetails.data.type == 'Choices') {
 					localAnswers.forEach((answer) => {
 						for (let i = 1; i <= MAX_OPTIONS; i++) {
 							if (questionDetails.data[`option_${i}`] == answer) {
@@ -1383,6 +1406,7 @@ const getAnswers = () => {
 	let answers = []
 	if (!questionDetails.data) return answers
 	const type = questionDetails.data.type
+	if (isInteractive.value) return [...interactiveAnswer.value]
 	if (type == 'Choices') {
 		selectedOptions.value.forEach((value, index) => {
 			if (selectedOptions.value[index])
@@ -1478,6 +1502,7 @@ const resetQuestion = () => {
 
 const submitQuiz = (reason = 'manual') => {
 	submissionReason.value = reason
+	if (isInteractive.value) addToLocalStorage()
 	if (!quiz.data.show_answers) {
 		if (questionDetails.data?.type == 'Open Ended' || getAnswers().length) {
 			addToLocalStorage()
@@ -1560,6 +1585,8 @@ const resetQuiz = () => {
 }
 
 const getInstructions = (question) => {
+	if (question.type === 'Ordering') return '拖拽调整为正确顺序'
+	if (question.type === 'Matching') return '点击左右内容进行匹配'
 	if (question.type == 'Choices')
 		if (question.multiple) return __('Choose all answers that apply')
 		else return __('Choose one answer')

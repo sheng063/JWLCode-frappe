@@ -1788,6 +1788,7 @@ def get_quiz_with_questions(quiz: str) -> dict:
 			"multiple",
 			*QUESTION_OPTION_FIELDS,
 			*QUESTION_EXPLANATION_FIELDS,
+			"interactive_items",
 		]
 		rows = frappe.get_all(
 			"LMS Question",
@@ -1795,7 +1796,9 @@ def get_quiz_with_questions(quiz: str) -> dict:
 			fields=fields,
 			ignore_permissions=True,
 		)
-		questions_by_name = {row["name"]: row for row in rows}
+		from lms.lms.quiz_interactions import public_question
+
+		questions_by_name = {row["name"]: public_question(row) for row in rows}
 
 	return {"quiz": quiz_doc, "questions_by_name": questions_by_name}
 

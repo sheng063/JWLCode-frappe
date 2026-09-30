@@ -116,7 +116,7 @@
 									<span class="me-2 text-ink-gray-4">
 										{{ __('Q{0}:').format(index + 1) }}
 									</span>
-									<span v-safe-html:rich="row.question" />
+									<span v-text="quizText(row.question)" />
 								</div>
 								<span
 									class="mt-2 size-1.5 shrink-0 rounded-full"
@@ -134,7 +134,7 @@
 								>
 									{{ __('Answer:') }}
 								</span>
-								<span v-safe-html:rich="row.answer" />
+								<span v-if="row.question_type === 'Open Ended'" v-safe-html:rich="row.answer" /><span v-else class="whitespace-pre-wrap" v-text="quizText(row.answer)" />
 							</div>
 						</div>
 						<!-- Only an open-ended answer is a judgement call; a choice was
@@ -350,6 +350,7 @@
 </template>
 
 <script setup>
+import { quizText } from '@/utils/quizText'
 import {
 	createDocumentResource,
 	createResource,
