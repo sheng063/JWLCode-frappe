@@ -13,7 +13,7 @@ afterEach(() => { globalThis.MessageChannel = native })
 function setup() {
   globalThis.MessageChannel = MockChannel as any
   const frame = { contentWindow: { postMessage: vi.fn() } }
-  const launch = { launch_id: 'launch', room_keys: ['arena'] }
+  const launch = { launch_id: 'launch', platform_api: 1 }
   const api = vi.fn().mockResolvedValue({ ticket: 'safe' })
   const bridge = createGameBridge({ getFrame: () => frame, getLaunch: () => launch, call: api })
   const ready = (source: any = frame.contentWindow, nonce = 'f'.repeat(32)) => window.dispatchEvent(new MessageEvent('message', { source, data: { type: 'jwl-game-ready', nonce } }))
@@ -31,14 +31,14 @@ describe('Game runtime bridge', () => {
     expect(frame.contentWindow.postMessage).toHaveBeenCalledTimes(1)
     bridge.dispose()
   })
-  it('rejects undeclared rooms and requests only scoped join tickets', async () => {
+  it('rejects unknown actions and requests operation-bound join tickets', async () => {
     const { api, bridge, ready } = setup()
     ready()
     const port = MockChannel.last.port1
-    await port.onmessage({ data: { type: 'ticket', id: '1', roomKey: 'foreign' } })
+    await port.onmessage({ data: { type: 'ticket', id: '1', action: 'foreign' } })
     expect(api).not.toHaveBeenCalled()
-    await port.onmessage({ data: { type: 'ticket', id: '2', roomKey: 'arena' } })
-    expect(api).toHaveBeenCalledWith('lms.lms.game_runtime.issue_join_ticket', { launch_id: 'launch', room_key: 'arena' })
+    await port.onmessage({ data: { type: 'ticket', id: '2', action: 'quickMatch' } })
+    expect(api).toHaveBeenCalledWith('lms.lms.game_runtime.issue_join_ticket', { launch_id: 'launch', action: 'quickMatch', room_id: '' })
     expect(port.postMessage).toHaveBeenCalledWith({ type: 'ticket', id: '2', result: { ticket: 'safe' } })
     bridge.dispose()
   })
@@ -48,7 +48,7 @@ describe('Game runtime bridge', () => {
     api.mockReturnValue(new Promise(r => { resolve = r }))
     ready()
     const port = MockChannel.last.port1
-    const pending = port.onmessage({ data: { type: 'ticket', id: '1', roomKey: 'arena' } })
+    const pending = port.onmessage({ data: { type: 'ticket', id: '1', action: 'quickMatch' } })
     bridge.reset()
     resolve({ ticket: 'stale' })
     await pending

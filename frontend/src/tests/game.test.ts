@@ -174,6 +174,25 @@ describe('Game', () => {
 		expect(w.text()).toContain('Demo')
 		w.unmount()
 	})
+	it('publishes relay options through the existing upload interface without deployment parameters', async () => {
+		const w = mount(Game)
+		await flushPromises()
+		await w.findAll('button').find(b => b.text() === '上传游戏')!.trigger('click')
+		await w.get('input[aria-label="启用通用联机"]').setValue(true)
+		await w.get('input[aria-label="发行版本"]').setValue('2.0.0')
+		await w.get('select[aria-label="最大联机人数"]').setValue(8)
+		const input = w.get('input[type=file]')
+		Object.defineProperty(input.element, 'files', { value: [new File([html], 'relay.html')] })
+		await input.trigger('change')
+		await w.get('form').trigger('submit')
+		await vi.waitFor(() => expect(api).toHaveBeenCalledWith('lms.lms.game.upload_game', expect.objectContaining({
+			filename: 'relay.html', multiplayer: expect.objectContaining({ enabled: true, release: '2.0.0', maxPlayers: 8 }),
+		})))
+		const args = api.mock.calls.find(([method]) => method.endsWith('upload_game'))![1]
+		expect(args).not.toHaveProperty('image')
+		expect(args).not.toHaveProperty('endpoint')
+		w.unmount()
+	})
 	it('filters games by search and format, and switches list layout', async () => {
 		const w = mount(Game)
 		await flushPromises()

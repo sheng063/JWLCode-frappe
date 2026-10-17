@@ -14,12 +14,14 @@ spec = importlib.util.spec_from_file_location('deploy_game', ROOT/'tools/deploy-
 deploy = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(deploy)
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--game', required=True)
+parser.add_argument('--game', required=True, help='Racing ZIP game ID')
+parser.add_argument('--gomoku', required=True, help='Gomoku single-HTML game ID')
 parser.add_argument('--site', default='school.localhost')
-parser.add_argument('--output', type=Path, default=ROOT/'docs/qa/game-colyseus-20261017')
+parser.add_argument('--output', type=Path, default=ROOT/'docs/qa/game-universal-20261017')
 args = parser.parse_args()
 args.output.mkdir(parents=True, exist_ok=True)
-fixture = deploy.bench('lms.tests.test_game_runtime.prepare_browser_smoke', {'game_name': args.game}, args.site)
+fixture = deploy.bench('lms.tests.test_game_runtime.prepare_browser_smoke', {'game_name': args.game, 'count': 4, 'extra_games': [args.gomoku]}, args.site)
+fixture['gomoku'] = args.gomoku
 process = None
 try:
     with tempfile.TemporaryDirectory(prefix='game-runtime-smoke-') as temp:

@@ -20,11 +20,15 @@ export function createGameBridge({ getFrame, getLaunch, call }: any) {
     port.onmessage = async ({ data }) => {
       if (current !== epoch || data?.type !== 'ticket' ||
           typeof data.id !== 'string' || data.id.length > 64 || busy) return
-      if (!launch.room_keys.includes(data.roomKey)) return
+      if (!['createRoom', 'quickMatch', 'joinRoom'].includes(data.action)) return
+      if (data.roomId !== undefined && (typeof data.roomId !== 'string' || data.roomId.length > 12)) return
       busy = true
       try {
         const result = await call('lms.lms.game_runtime.issue_join_ticket', {
-          launch_id: launch.launch_id, room_key: data.roomKey,
+          launch_id: launch.launch_id, action: data.action,
+          room_id: data.roomId || '',
+          ...(data.maxPlayers !== undefined ? { max_players: data.maxPlayers } : {}),
+          ...(data.visibility !== undefined ? { visibility: data.visibility } : {}),
         })
         if (current === epoch) port?.postMessage({ type: 'ticket', id: data.id, result })
       } catch {

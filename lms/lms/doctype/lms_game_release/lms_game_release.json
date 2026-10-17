@@ -12,9 +12,11 @@
     "client_sha256",
     "html_base64",
     "entry_file",
-    "runtime_profile",
-    "server_image",
-    "status"
+    "status",
+    "filename",
+    "client_type",
+    "platform_api",
+    "compatibility_key"
   ],
   "fields": [
     {
@@ -59,19 +61,8 @@
       "fieldname": "entry_file",
       "label": "Entry File",
       "fieldtype": "Data",
-      "reqd": 0
-    },
-    {
-      "fieldname": "runtime_profile",
-      "label": "Runtime Profile",
-      "fieldtype": "Data",
-      "reqd": 1
-    },
-    {
-      "fieldname": "server_image",
-      "label": "Server Image",
-      "fieldtype": "Data",
-      "reqd": 1
+      "reqd": 0,
+      "length": 512
     },
     {
       "fieldname": "status",
@@ -79,6 +70,33 @@
       "fieldtype": "Select",
       "reqd": 1,
       "options": "Draft\nReady\nRetired"
+    },
+    {
+      "fieldname": "filename",
+      "label": "Client Filename",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "client_type",
+      "label": "Client Type",
+      "fieldtype": "Select",
+      "options": "html\nzip",
+      "reqd": 1,
+      "default": "zip"
+    },
+    {
+      "fieldname": "platform_api",
+      "label": "Platform API",
+      "fieldtype": "Data",
+      "default": "1",
+      "reqd": 1
+    },
+    {
+      "fieldname": "compatibility_key",
+      "label": "Compatibility Key",
+      "fieldtype": "Data",
+      "reqd": 1
     }
   ],
   "permissions": [

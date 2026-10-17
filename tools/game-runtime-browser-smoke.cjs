@@ -1,71 +1,89 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const fixturePath = process.argv[2];
-const outputDir = process.argv[3];
-const signalDir = path.dirname(fixturePath);
-const baseUrl = process.env.LMS_URL || 'http://localhost:8000';
 const assert = require('node:assert/strict');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const fixture = JSON.parse(fs.readFileSync(fixturePath));
-(async () => {
-  const browser = await chromium.launch({headless:true, ...(process.env.CHROMIUM_EXECUTABLE ? {executablePath:process.env.CHROMIUM_EXECUTABLE} : {})});
-  const contexts = [];
-  const pages = [];
-  const failures = [];
-  for (const account of fixture.accounts) {
-    const context = await browser.newContext(); contexts.push(context);
-    const r = await context.request.post(baseUrl+'/api/method/login',{form:{usr:account.user,pwd:account.password}});
-    assert.equal(r.status(),200,'student login');
-    const page = await context.newPage(); pages.push(page);
-    page.on('pageerror', e => failures.push(e.message));
-    page.on('console', m=> {if(m.type()==='error') console.log('browser error:',m.text().slice(0,350));});
-    await page.goto(`${baseUrl}/lms/game/${fixture.game}`);
-    await page.frameLocator('iframe').locator('#status').waitFor({timeout:20000});
-    console.log('iframe status:',await page.frameLocator('iframe').locator('#status').innerText());
+const { Client } = require(path.resolve(__dirname,'../services/game-runtime/node_modules/@colyseus/sdk'));
+const fixturePath=process.argv[2], output=process.argv[3], fixture=JSON.parse(fs.readFileSync(fixturePath));
+const signal=path.dirname(fixturePath), base=process.env.LMS_URL || 'http://localhost:8000';
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+ const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_EXECUTABLE?{executablePath:process.env.CHROMIUM_EXECUTABLE}:{})});
+ try{
+  const pages=[],contexts=[],errors=[];
+  for(let i=0;i<4;i++){
+   const context=await browser.newContext();contexts.push(context);
+   const account=fixture.accounts[i];
+   assert.equal((await context.request.post(base+'/api/method/login',{form:{usr:account.user,pwd:account.password}})).status(),200);
+   const page=await context.newPage();pages.push(page);page.on('pageerror',error=>errors.push(error.message));
+   await page.goto(`${base}/lms/game/${i<2?fixture.gomoku:fixture.game}`);
+   await page.frameLocator('iframe').locator('#status').filter({hasText:'联机已就绪'}).waitFor({timeout:25000});
+   await page.frameLocator('iframe').locator('#quick-match').click();
   }
-  for (const page of pages) {
-    await page.frameLocator('iframe').locator('#status').filter({hasText:'2 人在线'}).waitFor({timeout:20000});
-    assert.equal(await page.frameLocator('iframe').locator('.player').count(),2);
-  }
-  const before = await pages[1].frameLocator('iframe').locator('.player').evaluateAll(nodes=>nodes.map(n=>n.style.left));
-  const frame = pages[0].frames().find(f=>f.url().includes('/game-assets/'));
-  await frame.locator('#stage').click({position:{x:100,y:100}});
-  await pages[0].waitForTimeout(300);
-  const after = await pages[1].frameLocator('iframe').locator('.player').evaluateAll(nodes=>nodes.map(n=>n.style.left));
-  assert.notDeepEqual(before,after,'authoritative movement visible in the other browser');
-  await pages[0].setViewportSize({width:390,height:844});
-  await pages[0].frameLocator('iframe').locator('#status').filter({hasText:'2 人在线'}).waitFor({timeout:20000});
-  assert.equal(await pages[0].evaluate(()=>document.documentElement.scrollWidth <= window.innerWidth),true,'mobile page fits viewport');
-  await pages[0].screenshot({path:path.join(outputDir,'mobile.png'),fullPage:true});
-  await pages[1].screenshot({path:path.join(outputDir,'desktop.png'),fullPage:true});
-  console.log('PASS: two different students share one room and synchronize movement.');
-  const { Client } = require(path.resolve(__dirname,'../services/game-runtime/node_modules/@colyseus/sdk'));
-  async function api(page, method, body) {
-    return page.evaluate(async ({method,body})=>{
-      const r=await fetch('/api/method/'+method,{method:'POST',headers:{'Content-Type':'application/json','X-Frappe-CSRF-Token':window.csrf_token},body:JSON.stringify(body)});
-      if(!r.ok) throw new Error('API failed: '+r.status);
-      return (await r.json()).message;
-    },{method,body});
-  }
-  const launch=await api(pages[0],'lms.lms.game_runtime.create_launch',{game:fixture.game});
-  const ticket=await api(pages[0],'lms.lms.game_runtime.issue_join_ticket',{launch_id:launch.launch_id,room_key:'arena'});
-  const directClient=new Client(ticket.endpoint);
-  directClient.http.options.credentials='omit';directClient.auth.token=ticket.ticket;
-  const directRoom=await directClient.joinOrCreate('arena');
-  const replay=new Client(ticket.endpoint);replay.auth.token=ticket.ticket;
-  await assert.rejects(replay.joinOrCreate('arena'));
-  console.log('PASS: consumed join ticket cannot be replayed.');
-  const disconnected=new Promise(resolve=>directRoom.onLeave(code=>resolve(code)));
-  fs.writeFileSync(path.join(signalDir,'live.json'),JSON.stringify({game:fixture.game,connected:true}));
-  // A signal file lets the host revoke game access while both browsers remain connected.
-  const deadline=Date.now()+45000;
-  while(!fs.existsSync(path.join(signalDir,'revoked')) && Date.now()<deadline) await pages[0].waitForTimeout(250);
-  const code = await Promise.race([disconnected,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Server lease did not revoke direct WebSocket')),32000).unref())]);
+  const frame=i=>pages[i].frameLocator('iframe');
+  for(let i=0;i<4;i++)await frame(i).locator('#status').filter({hasText:'2 人在线'}).waitFor({timeout:20000});
+  const codes=await Promise.all(pages.map((p,i)=>frame(i).locator('#room-code').inputValue()));
+  assert.equal(codes[0],codes[1]);assert.equal(codes[2],codes[3]);assert.notEqual(codes[0],codes[2]);
+  await frame(0).locator('[data-cell="112"]').click();
+  await frame(1).locator('[data-cell="112"][data-piece="1"]').waitFor();
+  await frame(1).locator('[data-cell="113"]').click();
+  await frame(0).locator('[data-cell="113"][data-piece="2"]').waitFor();
+  console.log('PASS: single-HTML gomoku and ZIP racing run simultaneously in isolated rooms.');
+  console.log('PASS: frontend gomoku moves synchronize through generic messages.');
+  const before=await frame(3).locator('.player').evaluateAll(items=>items.map(x=>x.style.left));
+  await frame(2).locator('#stage').click({position:{x:100,y:100}});
+  await pages[2].waitForTimeout(350);
+  const after=await frame(3).locator('.player').evaluateAll(items=>items.map(x=>x.style.left));
+  assert.notDeepEqual(before,after);
+  console.log('PASS: host-client racing snapshot reaches the other player.');
+  await pages[2].setViewportSize({width:390,height:844});
+  // The LMS may remount its route when switching between desktop/mobile layouts.
+  await frame(2).locator('#status').waitFor();
+  const mobileStatus=await frame(2).locator('#status').innerText();
+  if(!mobileStatus.includes('已连接')){await frame(2).locator('#status').filter({hasText:'联机已就绪'}).waitFor();await frame(2).locator('#quick-match').click();}
+  await frame(2).locator('#status').filter({hasText:'2 人在线'}).waitFor({timeout:20000});
+  assert.equal(await pages[2].evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
+  await pages[2].screenshot({path:path.join(output,'mobile.png'),fullPage:true});
+  await pages[0].screenshot({path:path.join(output,'gomoku.png'),fullPage:true});
+  await pages[3].screenshot({path:path.join(output,'race.png'),fullPage:true});
+  // Whichever peer is now host, leaving one peer must make the other the host.
+  await frame(2).locator('#leave-room').click();
+  await frame(3).locator('#players').filter({hasText:'你（房主）'}).waitFor();
+  console.log('PASS: host ownership transfers to a connected peer.');
+  await frame(2).locator('#create-room').click();
+  await frame(2).locator('#status').filter({hasText:'1 人在线'}).waitFor();
+  const privateCode=await frame(2).locator('#room-code').inputValue();
+  await frame(3).locator('#leave-room').click();
+  await frame(3).locator('#join-code').fill(privateCode);await frame(3).locator('#join-room').click();
+  await frame(2).locator('#status').filter({hasText:'2 人在线'}).waitFor();
+  await frame(0).locator('#leave-room').click();
+  await frame(0).locator('#join-code').fill(privateCode);await frame(0).locator('#join-room').click();
+  await frame(0).locator('#status').filter({hasText:'another game or compatibility group'}).waitFor();
+  console.log('PASS: room-code invitations work and cannot cross game identity.');
+  await frame(0).locator('#quick-match').click();
+  await frame(0).locator('#status').filter({hasText:'2 人在线'}).waitFor();
+  async function api(page,method,body){return page.evaluate(async({method,body})=>{const r=await fetch('/api/method/'+method,{method:'POST',headers:{'Content-Type':'application/json','X-Frappe-CSRF-Token':window.csrf_token},body:JSON.stringify(body)});if(!r.ok)throw new Error('API failed '+r.status);return(await r.json()).message;},{method,body});}
+  const launch=await api(pages[2],'lms.lms.game_runtime.create_launch',{game:fixture.game});
+  const ticket=await api(pages[2],'lms.lms.game_runtime.issue_join_ticket',{launch_id:launch.launch_id,action:'quickMatch',max_players:4});
+  const native=new Client(ticket.endpoint);native.auth.token=ticket.ticket;native.http.options.credentials='omit';
+  const direct=await native.joinOrCreate('universal');
+  await assert.rejects(native.joinOrCreate('universal'));
+  console.log('PASS: real LMS one-use ticket rejects replay.');
+  const timings=[];
+  direct.onMessage('relay',message=>{if(message.type==='probe:echo')timings.push(performance.now()-message.payload.sent);});
+  for(let seq=1;seq<=20;seq++){direct.send('relay',{protocol:1,type:'probe:echo',payload:{sent:performance.now()},seq,echo:true});await sleep(50);}
+  const end=Date.now()+3000;while(timings.length<20&&Date.now()<end)await sleep(50);
+  assert.equal(timings.length,20);
+  timings.sort((a,b)=>a-b);
+  const health=await(await fetch(ticket.endpoint+'/readyz')).json();
+  fs.writeFileSync(path.join(output,'metrics.json'),JSON.stringify({relayEchoRttMs:{samples:20,median:Number(timings[10].toFixed(2)),p95:Number(timings[18].toFixed(2))},health},null,2));
+  const left=new Promise(resolve=>direct.onLeave(code=>resolve(code)));
+  fs.writeFileSync(path.join(signal,'live.json'),JSON.stringify({ready:true}));
+  const deadline=Date.now()+45000;while(!fs.existsSync(path.join(signal,'revoked'))&&Date.now()<deadline)await sleep(100);
+  const code=await Promise.race([left,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Lease revocation timed out')),32000).unref())]);
   assert.equal(code,4003);
-  console.log('PASS: server revokes independent WebSocket with code 4003.');
-  // Parent may remove the iframe first; direct server lease check is tested separately.
-  await pages[0].waitForFunction(()=>!document.querySelector('iframe'),null,{timeout:35000});
-  console.log('PASS: live game switch removes student iframe.');
-  assert.deepEqual(failures,[]);
-  await browser.close();
-})().catch(error=>{console.error(error.stack);process.exitCode=1;setTimeout(()=>process.exit(1),1000)});
+  await pages[2].waitForFunction(()=>!document.querySelector('iframe'),null,{timeout:35000});
+  assert.ok((await frame(0).locator('#status').innerText()).includes('2 人在线'),'revoking racing does not revoke gomoku');
+  console.log('PASS: revocation closes independent WS (4003) and racing iframe; gomoku remains connected.');
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+})().catch(error=>{console.error(error.stack);process.exitCode=1;});

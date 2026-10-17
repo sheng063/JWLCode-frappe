@@ -1,138 +1,115 @@
-# Game 联机服务：Colyseus
+# Game 通用 Colyseus 联机服务
 
-实现日期：2026-10-17。对应设计：[接入方案](game-colyseus-plan.md)。
+本次重构按 [通用 Room 计划](game-colyseus-universal-room-plan.md) 实施，替代之前的每游戏权威服务器方案。当前为单实例、客户端规则、中继架构。
 
-## 当前已实现
+## 已实现的结构
 
-Frappe 提供游戏启动与访问授权，独立 Colyseus Runtime 负责房间和状态同步。当前交付单实例运行、版本化前端制品、独立 Redis/代理、可信本地发布工具、浏览器启动辅助库与双人示例。普通 HTML/ZIP 的上传、播放和学生解锁保留。
+- 一套固定的 UniversalRelay Runtime，只注册一个 `universal` 房间类型，各游戏/房间实例独立。
+- Runtime 管理名单、房主、房间号、建房/快速匹配/定向加入、有限重连和 JSON 消息中继，不包含赛车或五子棋规则。
+- 游戏仅交付 HTML/ZIP 和前端 manifest。教师从现有上传弹窗生成配置，或使用 CLI 发布；不构建游戏镜像、不新增容器/端口、不改代理、不重启 Runtime。
+- 保留原静态上传、隔离 iframe、ZIP 资源 Cookie、教师试玩、课程/课时解锁与学生开关。联机 HTTP 使用短期票据且不携带 LMS Cookie。
+- 固定服务使用 Colyseus 单进程本地 Presence/Driver，不再有游戏 Redis；Frappe 既有 Redis 的 game-runtime: 命名空间继续保存有 TTL 的 launch、一次性票据及租约。
 
-示例为“联机移动实验室”，点击场地或方向键移动；不同学生通过 Game 页面自动匹配并看到对方。游戏 ID 为本地部署生成值，不是跨站点固定标识。
+## 本地运行结果
 
-本地验收部署：
+- 五子棋单 HTML：`http://localhost:8000/lms/game/ttnikv3v10`。
+- 赛车 ZIP：`http://localhost:8000/lms/game/dl4h9o0lpe`，保留原示例游戏记录并升级其前端。
+- 固定服务：`http://localhost:2572`；`/healthz` 检查进程，`/readyz` 检查授权控制面及单一 Room 类型。
+- 两个示例均默认对学生关闭，教师可直接试玩；可在游戏库按需开放。
+- 只部署本地环境。原独立 `colyseus-server:2567` 不属于本项目新服务，未修改。生产公网域名、证书和 TLS 未配置。
 
-- Game 页面：`http://localhost:8000/lms/game/dl4h9o0lpe`。
-- Runtime：`http://localhost:2571`，健康检查 `/healthz`、就绪检查 `/readyz`。
-- 当前示例版本：`1.0.3`；游戏默认对学生关闭，教师可以直接试玩，教师按需在游戏库开启。
-- 本地原有 `colyseus-server:2567` 未修改。本服务使用独立 Compose 项目。
-- 只部署本机测试环境，没有配置公网域名和生产 TLS。
-
-## 服务与权限
-
-`LMS Game.runtime_mode` 区分静态与 Colyseus 游戏；`active_release` 指向不可变制品记录。`LMS Game Release` 绑定前端 ZIP 校验值、入口、清单与服务端镜像 digest；`LMS Game Deployment` 登记 endpoint、Ready/Draining/Stopped 等状态。普通教师、学生不能通过通用 DocType API 发布服务器代码。
-
-启动过程：
-
-1. 已登录父页检查现有 Game 权限，创建与站点、用户、登录会话、游戏、版本、部署绑定的 launch。
-2. iframe 平台库发起随机 nonce 握手。父页只接受当前 iframe，通过独立 MessageChannel 签发联机票据。
-3. 原生 Colyseus SDK 用短期 ticket 发起匹配。Runtime 的强制静态 onAuth 通过服务身份到 Frappe 原子兑换；票据有效期 60 秒，只能成功消费一次。
-4. 座位预订完成后直接 WSS/本地 WS 连入所属 Runtime；服务端核对房间 scope、游戏、版本和部署。
-5. 连接每 5 秒批量复核权限，30 秒租约保证控制面不可用时不会无限保留操作权限。开关、课程/课时规则、账号、原会话、launch 关闭和部署停服均参与复核。
-
-现阶段在线撤权依靠租约轮询，未实现设计中的服务端推送撤销事件；正常复核约 5 秒，故障兜底约 30 秒加事件循环调度。父页保留实时通知和 30 秒检查，但服务端踢线独立生效。
-
-刷新、重新开始、离开页面或权限撤销会关闭旧 launch；断线重连窗口为 20 秒，服务端重新验证权限。重载整个页面按新启动处理，不保证恢复旧房间。
-
-iframe 仍不使用 allow-same-origin。静态资源沿用 ZIP 专用 Cookie；联机 HTTP 明确使用 `credentials: omit` 和票据。CSP 只增加经站点配置批准的 Runtime HTTP(S)/WS(S) 源，通用 Frappe API 不向 null origin 开放。
-
-Colyseus SDK 0.18.5 在构造 Client 时会尝试使用浏览器存储。模板通过构建插件将 SDK Storage 模块替换为内存实现，避免 opaque iframe 中的 IndexedDB 异常，票据不持久化。升级 SDK 后必须重新验证该构建适配。
-
-## 本地构建和首次发布
-
-前提：Docker、Python 3、Node >=22、npm；现有 `docker/docker-compose.yml` 的本地 Bench 已启动。发布操作通过受信 CLI 执行，没有公开的上传代码执行接口，也没有给 Frappe 挂载 Docker socket。
-
-先把当前应用迁移和构建至本地：
+## 一次性部署平台
 
 ```bash
+npm --prefix services/game-runtime ci
 ./docker/redeploy.sh
+python3 tools/deploy-universal-runtime.py --port 2572
 ```
 
-构建示例（得到 client.zip、manifest 和不可变镜像 ID）：
+最后一个命令属于平台维护：构建固定 Runtime、配置唯一 endpoint/服务密钥，启动一组 Runtime+Nginx 容器。更新前若存在活动房间会拒绝执行。后续发布游戏不调用这个命令。
+
+Runtime 使用 Node 22、锁定的 Colyseus 依赖、非 root、只读文件系统、CPU/内存限制。Nginx 处理 Upgrade、载荷限制与基础请求限流，私有 Node 端口不直接发布。默认只绑定 localhost；生产需在 HTTPS/WSS 入口后部署并按实际网络配置源站。
+
+唯一服务配置保存于站点 `game_universal_runtime`，包含 endpoint、protocolVersion、服务状态和服务密钥。密钥通过临时私有文件交给 Bench，运行 env 位于已忽略的 `docker/.game-runtime/universal/runtime.env`，权限 0600。不要提交或分享 env 文件。
+
+```bash
+docker compose --env-file docker/.game-runtime/universal/runtime.env \
+  -f docker/game-runtime.compose.yml logs --tail 100 runtime
+```
+
+日常游戏上传/激活只更新数据库及前端资源。Web 请求读取最新联机配置，不依赖重新启动 Frappe 才看见发布结果。
+
+## 教师上传与版本升级
+
+打开 Game → 上传游戏，选择 HTML/ZIP，勾选“启用通用联机”。可设置发行版本、稳定游戏标识、兼容联机组、最大人数、私人房间和快速匹配。选择“发布到”已有游戏即为前端升级；首次发布默认关闭学生访问。
+
+ZIP 内的 game.manifest.json 优先使用；未提供时按表单生成。清单只能描述前端资源和 relay 配置，不接受游戏服务器目录、Node 启动命令、镜像、Compose 或任意后端 URL。普通静态 HTML/ZIP 不必启用此选项。
+
+不同发行版本默认分房。显式共享 compatibilityKey 时允许混房，游戏作者需保证协议兼容。新 launch 固定到新资源，旧 launch 继续读取不可变旧资源；旧版本 Room 不因上传新游戏而被停止。单游戏开关仍同时约束该游戏的所有在线版本。
+
+已发布的资源、游戏标识和协议不能原地改写。教师下载返回当前版本前端文件；删除逻辑游戏时清理关联版本资源。
+
+## 开发者前端构建与发布
 
 ```bash
 python3 tools/build-colyseus-demo.py --release 1.0.0
 ```
 
-发布新游戏，选择空闲端口：
+只生成 SDK、五子棋与赛车的单 HTML、ZIP 和 manifest，不操作 Docker。完整 SDK 契约见 [HTML5 游戏通用联机接入](game-multiplayer-sdk.md)。
 
 ```bash
 python3 tools/deploy-game.py \
-  --manifest services/game-runtime/dist/game.manifest.json \
-  --client services/game-runtime/dist/client.zip \
-  --image "$(docker image inspect jwlcode/game-runtime:colyseus-v1 --format '{{.Id}}')" \
-  --port 2571 --title '联机移动实验室'
-```
+  --manifest services/game-runtime/dist/gomoku-html.manifest.json \
+  --client services/game-runtime/dist/gomoku.html --title '联机五子棋'
 
-工具校验制品校验值与镜像一致性，登记版本、生成服务密钥、启动隔离的 Runtime/Redis/代理，检查候选版本 `/readyz`，再激活版本。返回 game/release/deployment ID、Game URL、Compose 项目名及本机 env 文件位置。
-
-默认只监听 `127.0.0.1`，自动批准对应 localhost origin。构建/发布产物和密钥置于已忽略的 `docker/.game-runtime/`；runtime.env 权限为 0600，不应提交或分享。服务密钥通过临时文件传入 Bench，避免放进命令参数；站点配置按部署保存服务密钥。Web 请求读取最新联机配置，后续新增游戏无需重启 Frappe。
-
-发布失败时停止候选部署并清理对应容器；保留发行记录供诊断，不自动删除游戏数据。工具当前自动检查 HTTP 就绪，完整真实联机验收需运行下方 smoke 工具，尚未接入 CI 的强制发布门禁。
-
-## 后续游戏接入
-
-1. 基于示例编写原生 Colyseus Room/Schema。游戏类使用 `platformCreate`、`platformJoin`、`platformLeave`、`platformDispose` 钩子；不要重写包装器管理的 onAuth/onCreate/onJoin/onDrop/onReconnect/onLeave/onDispose。
-2. 服务端模块导出 `rooms` 映射，例如 `{ arena: MyRoom }`；镜像内通过 `GAME_MODULE=/app/game/rooms.js` 指向模块。以本项目 Runtime 镜像为基座时，将模块和游戏依赖构建进自己的镜像，保留统一入口。
-3. 前端引入原生 SDK 和 `packages/game-platform-client/index.js`，调用 `handshake()`，然后 `createColyseusClient(Client, roomKey)`，继续使用原生 `joinOrCreate`/`joinById`、消息和状态接口。
-4. 使用 `packages/game-platform-client/esbuild.js` 的 `colyseusSandboxStorage` 插件打包；其他打包器应提供等效的 SDK 内存存储别名。参考 `services/game-runtime/build-demo.js`。
-5. 构建 client.zip 与自己的 OCI 镜像，按设计文档生成 manifest。运行通用 deploy-game 工具；无需改 Frappe 游戏页面和鉴权代码，也无需为单实例手写 Nginx 配置。
-
-清单中的房间 visibility 必须为 public 或 private。public 允许已授权玩家自动匹配；private 房间不参与 joinOrCreate 搜索，需要游戏提供已授权的定向加入流程。两者都必须经过平台鉴权，房间 ID 不是入场凭证。
-
-站点 scope 由服务端覆盖客户端选项，当前默认同站点、同游戏、同版本匹配；尚未提供班级范围配置或通用邀请大厅。游戏输入校验、胜负和权威状态仍由游戏作者实现。平台限制房间数、连接数、消息载荷和每秒消息数，并使用容器 CPU/内存限制。
-
-## 升级、回滚和停服
-
-升级使用更高 release，发布时传入原 game ID，并为新实例选择另一个端口：
-
-```bash
-python3 tools/build-colyseus-demo.py --release 1.0.1
 python3 tools/deploy-game.py \
-  --manifest services/game-runtime/dist/game.manifest.json \
-  --client services/game-runtime/dist/client.zip \
-  --image "$(docker image inspect jwlcode/game-runtime:colyseus-v1 --format '{{.Id}}')" \
-  --port 2572 --game '<已有 Game ID>'
+  --manifest services/game-runtime/dist/race-zip.manifest.json \
+  --client services/game-runtime/dist/race.zip --title '联机赛车'
 ```
 
-激活后新 launch 固定到新版本，旧启动上下文继续读取自己的前端资源；旧部署标记 Draining，停止新匹配，已有连接继续续租。原生 Room 不会在两个版本间透明迁移。教师下载返回当前版本 ZIP。
+发布已有游戏时加 `--game '<Game ID>'` 并使用未发布的新版本号。该工具只将制品交给 Frappe 前端发布逻辑，不接收 --image/--port/--endpoint 参数，也不启动或重启联机服务。
 
-通过返回的 env 文件和项目名管理独立栈：
+## 鉴权和协议边界
+
+1. GameDetail 调用 create_launch，使用现有 require_access / AccessEvaluator 检查登录、账号、全站/单游戏、课程/课时及个人规则。
+2. launch 固定站点、用户/原会话、游戏、前端发行版本、兼容组和 scope。单 HTML 和 ZIP 都仅允许固定 Runtime 的连接源。
+3. iframe 以随机 nonce 发 READY；父页只接受当前 Window，通过单独 MessageChannel 发出操作票据。重新开始、导航、撤权会关闭旧 launch/端口。
+4. ticket 约 60 秒有效，一次性消费，绑定 createRoom/quickMatch/joinRoom 及目标房间号；操作或目标不一致时拒绝兑换。
+5. 原生匹配控制器附加服务端操作上下文，UniversalRoom 从已兑换身份生成分房键。joinById 也检查 site/game/gameKey/compatibilityKey/scope 和 manifest 人数/可见性权限，不能凭房号绕过授权。
+6. 已连接玩家每 5 秒批量复核，租约 30 秒。控制面不可用时不延长授权；撤权后服务端独立断开，前端 iframe 撤下并非唯一保障。教师保留试玩权限。
+7. 游戏消息由同房中继直接转发，不经过 Python。服务端注入真实 from，校验 envelope、JSON/大小、顺序与速率；不判定业务胜负或可信分数。
+
+默认 2–8 人、16 KiB/条、60 条/秒、单用户 2 个存续房间/4 个连接，房间寿命 1 小时。短暂断网可在 20 秒窗口重新验证后恢复；撤权和限流等主动踢线不允许借重连绕过。
+
+## 迁移与保留数据
+
+- 旧 `Colyseus` 运行模式在迁移中停用：原资源和旧发行记录保留、旧服务记录标为 Stopped，旧客户端不能自动变成新协议。
+- 本地原示例已用同一 Game ID 上传新赛车 ZIP，其他静态游戏未改内容和访问规则。
+- `LMS Game Release` 移除活跃模型中的 server_image/runtime_profile 字段，增加 client_type、filename、platform_api、compatibility_key。
+- `LMS Game Deployment` 仅保留只读历史记录供追溯，不参与启动、授权、配置、发布或匹配，也不为新游戏创建记录。唯一服务由站点配置管理。
+- 旧 per-game 容器需在无房间时停用。数据库迁移不擅自操作 Docker；本机本项目旧栈已停用，独立外部容器未处理。
+- 老方案和老 QA 文件作为历史保留，当前行为以本文件及 SDK 文档为准。
+
+## 验证与小规模测量
 
 ```bash
-docker compose --env-file '<runtime.env>' -p '<project>' \
-  -f docker/game-runtime.compose.yml logs --tail 100 runtime
-```
-
-旧房间结束后，由管理 CLI 调用 `lms.lms.game_publish.stop_deployment` 并 down 该栈。恢复保留版本时，先调用 `prepare_deployment` 标记 Starting，再用原 env 文件 up，检查 /readyz 后调用 `activate_release`。这些函数仅供 System Manager 的 Bench/可信发布 Worker 调用，没有 whitelisted HTTP 入口。
-
-Compose 操作不会自动更改数据库部署状态；单独 down 会使就绪失败，现有客户端断线。生产环境应将这些步骤纳入发布 Worker，并增加排空截止时间、发布失败回滚与告警策略。
-
-## 验证
-
-Runtime：
-
-```bash
-npm --prefix services/game-runtime ci
 npm --prefix services/game-runtime test
 ```
 
-后端通过 Bench run-tests 运行 `lms.tests.test_game_runtime`、`lms.tests.test_game`、`lms.tests.test_game_packages`、`lms.tests.test_game_access`，共 41 项；前端相关 41 项通过。现有审计测试针对当前 Frappe 测试模式默认不生成 Version 的行为显式模拟生产模式，并为课时测试数据设置顺序，未修改原解锁业务规则。
+Runtime 测试包含真实 HTTP/WS、同游戏多房、跨游戏/版本/范围/站点隔离、房号/满房、票据操作绑定、防重放、定向/广播/回显、消息限流、用户配额、房主交接、网络重连、故障租约及 2/4/8 人转发。
 
-真实浏览器验收：需安装可用 Playwright，必要时设置 PLAYWRIGHT_MODULE 和 CHROMIUM_EXECUTABLE 指向现有运行时。全站当前策略必须允许临时 QA 学生进入；工具不会更改全站权限规则。
+Frappe 回归模块：test_game_runtime、test_game、test_game_packages、test_game_access。前端覆盖新上传表单、桥接及原游戏/解锁界面。现有 Vite 5 与 Vitest 4 不兼容，相关前端测试在独立临时运行器完成，未改项目依赖。
+
+真实浏览器验收：
 
 ```bash
-python3 tools/test-game-runtime.py --game '<Game ID>'
+python3 tools/test-game-runtime.py --game '<赛车 ZIP Game ID>' --gomoku '<五子棋 HTML Game ID>'
 ```
 
-工具创建两个临时学生，验证 iframe 运行、同房间状态与操作同步、票据重放拒绝、独立原生 WebSocket 的服务端撤权以及页面退出；结束后删除账号并恢复该游戏原开关。截图及日志输出至 QA 目录，不保存账号密码。
+需可用 Playwright/Chromium，可用 PLAYWRIGHT_MODULE / CHROMIUM_EXECUTABLE 指向现有工具。验收创建 4 个临时学生，验证两游戏同时联机、落子/快照、房主交接、私房与跨游戏拒绝、票据重放、独立 WS 撤权及另一游戏继续运行；最后删账号并恢复游戏开关。
 
-验收材料：[桌面](qa/game-colyseus-20261017/desktop.png)、[手机](qa/game-colyseus-20261017/mobile.png)、[浏览器日志](qa/game-colyseus-20261017/browser.log)。
+验收材料位于 [QA 目录](qa/game-universal-20261017/validation.md)，包含截图、日志、回环测量及容器镜像/启动时间不变的记录。测量仅代表本机小规模场景，不是生产容量或 CCU 承诺。
 
-## 尚未交付的后续能力
+## 尚未承诺
 
-- 公网 TLS、生产域名/网络和生产容量规划；当前部署限定本机 localhost。
-- 多进程池的命名空间和进程定向路由；当前每个部署一个 Node 实例和一套 Redis。
-- 通用大厅、邀请码、班级匹配、服务器主动撤权事件。
-- 对局成绩持久化、结果 outbox、崩溃续局、自动扩缩容及自动排空控制器。
-- 托管任意用户上传的服务器源码；目前只发布受信开发者构建的镜像。
-
-这些能力属于设计中的后续阶段，不影响当前单实例游戏按统一契约发布和运行。
+多节点/热迁移、断电续局、反作弊、可信成绩、复杂好友/观战、跨房间业务状态不在此架构首期范围。业务规则、快照、主持人迁移后的继续/重开策略由各游戏客户端负责。生产 TLS、出站带宽与 VPS 容量需按部署环境和实际游戏另行配置、验证。

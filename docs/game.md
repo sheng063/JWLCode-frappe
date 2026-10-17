@@ -157,3 +157,7 @@ Game 统一以沙箱 iframe 播放 HTML 或 ZIP 游戏，保留游戏上传、�
 ## 2026-10-17：接入独立 Colyseus Runtime
 
 新增独立 Colyseus 联机服务与版本化发布工具，保留原 HTML/ZIP 沙箱播放和学生解锁规则。游戏开发者按统一契约交付客户端 ZIP、服务端镜像和 manifest，通过可信本地 CLI 发布并绑定 Game；浏览器使用短期一次性票据连接服务，在线权限通过服务端租约复核。包含可试玩的双人联机示例。使用方式、部署命令、验收与后续范围见 [Colyseus 联机服务](game-colyseus.md)。
+
+## 2026-10-17：通用中继 Room 重构
+
+Game 使用唯一 UniversalRelay Runtime 和 v1 JS SDK。教师上传 HTML/ZIP、设置版本/人数/匹配选项即可发布联机前端；后续游戏不构建镜像、不新增容器/端口、不改服务代码。Runtime 只维护房间、玩家、主持人和消息中继，游戏规则与快照由客户端负责。提供双人五子棋和四人赛车示例，保留原学生解锁与沙箱边界。旧每游戏服务设计已由 [通用 Room 计划](game-colyseus-universal-room-plan.md) 替代；当前部署见 [使用说明](game-colyseus.md)，开发接口见 [统一 SDK](game-multiplayer-sdk.md)。

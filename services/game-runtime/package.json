@@ -14,10 +14,8 @@
   "dependencies": {
     "@colyseus/core": "0.18.19",
     "@colyseus/schema": "5.0.40",
-    "@colyseus/ws-transport": "0.18.4",
-    "@colyseus/redis-presence": "0.18.5",
-    "@colyseus/redis-driver": "0.18.5",
     "@colyseus/sdk": "0.18.5",
+    "@colyseus/ws-transport": "0.18.4",
     "express": "5.1.0"
   },
   "devDependencies": {

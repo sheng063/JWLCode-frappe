@@ -1,85 +1,42 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { platformRoom } from '../src/platform.js';
+import { assertRoomAccess, validateEnvelope } from '../src/universal.js';
+import { RelaySession } from '../../../packages/game-platform-client/session.js';
 
-const auth = { lease_id: 'a'.repeat(64), deployment: 'dep', release: 'release', game: 'game', scope: 'school' };
-function fixture(overrides = {}) {
-  const pool = { rooms: 0, connections: 0, seats: new Map(), draining: false };
-  const control = { call: async method => method === 'redeem_ticket' ? { ...auth } : { valid: [auth.lease_id], lease_seconds: 30 } };
-  class Game { constructor() { this.clock = { setInterval() {} }; this.setPrivate = async () => {}; } }
-  const Wrapped = platformRoom(Game, { control, pool, deployment: 'dep', release: 'release', game: 'game', room: { key: 'arena', maxClients: 4 }, limits: { maxConnections: 4, maxRooms: 2 }, ...overrides });
-  return { Wrapped, pool, control };
-}
-test('static authentication rejects missing token and binds server-side scope', async () => {
-  const { Wrapped } = fixture();
-  await assert.rejects(Wrapped.onAuth('', {}));
-  const options = { platformScope: 'attacker' };
-  const result = await Wrapped.onAuth('f'.repeat(64), options);
-  assert.equal(options.platformScope, 'school');
-  assert.equal(result.game, 'game');
+const auth = { site:'school', game:'game', game_key:'stable', compatibility_key:'v1', scope:'school', permissions:{minPlayers:2,maxPlayers:8,allowPrivateRoom:true,allowQuickMatch:true} };
+const room = { isolation:JSON.stringify(['school','game','stable','v1','school']),maxClients:4,visibility:'private' };
+test('all room joins enforce site/game/key/compatibility/scope and capacity permissions', () => {
+  assertRoomAccess(room,auth);
+  for (const key of ['site','game','game_key','compatibility_key','scope']) assert.throws(()=>assertRoomAccess(room,{...auth,[key]:'foreign'}));
+  assert.throws(()=>assertRoomAccess(room,{...auth,permissions:{...auth.permissions,maxPlayers:2}}));
+  assert.throws(()=>assertRoomAccess(room,{...auth,permissions:{...auth.permissions,allowPrivateRoom:false}}));
 });
-test('foreign deployment/release is rejected before matchmaking', async () => {
-  const { Wrapped } = fixture({ control: { call: async () => ({ ...auth, release: 'foreign' }) } });
-  await assert.rejects(Wrapped.onAuth('f'.repeat(64), {}));
+test('relay validates platform envelope while leaving game payload semantics alone', () => {
+  const envelope = {protocol:1,type:'unknown-game:custom',seq:1,payload:{arbitrary:['data',42]},from:'spoofed'};
+  assert.ok(validateEnvelope(envelope,-1,16384)>0);
+  for(const patch of [{type:'platform:hostChanged'},{protocol:2},{seq:0},{payload:new Uint8Array(4)},{payload:{x:NaN}},{payload:'x'.repeat(16384)}]) assert.throws(()=>validateEnvelope({...envelope,...patch},0,16384));
 });
-test('room and connection quotas apply including outstanding reservations', async () => {
-  const { Wrapped, pool } = fixture();
-  pool.connections = 4;
-  await assert.rejects(Wrapped.onAuth('f'.repeat(64), {}));
-  pool.rooms = 2;
-  await assert.rejects(new Wrapped().onCreate({ platformScope: 'school' }));
+test('SDK sends uniform envelopes and never exposes platform message namespace', () => {
+  const sent=[];
+  const signal=()=>{};
+  const native={roomId:'AB123456',sessionId:'me',state:{players:new Map(),hostId:'me'},onStateChange:signal,onMessage:signal,onLeave:signal,send:(...args)=>sent.push(args),leave:async()=>4000};
+  const sdk=new RelaySession(native);
+  sdk.send('car:update',{x:42},{to:'peer'});
+  assert.deepEqual(sent[0],['relay',{protocol:1,type:'car:update',payload:{x:42},seq:1,to:'peer'}]);
+  assert.throws(()=>sdk.send('platform:fake',{}));
+  assert.throws(()=>sdk.send('bytes','x'.repeat(17000)));
 });
-test('joinById cannot cross authorized room scope', async () => {
-  const { Wrapped } = fixture();
-  const room = new Wrapped();
-  await room.onCreate({ platformScope: 'another-school' });
-  await assert.rejects(room.onJoin({ sessionId: 'a' }, {}, auth));
+test('SDK roster and host events work for initial and changed members', () => {
+  const signal=()=>{};
+  const native={roomId:'AB123456',sessionId:'me',state:{players:new Map([['me',{label:'Me',connected:true}]]),hostId:'me'},onStateChange:signal,onMessage:signal,onLeave:signal};
+  const sdk=new RelaySession(native),joined=[],left=[],hosts=[];
+  sdk.on('playerJoined',x=>joined.push(x.playerId));sdk.on('playerLeft',x=>left.push(x.playerId));sdk.on('hostChanged',x=>hosts.push(x.hostId));
+  native.state.players.set('peer',{label:'Peer',connected:true});sdk.updateRoster();
+  native.state.players.delete('me');native.state.hostId='peer';sdk.updateRoster();
+  assert.deepEqual(joined,['me','peer']);assert.deepEqual(left,['me']);assert.deepEqual(hosts,['me','peer']);
 });
-test('lease failures never extend permission and expiration disconnects', async () => {
-  const { Wrapped, control, pool } = fixture();
-  const room = new Wrapped();
-  await room.onCreate({ platformScope: 'school' });
-  const leaves = [];
-  const client = { sessionId: 'a', leave: code => leaves.push(code) };
-  await room.onJoin(client, {}, auth);
-  const lease = room._leases.get('a');
-  const before = lease.until;
-  control.call = async () => { throw new Error('offline'); };
-  await room.refreshLeases();
-  assert.equal(lease.until, before);
-  lease.until = 0;
-  room.expireLeases();
-  assert.deepEqual(leaves, [4003]);
-  await room.onLeave(client);
-  await room.onDispose();
-  assert.equal(pool.connections, 0);
-  assert.equal(pool.rooms, 0);
-});
-test('revoked reconnect is rejected', async () => {
-  const { Wrapped, control } = fixture();
-  const room = new Wrapped();
-  await room.onCreate({ platformScope: 'school' });
-  const client = { sessionId: 'a', leave() {} };
-  await room.onJoin(client, {}, auth);
-  control.call = async () => ({ valid: [], lease_seconds: 30 });
-  await assert.rejects(room.onReconnect(client));
-});
-test('game cannot override platform authorization lifecycle', () => {
-  class Unsafe { onAuth() { return true; } }
-  assert.throws(() => platformRoom(Unsafe, {}), /platform lifecycle/);
-});
-test('memory auth storage stays synchronous without browser persistence', async () => {
-  const storage = await import('../../../packages/game-platform-client/storage.js');
-  storage.setItem('test', 'value');
-  let actual;
-  storage.getItem('test', value => { actual = value; });
-  assert.equal(actual, 'value');
-  storage.removeItem('test');
-  storage.getItem('test', value => { actual = value; });
-  assert.equal(actual, undefined);
-});
-test('demo bundle avoids unavailable IndexedDB in opaque sandbox', async () => {
-  const { readFile } = await import('node:fs/promises');
-  const html = await readFile(new URL('../dist/index.html', import.meta.url), 'utf8');
-  assert.equal(html.includes('indexedDB.open'), false);
+test('opaque iframe SDK storage never accesses browser persistence',async()=>{
+  const {readFile}=await import('node:fs/promises');
+  const html=await readFile(new URL('../dist/gomoku.html',import.meta.url),'utf8');
+  assert.equal(html.includes('indexedDB.open'),false);
 });

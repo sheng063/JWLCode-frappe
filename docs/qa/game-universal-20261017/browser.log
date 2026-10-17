@@ -1,0 +1,7 @@
+PASS: single-HTML gomoku and ZIP racing run simultaneously in isolated rooms.
+PASS: frontend gomoku moves synchronize through generic messages.
+PASS: host-client racing snapshot reaches the other player.
+PASS: host ownership transfers to a connected peer.
+PASS: room-code invitations work and cannot cross game identity.
+PASS: real LMS one-use ticket rejects replay.
+PASS: revocation closes independent WS (4003) and racing iframe; gomoku remains connected.

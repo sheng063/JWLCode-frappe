@@ -14,7 +14,8 @@
 		"cover_image",
 		"entry_file",
 		"runtime_mode",
-		"active_release"
+		"active_release",
+		"game_key"
 	],
 	"fields": [
 		{
@@ -64,7 +65,7 @@
 			"fieldname": "runtime_mode",
 			"label": "Runtime Mode",
 			"fieldtype": "Select",
-			"options": "Static\nColyseus",
+			"options": "Static\nUniversalRelay",
 			"default": "Static"
 		},
 		{
@@ -72,6 +73,13 @@
 			"label": "Active Release",
 			"fieldtype": "Link",
 			"options": "LMS Game Release",
+			"read_only": 1
+		},
+		{
+			"fieldname": "game_key",
+			"label": "Stable Game Key",
+			"fieldtype": "Data",
+			"unique": 1,
 			"read_only": 1
 		}
 	],

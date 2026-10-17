@@ -1,5 +1,7 @@
 # Game 接入 Colyseus 联机服务方案
 
+> 已被 [通用 Room 重构计划](game-colyseus-universal-room-plan.md) 替代；本文仅保留历史设计。当前实现见 [通用联机服务](game-colyseus.md)。
+
 日期：2026-10-17。状态：设计方案，未实施、未部署。
 依据：`52ef3a2` 基础上的当前工作区（包含尚未提交的 Game 改动）。
 

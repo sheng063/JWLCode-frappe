@@ -355,6 +355,19 @@
 					<p class="muted">
 						多文件游戏请打包为 ZIP，并包含 index.html 和相关素材。
 					</p>
+					<label class="relay-toggle"><input v-model="relayEnabled" type="checkbox" :disabled="uploading" aria-label="启用通用联机" />启用通用联机</label>
+					<p class="muted">游戏需接入平台 v1 SDK；支持建房、房间号加入和快速匹配。上传不会改动联机服务。</p>
+					<fieldset v-if="relayEnabled" class="relay-settings" :disabled="uploading">
+						<legend>联机发布设置</legend>
+						<label>发布到<select v-model="publishTarget" aria-label="发布到游戏"><option value="">新游戏</option><option v-for="item in games" :key="item.name" :value="item.name">{{ item.title }}</option></select></label>
+						<label>发行版本<input v-model="releaseVersion" aria-label="发行版本" maxlength="80" placeholder="例如 1.0.0" /></label>
+						<label>游戏标识（选填）<input v-model="gameKey" :readonly="!!selectedPublishGame?.game_key" aria-label="游戏标识" maxlength="80" placeholder="留空由平台生成" /></label>
+						<label>兼容联机组（选填）<input v-model="compatibilityKey" aria-label="兼容联机组" maxlength="80" placeholder="留空按发行版本隔离" /></label>
+						<label>最大人数<select v-model.number="maxPlayers" aria-label="最大联机人数"><option v-for="count in [2,3,4,5,6,7,8]" :key="count" :value="count">{{ count }} 人</option></select></label>
+						<label><input v-model="allowPrivateRoom" type="checkbox" />允许私人房间</label>
+						<label><input v-model="allowQuickMatch" type="checkbox" />允许快速匹配</label>
+						<p class="muted">包内 game.manifest.json 优先使用；没有清单时按以上设置生成。首次发布默认对学生关闭，请先试玩。</p>
+					</fieldset>
 					<p v-if="error" role="alert" class="feedback error">{{ error }}</p>
 				</form></template
 			>
@@ -481,6 +494,16 @@ const games = ref([])
 const file = ref(null)
 const fileInput = ref(null)
 const title = ref('')
+const relayEnabled = ref(false)
+const publishTarget = ref('')
+const releaseVersion = ref('1.0.0')
+const gameKey = ref('')
+const compatibilityKey = ref('')
+const maxPlayers = ref(4)
+const allowPrivateRoom = ref(true)
+const allowQuickMatch = ref(true)
+const selectedPublishGame = computed(() => games.value.find(item => item.name === publishTarget.value))
+watch(publishTarget, () => { gameKey.value = selectedPublishGame.value?.game_key || '' })
 const editingGame = ref(null)
 const showEditor = ref(false)
 const busyGame = ref('')
@@ -623,10 +646,26 @@ async function upload() {
 			filename: file.value.name,
 			content,
 			title: title.value,
+			...(relayEnabled.value ? {
+				...(publishTarget.value ? { game: publishTarget.value } : {}),
+				multiplayer: {
+					enabled: true, release: releaseVersion.value,
+					...(gameKey.value ? { gameKey: gameKey.value } : {}),
+					...(compatibilityKey.value ? { compatibilityKey: compatibilityKey.value } : {}),
+					minPlayers: 2, maxPlayers: maxPlayers.value,
+					allowPrivateRoom: allowPrivateRoom.value,
+					allowQuickMatch: allowQuickMatch.value,
+				},
+			} : {}),
 		})
 		file.value = null
 		if (fileInput.value) fileInput.value.value = ''
 		title.value = ''
+		relayEnabled.value = false
+		publishTarget.value = ''
+		releaseVersion.value = '1.0.0'
+		gameKey.value = ''
+		compatibilityKey.value = ''
 		showUpload.value = false
 		activeTab.value = 'library'
 		search.value = ''
@@ -670,6 +709,11 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.relay-settings { display: grid; gap: 12px; padding: 16px; border: 1px solid #dbe5e2; border-radius: 12px; }
+.relay-settings legend { padding: 0 6px; font-weight: 600; }
+.relay-settings input:not([type="checkbox"]), .relay-settings select { display: block; width: 100%; margin-top: 5px; padding: 8px; border: 1px solid #dbe5e2; border-radius: 8px; }
+.relay-toggle { display: flex; gap: 8px; align-items: center; }
+
 .game-center {
 	--accent: #087f68;
 	--line: #e1e8e6;

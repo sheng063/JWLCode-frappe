@@ -11,6 +11,6 @@ class LMSGame(Document):
 			for deployment in frappe.get_all("LMS Game Deployment", filters={"release": release}, pluck="name"):
 				frappe.delete_doc("LMS Game Deployment", deployment, ignore_permissions=True)
 			frappe.delete_doc("LMS Game Release", release, ignore_permissions=True)
-		if self.entry_file:
+		if self.entry_file or self.runtime_mode == "UniversalRelay":
 			from lms.lms.game_package import remove_package_after_commit
 			remove_package_after_commit(self.name)

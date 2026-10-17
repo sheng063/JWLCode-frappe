@@ -105,7 +105,7 @@ async function loadGame() {
 		if (access.game_enabled === false) return revokeGameAccess()
 		let result = await call('lms.lms.game.get_game', { name: props.gameId })
 		if (version !== requestVersion) return
-		if (result.runtime_mode === 'Colyseus') {
+		if (result.runtime_mode === 'UniversalRelay') {
 			result = await call('lms.lms.game_runtime.create_launch', { game: props.gameId })
 			if (version !== requestVersion) {
 				call('lms.lms.game_runtime.close_launch', { launch_id: result.launch_id }).catch(() => {})
