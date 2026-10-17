@@ -1,0 +1,26 @@
+
+> @jwlcode/game-runtime@1.0.0 test
+> npm run build:demo && node --test test/*.test.js
+
+
+> @jwlcode/game-runtime@1.0.0 build:demo
+> node build-demo.js
+
+Built dist/index.html
+✔ static authentication rejects missing token and binds server-side scope (0.702708ms)
+✔ foreign deployment/release is rejected before matchmaking (0.095125ms)
+✔ room and connection quotas apply including outstanding reservations (0.14025ms)
+✔ joinById cannot cross authorized room scope (0.12225ms)
+✔ lease failures never extend permission and expiration disconnects (0.652042ms)
+✔ revoked reconnect is rejected (0.167542ms)
+✔ game cannot override platform authorization lifecycle (0.161875ms)
+✔ memory auth storage stays synchronous without browser persistence (0.297333ms)
+✔ demo bundle avoids unavailable IndexedDB in opaque sandbox (3.571125ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 98.288917

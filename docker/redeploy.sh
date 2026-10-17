@@ -41,6 +41,8 @@ COPYFILE_DISABLE=1 tar \
 	--exclude='*/__pycache__' \
 	--exclude='*/node_modules' \
 	--exclude='./lms/public/frontend' \
+	--exclude='./docker/.game-runtime' \
+	--exclude='./services/game-runtime/dist' \
 	-cf - . \
 | compose exec -T frappe tar -xf - -C "${APP_DIR}"
 

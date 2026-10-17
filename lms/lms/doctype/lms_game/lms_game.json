@@ -12,7 +12,9 @@
 		"html_base64",
 		"description",
 		"cover_image",
-		"entry_file"
+		"entry_file",
+		"runtime_mode",
+		"active_release"
 	],
 	"fields": [
 		{
@@ -57,6 +59,20 @@
 			"label": "ZIP Entry File",
 			"read_only": 1,
 			"length": 512
+		},
+		{
+			"fieldname": "runtime_mode",
+			"label": "Runtime Mode",
+			"fieldtype": "Select",
+			"options": "Static\nColyseus",
+			"default": "Static"
+		},
+		{
+			"fieldname": "active_release",
+			"label": "Active Release",
+			"fieldtype": "Link",
+			"options": "LMS Game Release",
+			"read_only": 1
 		}
 	],
 	"permissions": [

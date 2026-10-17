@@ -1,0 +1,51 @@
+services:
+  game-redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "noeviction"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    mem_limit: 192m
+  runtime:
+    image: ${GAME_IMAGE:?Set GAME_IMAGE}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 2567
+      GAME_DEPLOYMENT: ${GAME_DEPLOYMENT}
+      GAME_RELEASE: ${GAME_RELEASE}
+      GAME_ID: ${GAME_ID}
+      GAME_SERVICE_KEY: ${GAME_SERVICE_KEY}
+      GAME_MANIFEST: /run/game/manifest.json
+      GAME_REDIS_URL: redis://game-redis:6379
+      FRAPPE_URL: http://frappe:8000
+      FRAPPE_SITE: ${FRAPPE_SITE:-school.localhost}
+      GAME_ALLOWED_ORIGINS: ${GAME_ALLOWED_ORIGINS:-http://localhost:8000}
+    volumes:
+      - ${GAME_DEPLOY_DIR}/manifest.json:/run/game/manifest.json:ro
+    read_only: true
+    tmpfs: [/tmp:size=32m]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: ${GAME_MEMORY_MIB:-512}m
+    cpus: ${GAME_CPUS:-1}
+    depends_on:
+      game-redis: {condition: service_healthy}
+    networks: [default, frappe]
+  proxy:
+    image: nginx:1.28-alpine
+    restart: unless-stopped
+    ports:
+      - "${GAME_BIND:-127.0.0.1}:${GAME_PORT:-2567}:8080"
+    volumes:
+      - ./game-runtime.nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [runtime]
+    mem_limit: 64m
+networks:
+  frappe:
+    external: true
+    name: ${FRAPPE_NETWORK:-jwl-learning_default}

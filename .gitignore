@@ -17,3 +17,8 @@ frappe-ui
 frappe-semgrep-rules
 # Local Docker credentials
 docker/.env
+
+# Runtime reproducible dependencies and local game artifacts
+!services/game-runtime/package-lock.json
+services/game-runtime/dist/
+docker/.game-runtime/

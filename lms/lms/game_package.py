@@ -89,16 +89,20 @@ def find_entry(files):
 	raise ValueError("Place one index.html at the root of the ZIP, or include a single HTML entry file.")
 
 
-def package_root(name):
+def package_root(name, release=None):
 	root = Path(frappe.get_site_path('private', 'lms-game-packages')).resolve()
 	path = (root / name).resolve()
 	if path.parent != root:
 		raise frappe.PermissionError
+	if release:
+		if not re.fullmatch(r'[a-zA-Z0-9_-]+', release):
+			raise frappe.PermissionError
+		path = path / 'releases' / release
 	return path
 
 
-def store_package(name, files):
-	root = package_root(name)
+def store_package(name, files, release=None):
+	root = package_root(name, release=release)
 	root.mkdir(parents=True, exist_ok=False)
 	# A database rollback must not leave unpacked game files behind.
 	frappe.db.after_rollback.add(lambda: shutil.rmtree(root, ignore_errors=True))
@@ -141,7 +145,7 @@ def session_is_active(sid, user):
 	return not end or datetime.now(timezone.utc) < datetime.fromisoformat(end)
 
 
-def launch_url(game):
+def launch_url(game, release=None):
 	request = getattr(frappe.local, 'request', None)
 	if request and request.scheme != 'https' and request.host.split(':')[0] not in ('localhost', '127.0.0.1'):
 		frappe.throw('ZIP 游戏的安全会话需要 HTTPS，请使用站点的 HTTPS 地址。')
@@ -154,8 +158,8 @@ def launch_url(game):
 	from frappe.utils.password import get_encryption_key
 	binding = hmac.new(get_encryption_key().encode(), sid.encode(), hashlib.sha256).hexdigest()
 	frappe.local.cookie_manager.set_cookie('lms_game_session', binding, secure=True, httponly=True, samesite='None', max_age=TOKEN_TTL)
-	frappe.cache.set_value('game-package:' + token, {'game': game.name, 'user': frappe.session.user, 'sid': sid, 'binding': binding}, expires_in_sec=TOKEN_TTL)
-	return '/game-assets/' + token + '/' + quote(game.entry_file, safe='/')
+	frappe.cache.set_value('game-package:' + token, {'game': game.name, 'user': frappe.session.user, 'sid': sid, 'binding': binding, 'release': release.name if release else None}, expires_in_sec=TOKEN_TTL)
+	return '/game-assets/' + token + '/' + quote(release.entry_file if release else game.entry_file, safe='/')
 
 
 def prepare_html(raw, asset_root):
@@ -280,7 +284,10 @@ class GamePackageRenderer(BaseRenderer):
 			raise frappe.DoesNotExistError
 		if not game_is_enabled(access['game'], access['user']):
 			raise frappe.PermissionError
-		root = package_root(access['game'])
+		release = access.get('release')
+		if release and frappe.db.get_value('LMS Game Release', release, 'game') != access['game']:
+			raise frappe.PermissionError
+		root = package_root(access['game'], release=release)
 		path = (root / resource).resolve()
 		if not path.is_relative_to(root) or not path.is_file():
 			raise frappe.DoesNotExistError
@@ -292,7 +299,9 @@ class GamePackageRenderer(BaseRenderer):
 		elif mime == 'text/css':
 			body = prepare_css(body, path, root, asset_root)
 		response = Response(body, mimetype=mime)
-		policy = f"sandbox allow-scripts allow-pointer-lock; default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' {asset_root} https: blob:; style-src 'unsafe-inline' {asset_root} https:; img-src {asset_root} https: data: blob:; media-src {asset_root} https: data: blob:; font-src {asset_root} https: data:; connect-src {asset_root}; frame-src {asset_root}; worker-src blob:; base-uri 'none'; form-action 'none'"
+		from lms.lms.game_runtime import connection_sources
+		connections = ' '.join(connection_sources(access['game'], release))
+		policy = f"sandbox allow-scripts allow-pointer-lock; default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' {asset_root} https: blob:; style-src 'unsafe-inline' {asset_root} https:; img-src {asset_root} https: data: blob:; media-src {asset_root} https: data: blob:; font-src {asset_root} https: data:; connect-src {asset_root} {connections}; frame-src {asset_root}; worker-src blob:; base-uri 'none'; form-action 'none'"
 		response.headers.update({
 			'Content-Security-Policy': policy,
 			'Access-Control-Allow-Origin': 'null',

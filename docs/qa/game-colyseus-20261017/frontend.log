@@ -1,0 +1,8 @@
+
+ RUN  v4.1.7 /private/tmp/frappe-game-removal-check-tf8ivyiu
+
+
+ Test Files  4 passed (4)
+      Tests  41 passed (41)
+   Start at  15:07:28
+   Duration  1.41s (transform 861ms, setup 437ms, import 873ms, tests 373ms, environment 2.82s)
