@@ -22,3 +22,6 @@ docker/.env
 !services/game-runtime/package-lock.json
 services/game-runtime/dist/
 docker/.game-runtime/
+
+# Local release archives
+/release-dist/

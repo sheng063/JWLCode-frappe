@@ -7,7 +7,7 @@
 首次克隆时包含 `frappe-ui` 子模块：
 
 ```bash
-git clone --branch learning-cn --recurse-submodules \
+git clone --branch main --recurse-submodules \
   git@github.com:sheng063/JWLCode-frappe.git
 cd JWLCode-frappe/docker
 docker compose up -d

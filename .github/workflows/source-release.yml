@@ -1,0 +1,37 @@
+name: 发布 JWLCode 源码包
+
+on:
+  push:
+    tags:
+      - 'v20*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: source-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 打包固定提交并生成校验和
+        run: python tools/build-release.py --version "$GITHUB_REF_NAME" --ref "$GITHUB_SHA"
+      - name: 校验发行包
+        working-directory: release-dist
+        run: sha256sum --check SHA256SUMS
+      - name: 发布 GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "JWLCode $GITHUB_REF_NAME" \
+            --notes-file "docs/releases/$GITHUB_REF_NAME.md" \
+            release-dist/*.tar.gz release-dist/*.zip release-dist/SHA256SUMS

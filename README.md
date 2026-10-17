@@ -16,6 +16,7 @@ JWLCode-frappe 是基于 Frappe Learning 二次开发的教学平台，包含 Fr
 | ICPC 题包 | 单题 / 批量导入、预检、草稿确认、版本发布、题面编辑、隐藏用例替换和批量导出 | [题包模块](lms/lms/problem_package/) |
 | 课程迁移 | 课程 ZIP 导入导出，携带章节、课时、测评、附件和完整编程题包；按源 ID 重建引用 | [导入导出入口](lms/lms/course_import_export.py)、[课程包 v2](lms/lms/course_bundle.py) |
 | 教学运营 | 学习项目、直播课、证书、徽章、支付、优惠券和统计；直播集成需单独配置 | [业务模型](lms/lms/doctype/)、[支付接口](lms/lms/payments.py) |
+| 游戏与联机 | HTML / ZIP 上传、隔离运行、学生开关及课程解锁；通用 Colyseus 房间、匹配、私房与前端 SDK | [游戏模块](lms/lms/game.py)、[运行时](services/game-runtime/)、[联机说明](docs/game-colyseus.md) |
 | 社区与扩展 | 讨论、通知、个人资料、职位；可选 Raven 成员规则集成 | [职位模块](lms/job/)、[Raven provider](lms/raven_provider.py) |
 | 中文定制 | 中文品牌、简体中文翻译，新安装默认中文并允许手机号登录 | [安装钩子](lms/install.py)、[中文翻译](lms/locale/zh.po) |
 
@@ -82,6 +83,72 @@ JWLCode-frappe/
 | 测试 | Frappe 测试运行器、Vitest、Cypress |
 
 以上框架范围是 [pyproject.toml](pyproject.toml) 的依赖声明，不表示所有版本组合均经过验证。实际 Python / Node.js 环境还需满足所选 Frappe 分支的要求；本地 Docker 默认使用 Frappe 和 Payments 的 `develop` 分支。
+
+## Release 下载与使用
+
+当前发行版为 **v2026.10.17**，从 [GitHub Releases](https://github.com/sheng063/JWLCode-frappe/releases/latest) 下载 `JWLCode-frappe-v2026.10.17.tar.gz`（Linux / macOS）或同名 `.zip`（Windows），以及 `SHA256SUMS`。请选择命名为 `JWLCode-frappe-*` 的附件；`assets-main` 是滚动静态资源包，GitHub 自动提供的 Source code 则是完整仓库快照，均不等同于本节的精简发行包。
+
+源码包保留后端、前端源码及静态资源、游戏与 SDK、部署脚本、文档和许可证；排除 Git 历史、依赖目录、Frappe UI 子模块、题库转换工作数据、Cypress 和 QA 日志截图。需要这些开发材料时，请克隆 `main` 分支。包内 `RELEASE.json` 记录发行版本和对应提交；日期发行号与上游 `lms.__version__` 分开管理。
+
+### 下载、校验与解压
+
+```bash
+VERSION=v2026.10.17
+BASE="https://github.com/sheng063/JWLCode-frappe/releases/download/$VERSION"
+curl -fLO "$BASE/JWLCode-frappe-$VERSION.tar.gz"
+curl -fLO "$BASE/SHA256SUMS"
+
+# Linux：仅校验本次下载的 tar.gz
+grep " JWLCode-frappe-$VERSION.tar.gz$" SHA256SUMS | sha256sum -c -
+# macOS：将上一行的 sha256sum 换为 shasum -a 256
+
+tar -xzf "JWLCode-frappe-$VERSION.tar.gz"
+cd "JWLCode-frappe-$VERSION"
+```
+
+Windows 可用 PowerShell 的 `Get-FileHash .\JWLCode-frappe-v2026.10.17.zip -Algorithm SHA256` 与校验文件中的同名条目比对，再解压 ZIP；后续 Docker 命令在 WSL2 中执行。
+
+### 从源码包首次启动
+
+准备 Docker Compose 和 Git。发行包不带 `.git`；Bench 的本地应用导入需要 Git 仓库，因此先在解压目录初始化一次：
+
+```bash
+git init -b main
+git add .
+git -c user.name='Release Installer' -c user.email='release@localhost' \
+  -c core.hooksPath=/dev/null commit -m '初始化 JWLCode 发行包'
+
+cp docker/.env.example docker/.env
+# 根据需要编辑 docker/.env 中的站点、端口和初始密码
+docker compose -f docker/docker-compose.yml up -d
+docker compose -f docker/docker-compose.yml logs -f frappe
+```
+
+初始化完成后访问 `http://school.localhost:8000/lms`，本地默认管理员为 `Administrator` / `admin`。发行包包含源码，不含预构建前端、数据库或依赖；首次启动仍需联网获取 Frappe、Payments、Python / Yarn 依赖并构建前端，无需初始化 Frappe UI 子模块。Compose 的用途与配置限制见下方“本地启动”。
+
+### 升级已有 Docker 站点
+
+先在原部署目录备份站点，并另行保存原 `docker/.env`：
+
+```bash
+docker compose -f docker/docker-compose.yml exec -T frappe \
+  runuser -u frappe -- bash -lc \
+  'cd /home/frappe/bench-data/frappe-bench && /home/frappe/.local/bin/bench --site school.localhost backup --with-files'
+```
+
+将生成的备份从 Bench Volume 复制到独立备份位置并确认可用。使用自定义站点时替换上述站点名。
+
+将新版发行包解压至新目录，复制原 `docker/.env`，确保继续使用相同 Compose 项目名（默认 `jwl-learning`）和原数据库 / Bench Volume。停止旧目录的 Compose（`down`，不加 `--volumes`），在新目录执行 `bash docker/redeploy.sh`；自定义站点需使用 `SITE_NAME=your-site.localhost bash docker/redeploy.sh`。脚本会同步应用、重建前端并执行数据库迁移；包本身不含课程、用户、上传文件和数据库备份。已有 Bench 的更新请继续使用 Bench 的应用维护流程。
+
+### 自行制作相同发行包
+
+在 Git 仓库根目录执行（只需 Python 3 和 Git）：
+
+```bash
+python3 tools/build-release.py --version v2026.10.17 --ref HEAD
+```
+
+产物位于忽略提交的 `release-dist/`：tar.gz、zip 和 SHA256SUMS。打包读取指定提交，未提交修改不会进入包内。推送 `v20*` 日期标签后，[源码发布工作流](.github/workflows/source-release.yml) 会自动制作并上传 GitHub Release；发布说明需先保存到 `docs/releases/<标签>.md`。
 
 ## 本地启动
 
@@ -198,6 +265,19 @@ bench --site school.localhost clear-cache
 
 当前支持 legacy ICPC 的受限标准输入输出题型，不执行包内参考解或输入校验器，不支持自定义输出校验器及交互题。单题 ZIP / KPP 上限为 20 MiB，解压总量上限为 128 MiB；站点上传限制也会生效。完整配置和限制见下方专题文档。
 
+## 游戏与通用联机
+
+教师可在游戏库上传 HTML / ZIP 游戏，设置学生访问与课程 / 课时解锁规则。静态游戏随 LMS 运行；联机游戏另需部署固定的通用 Runtime。该服务负责房间、匹配、名单和消息中继，游戏规则由客户端维护。
+
+在已运行的本地 Docker 站点上，准备 Node.js 22+ / npm 后执行：
+
+```bash
+npm --prefix services/game-runtime ci
+python3 tools/deploy-universal-runtime.py --port 2572
+```
+
+部署脚本会构建并启动 Runtime / Nginx，写入站点联机配置；默认仅绑定本机。后续上传新游戏无需重建运行时。游戏制作、版本发布和权限边界见 [通用联机部署](docs/game-colyseus.md) 与 [前端 SDK](docs/game-multiplayer-sdk.md)。
+
 ## 开发与验证
 
 前端命令在 `frontend/` 中运行：
@@ -226,6 +306,7 @@ bench --site test.localhost run-tests --module lms.tests.test_course_bundle
 
 | 主题 | 文档 |
 | --- | --- |
+| 游戏上传与联机 | [游戏模块](docs/game.md)、[通用联机服务](docs/game-colyseus.md)、[前端 SDK](docs/game-multiplayer-sdk.md) |
 | 中文设置与翻译 | [中文本地化](docs/LOCALIZATION_ZH_CN.md) |
 | 课程权限和班级同步 | [课程可见性、班级注册与讲师仪表盘](docs/course-visibility-and-batch-enrollment.md) |
 | 课程备份与迁移格式 | [课程 ZIP 格式 v2](docs/course-bundle-format.md) |
