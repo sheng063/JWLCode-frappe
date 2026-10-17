@@ -35,7 +35,9 @@ class TestGameAccess(BaseTestUtils):
 
 	def add_lesson(self, title):
 		lesson = self._create_lesson(title, self.chapter.name, self.course.name)
-		self._create_lesson_reference(self.chapter.name, lesson.name)
+		index = frappe.db.count('Lesson Reference', {'parent': self.chapter.name}) + 1
+		reference = self._create_lesson_reference(self.chapter.name, lesson.name)
+		reference.db_set('idx', index)
 		return lesson.name
 
 	def complete(self, user, lesson):
@@ -129,7 +131,10 @@ class TestGameAccess(BaseTestUtils):
 			access.bulk_student_access([self.a, self.b], 'assign_course', self.course.name)
 			for user in [self.a, self.b]:
 				self.assertTrue(any(c.kwargs.get('user') == user and c.kwargs.get('after_commit') for c in publish.call_args_list))
-		access.save_student_access(self.a, self.course.name, 'Allow', 'Reward')
+		# Current Frappe suppresses Version records by default while in_test.
+		# Exercise production audit behavior explicitly for this assertion.
+		with patch.object(frappe, 'in_test', False):
+			access.save_student_access(self.a, self.course.name, 'Allow', 'Reward')
 		result = access.get_students(search=self.suffix, status='unlocked', page_length=1)
 		self.assertEqual(result['total'], 1)
 		self.assertEqual(result['rows'][0]['student'], self.a)

@@ -910,5 +910,15 @@
 			"report",
 			"export"
 		]
+	},
+	"LMS Game Release": {
+		"System Manager#0": [
+			"read"
+		]
+	},
+	"LMS Game Deployment": {
+		"System Manager#0": [
+			"read"
+		]
 	}
 }

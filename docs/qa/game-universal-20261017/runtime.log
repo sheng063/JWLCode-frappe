@@ -1,0 +1,40 @@
+
+> @jwlcode/game-runtime@1.0.0 test
+> npm run build:demo && node --test test/*.test.js
+
+
+> @jwlcode/game-runtime@1.0.0 build:demo
+> node build-demo.js
+
+Built universal SDK, single HTML templates and ZIP client assets. No server image built.
+@colyseus/schema: defineTypes() is deprecated and will be removed in a future release. Use schema() with t.* field builders instead → https://docs.colyseus.io/state/schema
+✔ all room joins enforce site/game/key/compatibility/scope and capacity permissions (0.522334ms)
+✔ relay validates platform envelope while leaving game payload semantics alone (0.276417ms)
+✔ SDK sends uniform envelopes and never exposes platform message namespace (0.772584ms)
+✔ SDK roster and host events work for initial and changed members (0.178792ms)
+✔ opaque iframe SDK storage never accesses browser persistence (3.370333ms)
+✔ single fixed room type serves unrelated games and multiple private rooms (223.011458ms)
+✔ quick matching partitions by game, compatible version, scope, site and room size (33.23225ms)
+✔ room number joins enforce all identity partitions and reject unknown/full rooms (17.347ms)
+✔ ticket cannot change action or target, be replayed, or bypass the single room registration (13.306791ms)
+✔ relay supports arbitrary game types, server sender ID, targets and default no echo (134.610958ms)
+✔ reserved system namespace and oversized message close offending peers (9.163167ms)
+✔ host leave elects next connected peer and empty rooms are released (131.902583ms)
+✔ short authorization lease expires while control plane is unreachable (813.997791ms)
+Relay smoke load measurements: [{"players":2,"hzPerPlayer":20,"sent":60,"delivered":60,"elapsedMs":1537,"averageMs":0.58,"p95Ms":1.27,"runtimeRssBytes":95158272,"cpuMs":16.213,"jsonBytesIn":6870,"jsonBytesOut":7230},{"players":4,"hzPerPlayer":20,"sent":120,"delivered":360,"elapsedMs":1532,"averageMs":0.65,"p95Ms":1.3,"runtimeRssBytes":95354880,"cpuMs":36.801,"jsonBytesIn":13711,"jsonBytesOut":43293},{"players":8,"hzPerPlayer":20,"sent":240,"delivered":1680,"elapsedMs":1536,"averageMs":0.81,"p95Ms":1.82,"runtimeRssBytes":98631680,"cpuMs":49.24,"jsonBytesIn":27423,"jsonBytesOut":202041}]
+✔ 2/4/8 player rooms relay at 20Hz with measured latency and resource counters (4654.393959ms)
+✔ per-user room and connection quotas prevent unlimited creation (22.455ms)
+[Colyseus reconnection]: ⏳ will retry in 0.2 seconds...
+[Colyseus reconnection]: 🔄 Re-establishing sessionId 'bxdG6Fooy' with roomId 'A46AAF9D'... (attempt 1 of 15)
+[Colyseus reconnection]: ✅ reconnection successful!
+✔ native network reconnection preserves member ID and revalidates the lease (335.383083ms)
+✔ excessive message frequency disconnects the offender (5.799292ms)
+✔ explicit compatibility group permits two front-end release versions to share a room (4.6505ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14160.756

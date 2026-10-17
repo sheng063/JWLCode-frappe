@@ -1,0 +1,8 @@
+
+ RUN  v4.1.12 /private/tmp/game-universal-frontend-tests
+
+
+ Test Files  4 passed (4)
+      Tests  42 passed (42)
+   Start at  15:39:53
+   Duration  1.36s (transform 822ms, setup 313ms, import 942ms, tests 460ms, environment 2.40s)

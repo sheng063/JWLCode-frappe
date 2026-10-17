@@ -89,13 +89,15 @@ def set_game_availability(name: str, enabled: int):
 @frappe.whitelist()
 def get_games():
 	require_access()
-	return frappe.get_all("LMS Game", filters={} if can_manage_games() else {"enabled": 1}, fields=["name", "title", "enabled", "filename", "creation", "description", "cover_image", "entry_file"], order_by="creation desc")
+	return frappe.get_all("LMS Game", filters={} if can_manage_games() else {"enabled": 1}, fields=["name", "title", "enabled", "filename", "creation", "description", "cover_image", "entry_file", "runtime_mode", "game_key"], order_by="creation desc")
 
 
 @frappe.whitelist()
 def get_game(name: str):
 	require_access(name)
 	game = frappe.get_doc("LMS Game", name)
+	if game.runtime_mode == "UniversalRelay":
+		return {"name": game.name, "title": game.title, "runtime_mode": "UniversalRelay"}
 	if game.entry_file:
 		from lms.lms.game_package import launch_url
 		return {"name": game.name, "title": game.title, "url": launch_url(game)}
@@ -129,12 +131,19 @@ def validate_upload(filename, content):
 
 
 @frappe.whitelist(methods=["POST"])
-def upload_game(filename: str, content: str, title: str | None = None):
+def upload_game(filename: str, content: str, title: str | None = None, manifest: dict | None = None, multiplayer: dict | None = None, game: str | None = None):
 	require_manager()
+	if manifest or (multiplayer and multiplayer.get('enabled')) or game:
+		from lms.lms.game_publish import publish_content
+		return publish_content(filename, content, title, manifest, multiplayer, game)
 	entry, files = "", None
 	if PurePosixPath(filename).suffix.lower() == ".zip":
 		from lms.lms.game_package import validate_package
 		encoded, entry, files = validate_package(content)
+		from lms.lms.game_publish import embedded_manifest, publish_content
+		embedded = embedded_manifest(files, entry)
+		if embedded and embedded.get('multiplayer', {}).get('enabled'):
+			return publish_content(filename, content, title, embedded)
 	else:
 		encoded = validate_upload(filename, content)
 	filename = PurePosixPath(filename.replace("\\", "/")).name
@@ -197,7 +206,13 @@ def update_game(name: str, title: str, description: str = "", cover: str | None 
 def download_game(name: str):
 	require_manager()
 	game = frappe.get_doc("LMS Game", name)
-	return {"filename": game.filename, "content": game.html_base64}
+	content = game.html_base64
+	if game.runtime_mode == 'UniversalRelay' and game.active_release:
+		release = frappe.get_doc('LMS Game Release', game.active_release)
+		if release.game != game.name:
+			frappe.throw('Invalid game release.', frappe.PermissionError)
+		content = release.html_base64
+	return {"filename": game.filename, "content": content}
 
 
 @frappe.whitelist(methods=["POST"])

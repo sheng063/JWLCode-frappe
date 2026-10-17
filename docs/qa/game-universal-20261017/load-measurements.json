@@ -1,0 +1,41 @@
+[
+  {
+    "players": 2,
+    "hzPerPlayer": 20,
+    "sent": 60,
+    "delivered": 60,
+    "elapsedMs": 1537,
+    "averageMs": 0.58,
+    "p95Ms": 1.27,
+    "runtimeRssBytes": 95158272,
+    "cpuMs": 16.213,
+    "jsonBytesIn": 6870,
+    "jsonBytesOut": 7230
+  },
+  {
+    "players": 4,
+    "hzPerPlayer": 20,
+    "sent": 120,
+    "delivered": 360,
+    "elapsedMs": 1532,
+    "averageMs": 0.65,
+    "p95Ms": 1.3,
+    "runtimeRssBytes": 95354880,
+    "cpuMs": 36.801,
+    "jsonBytesIn": 13711,
+    "jsonBytesOut": 43293
+  },
+  {
+    "players": 8,
+    "hzPerPlayer": 20,
+    "sent": 240,
+    "delivered": 1680,
+    "elapsedMs": 1536,
+    "averageMs": 0.81,
+    "p95Ms": 1.82,
+    "runtimeRssBytes": 98631680,
+    "cpuMs": 49.24,
+    "jsonBytesIn": 27423,
+    "jsonBytesOut": 202041
+  }
+]

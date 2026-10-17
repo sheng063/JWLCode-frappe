@@ -7,7 +7,7 @@
 					{{ game?.title || 'Game' }}
 				</h1>
 			</div>
-			<Button v-if="game" @click="runKey++">重新开始</Button>
+			<Button v-if="game" @click="restartGame">重新开始</Button>
 		</header>
 		<GameAccessNotice
 			v-if="settings?.access && !settings.access.can_enter"
@@ -24,10 +24,11 @@
 		</div>
 		<iframe
 			v-if="game"
+			ref="gameFrame"
 			:key="runKey"
 			:title="game.title"
 			:src="game.url || undefined"
-			:srcdoc="game.url ? undefined : gameDocument(game.html)"
+			:srcdoc="game.url ? undefined : gameDocument(game.html, game.connect_sources)"
 			sandbox="allow-scripts allow-pointer-lock"
 			allow="fullscreen; autoplay"
 			referrerpolicy="no-referrer"
@@ -43,6 +44,7 @@ import { useRouter } from 'vue-router'
 import { Button, call } from 'frappe-ui'
 import { useSettings } from '@/stores/settings'
 import { gameDocument } from '@/utils/game'
+import { createGameBridge } from '@/utils/gameRuntime'
 import GameAccessNotice from '@/components/GameAccessNotice.vue'
 
 const props = defineProps({ gameId: { type: String, required: true } })
@@ -53,24 +55,41 @@ const settings = ref(null)
 const error = ref('')
 const loading = ref(false)
 const runKey = ref(0)
+const gameFrame = ref(null)
+let bridge
+let launchId = null
+
+function closeLaunch() {
+	bridge?.reset()
+	const previous = launchId
+	launchId = null
+	if (previous) call('lms.lms.game_runtime.close_launch', { launch_id: previous }).catch(() => {})
+}
+function restartGame() {
+	if (launchId) loadGame()
+	else runKey.value++
+}
 let requestVersion = 0
 let timer
 let checking = false
 let recheckPending = false
 
 function revokeAccess() {
+	closeLaunch()
 	requestVersion++
 	game.value = null
 	loading.value = false
 	error.value = settings.value?.access ? '' : '教师尚未开放 Game 模块。'
 }
 function revokeGameAccess() {
+	closeLaunch()
 	requestVersion++
 	game.value = null
 	loading.value = false
 	error.value = '教师已关闭此游戏，请等待重新启用。'
 }
 async function loadGame() {
+	closeLaunch()
 	const version = ++requestVersion
 	game.value = null
 	error.value = ''
@@ -84,8 +103,16 @@ async function loadGame() {
 		if (!(access.access?.can_enter ?? (access.can_manage || access.enabled)))
 			return revokeAccess()
 		if (access.game_enabled === false) return revokeGameAccess()
-		const result = await call('lms.lms.game.get_game', { name: props.gameId })
+		let result = await call('lms.lms.game.get_game', { name: props.gameId })
 		if (version !== requestVersion) return
+		if (result.runtime_mode === 'UniversalRelay') {
+			result = await call('lms.lms.game_runtime.create_launch', { game: props.gameId })
+			if (version !== requestVersion) {
+				call('lms.lms.game_runtime.close_launch', { launch_id: result.launch_id }).catch(() => {})
+				return
+			}
+			launchId = result.launch_id
+		}
 		game.value = result
 		runKey.value++
 	} catch (err) {
@@ -121,6 +148,7 @@ async function checkAccess() {
 	} catch {
 		if (version !== requestVersion) return
 		requestVersion++
+		closeLaunch()
 		game.value = null
 		error.value = '无法确认游戏访问权限，请重新加载。'
 	} finally {
@@ -139,6 +167,7 @@ watch(
 	},
 )
 onMounted(() => {
+	bridge = createGameBridge({ getFrame: () => gameFrame.value, getLaunch: () => game.value?.launch_id ? game.value : null, call })
 	window.addEventListener('lms-game-access-changed', checkAccess)
 	window.addEventListener('focus', checkAccess)
 	timer = window.setInterval(() => {
@@ -146,6 +175,8 @@ onMounted(() => {
 	}, 30000)
 })
 onUnmounted(() => {
+	closeLaunch()
+	bridge?.dispose()
 	window.removeEventListener('lms-game-access-changed', checkAccess)
 	window.removeEventListener('focus', checkAccess)
 	requestVersion++

@@ -1,0 +1,100 @@
+Starting test run with parameters: site=school.localhost, module=lms.tests.test_game_runtime, verbose=False, tests=(), force=False, profile=False, failfast=False, skip_before_tests=False, debug=False, selected_categories=[]
+View detailed logs (using --verbose): /home/frappe/bench-data/frappe-bench/logs/frappe.testing.log
+
+lms.tests.test_game_runtime.TestGameRuntime
+
+Running 15 unspecified-category tests for lms
+   [32m ✔ [0m test_closed_session_and_other_browser_cannot_authorize
+   [32m ✔ [0m test_cross_game_key_duplicate_release_and_server_manifest_rejected
+   [32m ✔ [0m test_csp_uses_fixed_service_only_and_rejects_foreign_release
+   [32m ✔ [0m test_expired_ticket_and_wrong_service_are_rejected
+   [32m ✔ [0m test_explicit_compatible_releases_can_share_group
+   [32m ✔ [0m test_fixed_runtime_drain_and_stop
+   [32m ✔ [0m test_launch_uses_release_and_never_exposes_sid
+   [32m ✔ [0m test_new_game_and_upgrade_create_no_deployments
+   [32m ✔ [0m test_released_resources_are_immutable
+   [32m ✔ [0m test_room_permissions_and_limits_come_from_manifest
+   [32m ✔ [0m test_single_use_ticket_and_online_lease
+   [32m ✔ [0m test_students_cannot_publish_and_disabled_students_lose_lease
+   [32m ✔ [0m test_ticket_binds_action_and_target_before_atomic_consumption
+   [32m ✔ [0m test_upload_generates_front_end_manifest
+   [32m ✔ [0m test_zip_embedded_manifest_and_server_files
+----------------------------------------------------------------------
+Ran 15 tests in 0.747s
+
+
+
+OK
+Starting test run with parameters: site=school.localhost, module=lms.tests.test_game, verbose=False, tests=(), force=False, profile=False, failfast=False, skip_before_tests=False, debug=False, selected_categories=[]
+View detailed logs (using --verbose): /home/frappe/bench-data/frappe-bench/logs/frappe.testing.log
+
+Running 8 unspecified-category tests for lms
+
+lms.tests.test_game.TestGame
+   [32m ✔ [0m test_guest_cannot_access_even_when_enabled
+   [32m ✔ [0m test_individual_game_switch_is_independent_and_enforced
+   [32m ✔ [0m test_invalid_metadata_and_cover_do_not_change_game
+/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/model/qb_query.py:163: V17FrappeDeprecationWarning: This codepath was marked (DATE: 2024-01-01) deprecated for removal (from v17 onwards); note:
+ The 'limit_page_length' parameter is deprecated. Use 'limit' instead.
+
+  deprecation_warning(
+   [32m ✔ [0m test_student_access_follows_switch_and_no_generic_rest_read
+   [32m ✔ [0m test_students_and_guests_cannot_manage_games
+   [32m ✔ [0m test_teacher_edits_cover_downloads_and_deletes
+   [32m ✔ [0m test_teacher_upload_roundtrip_and_sidebar
+   [32m ✔ [0m test_upload_validation
+----------------------------------------------------------------------
+Ran 8 tests in 1.431s
+
+OK
+
+
+Starting test run with parameters: site=school.localhost, module=lms.tests.test_game_packages, verbose=False, tests=(), force=False, profile=False, failfast=False, skip_before_tests=False, debug=False, selected_categories=[]
+View detailed logs (using --verbose): /home/frappe/bench-data/frappe-bench/logs/frappe.testing.log
+
+Running 10 unspecified-category tests for lms
+
+lms.tests.test_game_packages.TestGamePackages
+   [32m ✔ [0m test_delete_schedules_filesystem_cleanup_after_commit
+   [32m ✔ [0m test_html_credentials_preserve_scripts_and_external_assets
+   [32m ✔ [0m test_invalid_and_expired_tokens_are_rejected
+   [32m ✔ [0m test_local_fonts_are_embedded_without_path_escape
+   [32m ✔ [0m test_roundtrip_launch_assets_and_download
+   [32m ✔ [0m test_session_logout_and_expiry_revoke_assets
+   [32m ✔ [0m test_single_html_and_root_index_selection
+   [32m ✔ [0m test_student_token_is_revoked_when_game_is_hidden
+   [32m ✔ [0m test_student_token_is_revoked_when_individual_game_is_hidden
+   [32m ✔ [0m test_zip_paths_entries_and_size_limits
+----------------------------------------------------------------------
+Ran 10 tests in 1.008s
+
+OK
+
+
+Starting test run with parameters: site=school.localhost, module=lms.tests.test_game_access, verbose=False, tests=(), force=False, profile=False, failfast=False, skip_before_tests=False, debug=False, selected_categories=[]
+View detailed logs (using --verbose): /home/frappe/bench-data/frappe-bench/logs/frappe.testing.log
+
+Running 13 unit tests for lms
+
+lms.tests.test_game_access.TestGameAccess
+   [32m ✔ [0m test_batch_and_course_scope_are_distinct
+   [32m ✔ [0m test_bulk_filters_pagination_and_audit_notifications
+   [32m ✔ [0m test_bulk_lesson_assignment_reset_and_existing_denial
+   [32m ✔ [0m test_bulk_rejects_all_before_writing_and_validates_values
+   [32m ✔ [0m test_counts_distinct_current_lessons_and_revokes
+   [32m ✔ [0m test_default_lesson_unlocks_without_finishing_entire_course
+   [32m ✔ [0m test_empty_and_unconfigured_courses_fail_closed
+   [32m ✔ [0m test_individual_lesson_and_entire_course_override_default_target
+   [32m ✔ [0m test_lesson_options_are_ordered_scoped_and_reject_foreign_targets
+   [32m ✔ [0m test_override_precedence_and_default_off
+   [32m ✔ [0m test_removed_lesson_and_enrollment_fail_closed
+   [32m ✔ [0m test_students_unlock_independently_and_html_api_enforces
+/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/model/qb_query.py:163: V17FrappeDeprecationWarning: This codepath was marked (DATE: 2024-01-01) deprecated for removal (from v17 onwards); note:
+ The 'limit_page_length' parameter is deprecated. Use 'limit' instead.
+
+  deprecation_warning(
+   [32m ✔ [0m test_teacher_scope_and_forged_student_mutations
+----------------------------------------------------------------------
+Ran 13 tests in 5.235s
+
+OK

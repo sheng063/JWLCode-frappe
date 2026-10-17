@@ -1,4 +1,5 @@
 [pre_model_sync]
+lms.patches.v2_0.retire_per_game_colyseus
 community.patches.set_email_preferences
 community.patches.change_name_for_community_members
 community.patches.save_abbr_for_community_members

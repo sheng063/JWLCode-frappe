@@ -1,0 +1,6 @@
+iframe status: 正在申请联机授权…
+iframe status: 正在申请联机授权…
+PASS: two different students share one room and synchronize movement.
+PASS: consumed join ticket cannot be replayed.
+PASS: server revokes independent WebSocket with code 4003.
+PASS: live game switch removes student iframe.

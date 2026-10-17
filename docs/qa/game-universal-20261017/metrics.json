@@ -1,0 +1,25 @@
+{
+  "relayEchoRttMs": {
+    "samples": 20,
+    "median": 2.8,
+    "p95": 4.1
+  },
+  "health": {
+    "ready": true,
+    "roomTypes": [
+      "universal"
+    ],
+    "protocolVersion": 1,
+    "startedAt": "2026-10-17T07:46:06.545Z",
+    "rooms": 3,
+    "connections": 5,
+    "forwarded": 48,
+    "bytesIn": 9101,
+    "bytesOut": 5741,
+    "memoryBytes": 83582976,
+    "cpu": {
+      "user": 985523,
+      "system": 195458
+    }
+  }
+}

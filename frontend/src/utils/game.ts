@@ -19,11 +19,19 @@ export function readGameFile(file: File): Promise<string> {
 	})
 }
 
-export function gameDocument(html: string): string {
+export function gameDocument(html: string, connectSources: string[] = []): string {
 	// Placed before uploaded markup so it cannot relax the policy. The iframe
 	// deliberately omits allow-same-origin, keeping scripts away from LMS data.
+	const connections = connectSources.filter((source) => {
+		try {
+			const url = new URL(source)
+			return ['https:', 'wss:', 'http:', 'ws:'].includes(url.protocol) &&
+				!url.username && !url.password && url.pathname === '/' && !url.search && !url.hash &&
+				!/[\s;"'<>]/.test(source)
+		} catch { return false }
+	}).join(' ') || "'none'"
 	const policy =
-		"default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'unsafe-inline' https:; img-src data: blob: https:; media-src data: blob: https:; font-src data: https:; connect-src 'none'; base-uri 'none'; form-action 'none'"
+		`default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'unsafe-inline' https:; img-src data: blob: https:; media-src data: blob: https:; font-src data: https:; connect-src ${connections}; base-uri 'none'; form-action 'none'`
 	return `<!doctype html><meta http-equiv="Content-Security-Policy" content="${policy}">${html.replace(/^\s*<!doctype[^>]*>/i, '')}`
 }
 

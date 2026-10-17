@@ -1,0 +1,24 @@
+{
+  "name": "@jwlcode/game-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "npm run build:demo && node --test test/*.test.js",
+    "build:demo": "node build-demo.js"
+  },
+  "dependencies": {
+    "@colyseus/core": "0.18.19",
+    "@colyseus/schema": "5.0.40",
+    "@colyseus/sdk": "0.18.5",
+    "@colyseus/ws-transport": "0.18.4",
+    "express": "5.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.11"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "doctype": "DocType",
+  "name": "LMS Game Release",
+  "module": "LMS",
+  "engine": "InnoDB",
+  "autoname": "hash",
+  "field_order": [
+    "game",
+    "version",
+    "game_key",
+    "manifest",
+    "client_sha256",
+    "html_base64",
+    "entry_file",
+    "status",
+    "filename",
+    "client_type",
+    "platform_api",
+    "compatibility_key"
+  ],
+  "fields": [
+    {
+      "fieldname": "game",
+      "label": "Game",
+      "fieldtype": "Link",
+      "reqd": 1,
+      "options": "LMS Game"
+    },
+    {
+      "fieldname": "version",
+      "label": "Version",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "game_key",
+      "label": "Game Key",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "manifest",
+      "label": "Manifest",
+      "fieldtype": "Long Text",
+      "reqd": 1
+    },
+    {
+      "fieldname": "client_sha256",
+      "label": "Client Sha256",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "html_base64",
+      "label": "Html Base64",
+      "fieldtype": "Long Text",
+      "reqd": 1,
+      "hidden": 1
+    },
+    {
+      "fieldname": "entry_file",
+      "label": "Entry File",
+      "fieldtype": "Data",
+      "reqd": 0,
+      "length": 512
+    },
+    {
+      "fieldname": "status",
+      "label": "Status",
+      "fieldtype": "Select",
+      "reqd": 1,
+      "options": "Draft\nReady\nRetired"
+    },
+    {
+      "fieldname": "filename",
+      "label": "Client Filename",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "client_type",
+      "label": "Client Type",
+      "fieldtype": "Select",
+      "options": "html\nzip",
+      "reqd": 1,
+      "default": "zip"
+    },
+    {
+      "fieldname": "platform_api",
+      "label": "Platform API",
+      "fieldtype": "Data",
+      "default": "1",
+      "reqd": 1
+    },
+    {
+      "fieldname": "compatibility_key",
+      "label": "Compatibility Key",
+      "fieldtype": "Data",
+      "reqd": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1
+    }
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC"
+}
