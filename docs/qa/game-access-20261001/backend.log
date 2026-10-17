@@ -1,0 +1,31 @@
+/home/frappe/bench-data/frappe-bench/env/lib/python3.14/site-packages/fuzzywuzzy/fuzz.py:11: UserWarning: Using slow pure-python SequenceMatcher. Install python-Levenshtein to remove this warning
+  warnings.warn('Using slow pure-python SequenceMatcher. Install python-Levenshtein to remove this warning')
+test_guest_cannot_access_even_when_enabled (lms.tests.test_game.TestGame.test_guest_cannot_access_even_when_enabled) ... ok
+test_invalid_metadata_and_cover_do_not_change_game (lms.tests.test_game.TestGame.test_invalid_metadata_and_cover_do_not_change_game) ... ok
+test_student_access_follows_switch_and_no_generic_rest_read (lms.tests.test_game.TestGame.test_student_access_follows_switch_and_no_generic_rest_read) ... ok
+test_students_and_guests_cannot_manage_games (lms.tests.test_game.TestGame.test_students_and_guests_cannot_manage_games) ... ok
+test_teacher_edits_cover_downloads_and_deletes (lms.tests.test_game.TestGame.test_teacher_edits_cover_downloads_and_deletes) ... ok
+test_teacher_upload_roundtrip_and_sidebar (lms.tests.test_game.TestGame.test_teacher_upload_roundtrip_and_sidebar) ... ok
+test_upload_validation (lms.tests.test_game.TestGame.test_upload_validation) ... ok
+test_batch_and_course_scope_are_distinct (lms.tests.test_game_access.TestGameAccess.test_batch_and_course_scope_are_distinct) ... ok
+test_bulk_filters_pagination_and_audit_notifications (lms.tests.test_game_access.TestGameAccess.test_bulk_filters_pagination_and_audit_notifications) ... ok
+test_bulk_rejects_all_before_writing_and_validates_values (lms.tests.test_game_access.TestGameAccess.test_bulk_rejects_all_before_writing_and_validates_values) ... ok
+test_counts_distinct_current_lessons_and_revokes (lms.tests.test_game_access.TestGameAccess.test_counts_distinct_current_lessons_and_revokes) ... ok
+test_empty_and_unconfigured_courses_fail_closed (lms.tests.test_game_access.TestGameAccess.test_empty_and_unconfigured_courses_fail_closed) ... ok
+test_override_precedence_and_default_off (lms.tests.test_game_access.TestGameAccess.test_override_precedence_and_default_off) ... ok
+test_students_unlock_independently_and_html_api_enforces (lms.tests.test_game_access.TestGameAccess.test_students_unlock_independently_and_html_api_enforces) ... ok
+test_teacher_scope_and_forged_student_mutations (lms.tests.test_game_access.TestGameAccess.test_teacher_scope_and_forged_student_mutations) ... ok
+test_delete_schedules_filesystem_cleanup_after_commit (lms.tests.test_game_packages.TestGamePackages.test_delete_schedules_filesystem_cleanup_after_commit) ... ok
+test_html_credentials_preserve_scripts_and_external_assets (lms.tests.test_game_packages.TestGamePackages.test_html_credentials_preserve_scripts_and_external_assets) ... ok
+test_invalid_and_expired_tokens_are_rejected (lms.tests.test_game_packages.TestGamePackages.test_invalid_and_expired_tokens_are_rejected) ... ok
+test_local_fonts_are_embedded_without_path_escape (lms.tests.test_game_packages.TestGamePackages.test_local_fonts_are_embedded_without_path_escape) ... ok
+test_roundtrip_launch_assets_and_download (lms.tests.test_game_packages.TestGamePackages.test_roundtrip_launch_assets_and_download) ... ok
+test_session_logout_and_expiry_revoke_assets (lms.tests.test_game_packages.TestGamePackages.test_session_logout_and_expiry_revoke_assets) ... ok
+test_single_html_and_root_index_selection (lms.tests.test_game_packages.TestGamePackages.test_single_html_and_root_index_selection) ... ok
+test_student_token_is_revoked_when_game_is_hidden (lms.tests.test_game_packages.TestGamePackages.test_student_token_is_revoked_when_game_is_hidden) ... ok
+test_zip_paths_entries_and_size_limits (lms.tests.test_game_packages.TestGamePackages.test_zip_paths_entries_and_size_limits) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 2.564s
+
+OK

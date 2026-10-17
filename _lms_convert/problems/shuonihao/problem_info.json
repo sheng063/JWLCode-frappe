@@ -1,0 +1,30 @@
+{
+  "exercise_name": "earuau38q7",
+  "exercise_number": "P-000045",
+  "title": "C1·说你好",
+  "problem_id": "shuonihao",
+  "problem_name": "说你好",
+  "language": "Python",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "",
+      "output": "hello"
+    }
+  ],
+  "secret_from_lms": [
+    {
+      "idx": 1,
+      "input": "",
+      "output": "hello"
+    }
+  ],
+  "statement_html_len": 47,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

@@ -1,0 +1,29 @@
+{
+  "assignment": "ASG-01017",
+  "lesson": "1018 苹果和虫子",
+  "title": "C1 · 苹果和虫子",
+  "problem_statement": "<h4>题目描述</h4><p>蒜头君买了一箱 n 个苹果，箱子里混进了一条虫子。虫子每 x 小时能吃掉一个苹果，并且虫子在吃完一个苹果之前不会吃另一个。问经过 y 小时后还剩下多少个完整的苹果。</p><h4>输入格式</h4><p>三个整数 <code>n x y</code>，分别表示苹果总数、虫子吃掉一个苹果所需的小时数、经过的小时数（n ≥ 1，x ≥ 1，y ≥ 0）。</p><h4>输出格式</h4><p>一个整数，为剩余完整苹果的数量。若虫子已吃掉全部苹果，则剩余数量为 0。</p><h4>样例输入</h4><pre><code>10 3 6</code></pre><h4>样例输出</h4><pre><code>8</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main() {\n    int n, x, y;\n    cin >> n >> x >> y;\n    int pingguo;\n    if (y % x == 0) {\n        pingguo = n - y / x;\n    } else {\n        pingguo = n - y / x - 1;\n    }\n    if (pingguo < 0) {\n        cout << 0;\n    } else {\n        cout << pingguo;\n    }\n    return 0;\n}",
+  "test_cases": [
+    {
+      "input": "10 3 6",
+      "expected_output": "8"
+    },
+    {
+      "input": "10 3 7",
+      "expected_output": "7"
+    },
+    {
+      "input": "5 3 20",
+      "expected_output": "0"
+    },
+    {
+      "input": "3 3 6",
+      "expected_output": "1"
+    },
+    {
+      "input": "1 1 1",
+      "expected_output": "0"
+    }
+  ]
+}

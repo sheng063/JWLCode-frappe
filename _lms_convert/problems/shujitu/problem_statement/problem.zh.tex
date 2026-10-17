@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{数鸡兔}
+
+\subsection*{题目描述}
+蒜头君和椰菜妹一起养了一些鸡和兔子。只要给出它们的头数和脚数，请编写程序计算出鸡和兔子的数量。注意：每只鸡有 2 只脚，每只兔子有 4 只脚。
+
+\subsection*{输入格式}
+输入只有一行，包含两个用空格分开的整数，分别表示头的数量 tou 和脚的数量 jiao。这些数量都在 int 类型变量可以存储的范围内，并且保证存在整数解。
+
+\subsection*{输出格式}
+输出包括两行，每行一个整数。第一行是兔子的数量，第二行是鸡的数量。
+
+\subsection*{样例输入}
+\begin{verbatim}
+88 244
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+34
+54
+\end{verbatim}
+
+
+\end{document}

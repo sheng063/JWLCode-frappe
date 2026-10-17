@@ -1,0 +1,66 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{求面积的问题}
+
+小蒜的老师准备了很多个口袋，每个口袋里面有两张纸条。
+
+\begin{itemize}
+  \item 第一张纸条上说明了我们将要面对的是一个怎样的图形（可能是三角形，也可能是矩形）
+
+  \item 第二张纸条上说明了两条边的长度 $m$ 和 $n$（分别对应三角形的底和高，或者矩形的长和宽）
+
+\end{itemize}
+小蒜会从口袋中随机挑一个，并把纸条上的信息给你，让你的程序计算出图形的面积。
+
+提示
+
+\begin{itemize}
+  \item 矩形面积：长 $*$ 宽；
+
+  \item 三角形面积：低 $*$ 高 $/\text{ }2$；
+
+\end{itemize}
+\subsection*{输入格式}
+输入包含两行。
+
+输入的第一行为一个字符，只可能是 \texttt{r} 或 \texttt{t}。如果是 \texttt{r} 则表示我们要计算面积的图形是一个矩形；如果是 \texttt{t} 则为三角形。
+
+输入的第二行为两个实数，$m$ 和 $n$。分别对应三角形的底和高（或对应矩形的长和宽）（$0.0<m\le100.0$）。
+
+\subsection*{输出格式}
+输出为一行，为目标图形的面积。
+
+\subsection*{样例输入}
+\begin{verbatim}
+r
+3.0 2.1
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+6.3
+\end{verbatim}
+
+\subsection*{样例 2 输入}
+\begin{verbatim}
+t
+3.0 5.0
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+7.5
+\end{verbatim}
+
+
+\end{document}

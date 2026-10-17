@@ -1,0 +1,38 @@
+{
+  "exercise_name": "v6jsgpmmn4",
+  "exercise_number": "P-000027",
+  "title": "C1 · 计算规则 [2458685]",
+  "problem_id": "jisuanguize",
+  "problem_name": "计算规则",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 131072,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "1",
+      "output": "1"
+    },
+    {
+      "input": "8",
+      "output": "-245"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "1",
+      "output": "1"
+    },
+    {
+      "idx": 2,
+      "input": "8",
+      "output": "-245"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 1821,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

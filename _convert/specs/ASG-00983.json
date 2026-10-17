@@ -1,0 +1,25 @@
+{
+  "assignment": "ASG-00983",
+  "lesson": "0984 输出保留3位小数的浮点数",
+  "title": "C1 · 输出保留3位小数的浮点数",
+  "problem_statement": "<h4>题目描述</h4><p>读入一个浮点数，保留 <code>3</code> 位小数输出这个浮点数。</p><h4>输入格式</h4><p>输入一个浮点数 <code>shu</code>。</p><h4>输出格式</h4><p>输出这个浮点数，保留 <code>3</code> 位小数。</p><h4>样例输入</h4><pre><code>3.14159</code></pre><h4>样例输出</h4><pre><code>3.142</code></pre>",
+  "cpp_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\nint main(){\n    double shu;\n    cin >> shu;\n    cout << fixed << setprecision(3) << shu;\n    return 0;\n}\n",
+  "test_cases": [
+    {
+      "input": "3.14159\n",
+      "expected_output": "3.142"
+    },
+    {
+      "input": "2.5\n",
+      "expected_output": "2.500"
+    },
+    {
+      "input": "7.1234\n",
+      "expected_output": "7.123"
+    },
+    {
+      "input": "0.0004\n",
+      "expected_output": "0.000"
+    }
+  ]
+}

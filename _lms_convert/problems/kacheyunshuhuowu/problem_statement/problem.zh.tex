@@ -1,0 +1,48 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{卡车运输货物}
+
+蒜头君要把 $m$ 份玩具从工厂运到学校，有两辆颜色不同的卡车可选。
+
+\begin{itemize}
+  \item 红色卡车：每次最多能装载 $5$ 份玩具；
+
+  \item 蓝色卡车：每次最多能装载 $2$ 份玩具。
+
+\end{itemize}
+如果他只能选其中一种卡车来运玩具，那么最少需要运几次才能把所有玩具运到学校？
+
+\textbf{提示：} 注意只能选择一种卡车，你会选择哪辆呢？
+
+\subsection*{输入格式}
+输入只有一个整数 $m(1\lem\le1000)$，对应玩具的份数。
+
+这一题目确保输入的 $m$ 一定是 $10$ 的倍数。
+
+\subsection*{输出格式}
+输出只有一个整数，对应求出的运输次数。
+
+\subsection*{样例输入}
+\begin{verbatim}
+50
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+10
+\end{verbatim}
+
+如果有 $50$ 份玩具要从工厂运到学校，仅用红色卡车的话需要 $10$ 次，仅用蓝色卡车的话需要 $25$ 次，所以最少需要运 $10$ 次。
+
+
+\end{document}

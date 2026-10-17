@@ -1,0 +1,21 @@
+{
+  "assignment": "ASG-00861",
+  "lesson": "0862 数鸡兔",
+  "title": "C1 · 数鸡兔",
+  "problem_statement": "<h4>题目描述</h4><p>蒜头君和椰菜妹一起养了一些鸡和兔子。只要给出它们的头数和脚数，请编写程序计算出鸡和兔子的数量。注意：每只鸡有 2 只脚，每只兔子有 4 只脚。</p><h4>输入格式</h4><p>输入只有一行，包含两个用空格分开的整数，分别表示头的数量 tou 和脚的数量 jiao。这些数量都在 int 类型变量可以存储的范围内，并且保证存在整数解。</p><h4>输出格式</h4><p>输出包括两行，每行一个整数。第一行是兔子的数量，第二行是鸡的数量。</p><h4>样例输入</h4><pre><code>88 244</code></pre><h4>样例输出</h4><pre><code>34\n54</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main() {\n    int tou, jiao;\n    cin >> tou >> jiao;\n    // 让鸡和兔子都抬起两只脚，地上剩下的脚都属于兔子\n    int tu = (jiao - 2 * tou) / 2;\n    cout << tu << endl;\n    cout << tou - tu << endl;\n    return 0;\n}\n",
+  "test_cases": [
+    {
+      "input": "88 244",
+      "expected_output": "34\n54"
+    },
+    {
+      "input": "10 28",
+      "expected_output": "4\n6"
+    },
+    {
+      "input": "35 94",
+      "expected_output": "12\n23"
+    }
+  ]
+}

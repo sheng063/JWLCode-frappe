@@ -1,0 +1,29 @@
+{
+  "assignment": "ASG-00738",
+  "lesson": "0739 A + B 问题",
+  "title": "C1 · A + B 问题",
+  "problem_statement": "<h4>题目描述</h4><p>请设计程序实现求两个给定整数的和。我们需要从输入中读取两个整数存到变量，之后输出两个变量取值的和。</p><h4>输入格式</h4><p>输入只有一行，包含两个用空格隔开的整数 a 和 b。a、b 都在 int 类型变量可存储的范围内。</p><h4>输出格式</h4><p>输出一个整数，表示 a + b 的值。</p><h4>样例输入</h4><pre><code>1 2</code></pre><h4>样例输出</h4><pre><code>3</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main(){\n    int a, b;\n    cin >> a >> b;\n    cout << a + b;\n    return 0;\n}",
+  "test_cases": [
+    {
+      "input": "1 2",
+      "expected_output": "3"
+    },
+    {
+      "input": "10 20",
+      "expected_output": "30"
+    },
+    {
+      "input": "-3 7",
+      "expected_output": "4"
+    },
+    {
+      "input": "-5 -8",
+      "expected_output": "-13"
+    },
+    {
+      "input": "0 0",
+      "expected_output": "0"
+    }
+  ]
+}

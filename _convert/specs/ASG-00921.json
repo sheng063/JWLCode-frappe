@@ -1,0 +1,13 @@
+{
+  "assignment": "ASG-00921",
+  "lesson": "0922 bool 类型",
+  "title": "C1 · bool 类型",
+  "problem_statement": "<h4>题目描述</h4><p>验证 bool 类型变量的逻辑值，以及逻辑非运算符 ! 作用于 bool 类型变量后取值的变化情况。bool 变量可以被赋予逻辑值 true 或 false，其中 true 的值为 1，false 的值为 0。</p><h4>输入格式</h4><p>本题没有输入。</p><h4>输出格式</h4><p>输出两行。第一行输出 bool 变量赋值为 false 时的值（即 0）；第二行输出对该变量取逻辑非运算后得到的值（即 1）。</p><h4>样例输入</h4><pre><code></code></pre><h4>样例输出</h4><pre><code>0\n1</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main() {\n    bool buerzhi = false;\n    cout << buerzhi << endl;\n    cout << !buerzhi << endl;\n    return 0;\n}\n",
+  "test_cases": [
+    {
+      "input": "",
+      "expected_output": "0\n1"
+    }
+  ]
+}

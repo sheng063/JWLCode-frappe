@@ -1,0 +1,35 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{约数还是倍数}
+
+\subsection*{题目描述}
+输入两个具有倍数关系的整数，判断它们之间的大小关系，并输出正确的表达式。如果其中一个数 a 能被另一个数 b 整除，我们称 a 为 b 的倍数，b 为 a 的一个约数。
+
+\subsection*{输入格式}
+输入只有一行，包含两个用空格分开的整数 a、b。它们之间成倍数关系（其中一个能被另一个整除），并且都在 int 类型变量可以存储的范围内。
+
+\subsection*{输出格式}
+如果 a 大于 b，输出字符串 a / b = 后面紧跟着 a 除以 b 的整数商；否则输出字符串 b / a = 后面紧跟着 b 除以 a 的整数商。每个输出独占一行。
+
+\subsection*{样例输入}
+\begin{verbatim}
+6 3
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+a / b = 2
+\end{verbatim}
+
+
+\end{document}

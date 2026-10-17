@@ -1,0 +1,29 @@
+{
+  "exercise_name": "v6kvshhrdu",
+  "exercise_number": "P-000030",
+  "title": "C1 · 温度转换 [2458696]",
+  "problem_id": "wenduzhuanhuan",
+  "problem_name": "温度转换",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 32767,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "F\n41",
+      "output": "5.00000"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "F\n41",
+      "output": "5.00000"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 928,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

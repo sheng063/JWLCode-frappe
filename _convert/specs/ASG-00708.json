@@ -1,0 +1,13 @@
+{
+    "assignment": "ASG-00708",
+    "lesson": "0709 再算运算结果",
+    "title": "C1 · 再算运算结果",
+    "problem_statement": "<h4>题目描述</h4><p>使用 <code>cout</code> 输出 <code>8 * 8</code> 和 <code>9 * 9</code> 的计算结果。</p><h4>输入格式</h4><p>无。程序不需要读取任何输入。</p><h4>输出格式</h4><p>输出两行。第一行为 <code>8 * 8 = 64</code>，第二行为 <code>9 * 9 = 81</code>。</p><h4>样例输入</h4><pre><code></code></pre><h4>样例输出</h4><pre><code>8 * 8 = 64\n9 * 9 = 81</code></pre>",
+    "cpp_solution": "#include <iostream>\nusing namespace std;\nint main() {\n    cout << \"8 * 8 = \" << 8 * 8 << endl;\n    cout << \"9 * 9 = \" << 9 * 9 << endl;\n    return 0;\n}\n",
+    "test_cases": [
+        {
+            "input": "",
+            "expected_output": "8 * 8 = 64\n9 * 9 = 81"
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+  "assignment": "ASG-00847",
+  "lesson": "0848 用整型变量存储实数会怎么样呢",
+  "title": "C1 · 用整型变量存储实数",
+  "problem_statement": "<h4>题目描述</h4><p>学习变量时，老师反复强调根据数据范围选择变量类型的重要性。用 int 型变量存储实数会怎么样呢？请设计程序验证：读入一个实数，用 double 型变量 m 存储它，再将其值赋给 int 型变量 n（小数部分会被直接忽略，即截断取整），然后分别输出 m 和 n 的值。</p><h4>输入格式</h4><p>输入只有一个实数 m。</p><h4>输出格式</h4><p>两行，第一行输出 double 型变量 m 的值；第二行输出 int 型变量 n 的值（原实数的整数部分）。</p><h4>样例输入</h4><pre><code>1.2</code></pre><h4>样例输出</h4><pre><code>1.2\n1</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main(){\n    double m;\n    int n;\n    cin >> m;\n    n = m;\n    cout << m << endl << n;\n    return 0;\n}",
+  "test_cases": [
+    {
+      "input": "1.2",
+      "expected_output": "1.2\n1"
+    },
+    {
+      "input": "7.8",
+      "expected_output": "7.8\n7"
+    },
+    {
+      "input": "3.0",
+      "expected_output": "3\n3"
+    },
+    {
+      "input": "-4.7",
+      "expected_output": "-4.7\n-4"
+    },
+    {
+      "input": "12.5",
+      "expected_output": "12.5\n12"
+    }
+  ]
+}

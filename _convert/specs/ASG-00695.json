@@ -1,0 +1,13 @@
+{
+    "assignment": "ASG-00695",
+    "lesson": "0696 蒜头君的信息卡",
+    "title": "C1 · 蒜头君的信息卡",
+    "problem_statement": "<h4>题目描述</h4><p>请你利用程序输出蒜头君的信息卡，包含三行信息：姓名 <code>suan</code>、年龄 <code>13</code>、身高 <code>165cm</code>。</p><h4>输入格式</h4><p>无。程序不需要读取任何输入。</p><h4>输出格式</h4><p>输出三行：第一行为 <code>suan</code>，第二行为 <code>13</code>，第三行为 <code>165cm</code>。</p><h4>样例输入</h4><pre><code></code></pre><h4>样例输出</h4><pre><code>suan\n13\n165cm</code></pre>",
+    "cpp_solution": "#include <iostream>\nusing namespace std;\nint main() {\n    cout << \"suan\" << endl;\n    cout << \"13\" << endl;\n    cout << \"165cm\" << endl;\n    return 0;\n}\n",
+    "test_cases": [
+        {
+            "input": "",
+            "expected_output": "suan\n13\n165cm"
+        }
+    ]
+}

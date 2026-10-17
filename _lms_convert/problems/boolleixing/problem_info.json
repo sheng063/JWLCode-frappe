@@ -1,0 +1,29 @@
+{
+  "exercise_name": "utdcs40k25",
+  "exercise_number": "P-000060",
+  "title": "C1 · bool 类型",
+  "problem_id": "boolleixing",
+  "problem_name": "bool 类型",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "",
+      "output": "0\n1"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "",
+      "output": "0\n1"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 312,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

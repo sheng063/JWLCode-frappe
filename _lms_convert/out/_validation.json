@@ -1,0 +1,915 @@
+[
+  {
+    "pid": "abwenti",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/abwenti/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/abwenti.zip OK"
+    ]
+  },
+  {
+    "pid": "anyaoqiushuchu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/anyaoqiushuchu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=1 generated_ans=0 mismatches=0",
+      "validator: total=3 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/anyaoqiushuchu.zip OK"
+    ]
+  },
+  {
+    "pid": "banjiapiaowenti",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/banjiapiaowenti/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=13 generated_ans=0 mismatches=0",
+      "validator: total=14 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/banjiapiaowenti.zip OK"
+    ]
+  },
+  {
+    "pid": "baoguotuoyun",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/baoguotuoyun/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/baoguotuoyun.zip OK"
+    ]
+  },
+  {
+    "pid": "bianliangdeshengmingyushiyong",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/bianliangdeshengmingyushiyong/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/bianliangdeshengmingyushiyong.zip OK"
+    ]
+  },
+  {
+    "pid": "boolleixing",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/boolleixing/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/boolleixing.zip OK"
+    ]
+  },
+  {
+    "pid": "chengjipandingwenti",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/chengjipandingwenti/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/chengjipandingwenti.zip OK"
+    ]
+  },
+  {
+    "pid": "chengxugaicuo",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/chengxugaicuo/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/chengxugaicuo.zip OK"
+    ]
+  },
+  {
+    "pid": "chengxushejit1",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/chengxushejit1/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=9 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/chengxushejit1.zip OK"
+    ]
+  },
+  {
+    "pid": "chengxushejit2",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/chengxushejit2/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/chengxushejit2.zip OK"
+    ]
+  },
+  {
+    "pid": "chengxushejit3",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/chengxushejit3/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/chengxushejit3.zip OK"
+    ]
+  },
+  {
+    "pid": "chufadezhengqueyunsuan",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/chufadezhengqueyunsuan/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/chufadezhengqueyunsuan.zip OK"
+    ]
+  },
+  {
+    "pid": "duozuchengfajisuan",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/duozuchengfajisuan/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=7 generated_ans=0 mismatches=0",
+      "validator: total=8 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/duozuchengfajisuan.zip OK"
+    ]
+  },
+  {
+    "pid": "eryueyouduoshaotian",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/eryueyouduoshaotian/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/eryueyouduoshaotian.zip OK"
+    ]
+  },
+  {
+    "pid": "feipangwenti",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/feipangwenti/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/feipangwenti.zip OK"
+    ]
+  },
+  {
+    "pid": "fenduandianfei",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/fenduandianfei/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/fenduandianfei.zip OK"
+    ]
+  },
+  {
+    "pid": "fuzaqushuwei",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/fuzaqushuwei/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=14 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/fuzaqushuwei.zip OK"
+    ]
+  },
+  {
+    "pid": "gudingchazhipanduan",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/gudingchazhipanduan/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/gudingchazhipanduan.zip OK"
+    ]
+  },
+  {
+    "pid": "jianbeike",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/jianbeike/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/jianbeike.zip OK"
+    ]
+  },
+  {
+    "pid": "jintianhuixiayuma",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/jintianhuixiayuma/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=9 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/jintianhuixiayuma.zip OK"
+    ]
+  },
+  {
+    "pid": "jisuanguize",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/jisuanguize/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/jisuanguize.zip OK"
+    ]
+  },
+  {
+    "pid": "jisuanjiandanchufa",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/jisuanjiandanchufa/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=6 generated_ans=0 mismatches=0",
+      "validator: total=7 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/jisuanjiandanchufa.zip OK"
+    ]
+  },
+  {
+    "pid": "jisuanyunsuanjieguo",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/jisuanyunsuanjieguo/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/jisuanyunsuanjieguo.zip OK"
+    ]
+  },
+  {
+    "pid": "jueduizhipaixu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/jueduizhipaixu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=12 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/jueduizhipaixu.zip OK"
+    ]
+  },
+  {
+    "pid": "kacheyunshuhuowu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/kacheyunshuhuowu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/kacheyunshuhuowu.zip OK"
+    ]
+  },
+  {
+    "pid": "kaixuedianli",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/kaixuedianli/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/kaixuedianli.zip OK"
+    ]
+  },
+  {
+    "pid": "kaoshidengjihuafen",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/kaoshidengjihuafen/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/kaoshidengjihuafen.zip OK"
+    ]
+  },
+  {
+    "pid": "keqianrenwudazilianxi",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/keqianrenwudazilianxi/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=7 generated_ans=0 mismatches=0",
+      "validator: total=8 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/keqianrenwudazilianxi.zip OK"
+    ]
+  },
+  {
+    "pid": "mainaitang",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/mainaitang/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/mainaitang.zip OK"
+    ]
+  },
+  {
+    "pid": "maxsubarraysum",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/maxsubarraysum/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=5 secret=18 generated_ans=0 mismatches=0",
+      "validator: total=23 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/maxsubarraysum.zip OK"
+    ]
+  },
+  {
+    "pid": "nianlingdejisuan",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/nianlingdejisuan/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/nianlingdejisuan.zip OK"
+    ]
+  },
+  {
+    "pid": "nihaoxiaomao",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/nihaoxiaomao/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/nihaoxiaomao.zip OK"
+    ]
+  },
+  {
+    "pid": "p7deqibeishu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/p7deqibeishu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=12 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/p7deqibeishu.zip OK"
+    ]
+  },
+  {
+    "pid": "pingguohechongzi",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/pingguohechongzi/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=14 generated_ans=0 mismatches=0",
+      "validator: total=15 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/pingguohechongzi.zip OK"
+    ]
+  },
+  {
+    "pid": "qiubutonggaodudedaqiyazhi",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/qiubutonggaodudedaqiyazhi/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/qiubutonggaodudedaqiyazhi.zip OK"
+    ]
+  },
+  {
+    "pid": "qiuhe",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/qiuhe/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/qiuhe.zip OK"
+    ]
+  },
+  {
+    "pid": "qiujueduizhi",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/qiujueduizhi/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=12 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/qiujueduizhi.zip OK"
+    ]
+  },
+  {
+    "pid": "qiumianjidewenti",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/qiumianjidewenti/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/qiumianjidewenti.zip OK"
+    ]
+  },
+  {
+    "pid": "qushuwei",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/qushuwei/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/qushuwei.zip OK"
+    ]
+  },
+  {
+    "pid": "rili",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/rili/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=12 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/rili.zip OK"
+    ]
+  },
+  {
+    "pid": "shifouweibeishuguanxi",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shifouweibeishuguanxi/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shifouweibeishuguanxi.zip OK"
+    ]
+  },
+  {
+    "pid": "shixianjiaodegeshu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shixianjiaodegeshu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shixianjiaodegeshu.zip OK"
+    ]
+  },
+  {
+    "pid": "shixianwoniupashuwenti",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shixianwoniupashuwenti/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=11 generated_ans=0 mismatches=0",
+      "validator: total=12 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shixianwoniupashuwenti.zip OK"
+    ]
+  },
+  {
+    "pid": "shiyishiluojiyunsuan",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shiyishiluojiyunsuan/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shiyishiluojiyunsuan.zip OK"
+    ]
+  },
+  {
+    "pid": "shuchubaoliu3weixiaoshudefudians",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shuchubaoliu3weixiaoshudefudians/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=14 generated_ans=0 mismatches=0",
+      "validator: total=15 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shuchubaoliu3weixiaoshudefudians.zip OK"
+    ]
+  },
+  {
+    "pid": "shuchuqiouxing",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shuchuqiouxing/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=11 generated_ans=0 mismatches=0",
+      "validator: total=12 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shuchuqiouxing.zip OK"
+    ]
+  },
+  {
+    "pid": "shujitu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shujitu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shujitu.zip OK"
+    ]
+  },
+  {
+    "pid": "shuonihao",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shuonihao/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shuonihao.zip OK"
+    ]
+  },
+  {
+    "pid": "shuxuekaoshi",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shuxuekaoshi/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shuxuekaoshi.zip OK"
+    ]
+  },
+  {
+    "pid": "shuzidetiqu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shuzidetiqu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=14 generated_ans=0 mismatches=0",
+      "validator: total=15 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shuzidetiqu.zip OK"
+    ]
+  },
+  {
+    "pid": "shuzipaixu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/shuzipaixu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=13 generated_ans=0 mismatches=0",
+      "validator: total=14 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/shuzipaixu.zip OK"
+    ]
+  },
+  {
+    "pid": "siweishuzhongyououshuweima",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/siweishuzhongyououshuweima/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/siweishuzhongyououshuweima.zip OK"
+    ]
+  },
+  {
+    "pid": "sizeyunsuanxiaolian",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/sizeyunsuanxiaolian/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/sizeyunsuanxiaolian.zip OK"
+    ]
+  },
+  {
+    "pid": "suantoujunchipingguo",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/suantoujunchipingguo/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/suantoujunchipingguo.zip OK"
+    ]
+  },
+  {
+    "pid": "suantoujunchipingguo2",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/suantoujunchipingguo2/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/suantoujunchipingguo2.zip OK"
+    ]
+  },
+  {
+    "pid": "suantoujundangcaipan",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/suantoujundangcaipan/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=12 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/suantoujundangcaipan.zip OK"
+    ]
+  },
+  {
+    "pid": "suantoujundexinxika",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/suantoujundexinxika/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=7 generated_ans=0 mismatches=0",
+      "validator: total=8 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/suantoujundexinxika.zip OK"
+    ]
+  },
+  {
+    "pid": "suantoujunmaiwenju",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/suantoujunmaiwenju/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/suantoujunmaiwenju.zip OK"
+    ]
+  },
+  {
+    "pid": "suantoujunshangban",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/suantoujunshangban/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/suantoujunshangban.zip OK"
+    ]
+  },
+  {
+    "pid": "suantoujunxiangxiuxi",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/suantoujunxiangxiuxi/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/suantoujunxiangxiuxi.zip OK"
+    ]
+  },
+  {
+    "pid": "suanyuanmenpiao",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/suanyuanmenpiao/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=9 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/suanyuanmenpiao.zip OK"
+    ]
+  },
+  {
+    "pid": "tanchishechipingguo",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/tanchishechipingguo/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=9 generated_ans=0 mismatches=0",
+      "validator: total=10 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/tanchishechipingguo.zip OK"
+    ]
+  },
+  {
+    "pid": "tianhuabanshangdexiaodeng",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/tianhuabanshangdexiaodeng/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/tianhuabanshangdexiaodeng.zip OK"
+    ]
+  },
+  {
+    "pid": "tiaojianfenzhixiaojie",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/tiaojianfenzhixiaojie/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/tiaojianfenzhixiaojie.zip OK"
+    ]
+  },
+  {
+    "pid": "tulingceshidejiandanmoni",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/tulingceshidejiandanmoni/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=6 generated_ans=0 mismatches=0",
+      "validator: total=7 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/tulingceshidejiandanmoni.zip OK"
+    ]
+  },
+  {
+    "pid": "wenduzhuanhuan",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/wenduzhuanhuan/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/wenduzhuanhuan.zip OK"
+    ]
+  },
+  {
+    "pid": "wuzejisuanqi",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/wuzejisuanqi/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=15 generated_ans=0 mismatches=0",
+      "validator: total=16 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/wuzejisuanqi.zip OK"
+    ]
+  },
+  {
+    "pid": "xiaoshudechufa",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/xiaoshudechufa/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/xiaoshudechufa.zip OK"
+    ]
+  },
+  {
+    "pid": "xingqiwenti",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/xingqiwenti/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=6 generated_ans=0 mismatches=0",
+      "validator: total=7 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/xingqiwenti.zip OK"
+    ]
+  },
+  {
+    "pid": "xingyundeshuzi",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/xingyundeshuzi/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=12 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/xingyundeshuzi.zip OK"
+    ]
+  },
+  {
+    "pid": "xuanliwu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/xuanliwu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/xuanliwu.zip OK"
+    ]
+  },
+  {
+    "pid": "yanyiyanguanxibiaodashi",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/yanyiyanguanxibiaodashi/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=11 generated_ans=0 mismatches=0",
+      "validator: total=12 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/yanyiyanguanxibiaodashi.zip OK"
+    ]
+  },
+  {
+    "pid": "yigeyueyouduoshaotian",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/yigeyueyouduoshaotian/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=14 generated_ans=0 mismatches=0",
+      "validator: total=15 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/yigeyueyouduoshaotian.zip OK"
+    ]
+  },
+  {
+    "pid": "yigeyueyoujitian",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/yigeyueyoujitian/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=9 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/yigeyueyoujitian.zip OK"
+    ]
+  },
+  {
+    "pid": "yongbianliangshixiangengduoyunsu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/yongbianliangshixiangengduoyunsu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/yongbianliangshixiangengduoyunsu.zip OK"
+    ]
+  },
+  {
+    "pid": "yongzhengxingbianliangcunchushis",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/yongzhengxingbianliangcunchushis/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/yongzhengxingbianliangcunchushis.zip OK"
+    ]
+  },
+  {
+    "pid": "youfei",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/youfei/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/youfei.zip OK"
+    ]
+  },
+  {
+    "pid": "yueshuhaishibeishu",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/yueshuhaishibeishu/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/yueshuhaishibeishu.zip OK"
+    ]
+  },
+  {
+    "pid": "zaisuanyunsuanjieguo",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/zaisuanyunsuanjieguo/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=8 generated_ans=0 mismatches=0",
+      "validator: total=9 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/zaisuanyunsuanjieguo.zip OK"
+    ]
+  },
+  {
+    "pid": "zhangfangxingdemianji",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/zhangfangxingdemianji/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=11 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/zhangfangxingdemianji.zip OK"
+    ]
+  },
+  {
+    "pid": "zhangfangxingdezhouzhang",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/zhangfangxingdezhouzhang/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=13 generated_ans=0 mismatches=0",
+      "validator: total=14 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/zhangfangxingdezhouzhang.zip OK"
+    ]
+  },
+  {
+    "pid": "zhengchuyuqumodeyingyong",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/zhengchuyuqumodeyingyong/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=2 secret=10 generated_ans=0 mismatches=0",
+      "validator: total=12 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/zhengchuyuqumodeyingyong.zip OK"
+    ]
+  },
+  {
+    "pid": "zhengshusishewurudeshixian",
+    "rc": 0,
+    "lines": [
+      "compiled /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/problems/zhengshusishewurudeshixian/solution.exe",
+      "cross_check lms mismatches: 0",
+      "cases: sample=1 secret=12 generated_ans=0 mismatches=0",
+      "validator: total=13 non42=0",
+      "zip -> /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/scripts/../out/zhengshusishewurudeshixian.zip OK"
+    ]
+  }
+]

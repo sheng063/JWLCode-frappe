@@ -1,0 +1,46 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{绝对值排序}
+
+输入 $2$ 个整数，按绝对值从小到大排序。一个正数的绝对值是他本身，负数的绝对值是它的相反数，也就是该负数乘以负一。
+
+\subsection*{输入格式}
+输入包含 $2$ 个互不相同的 \texttt{int} 范围内的整数，用空格隔开。
+
+\subsection*{输出格式}
+输出一行，包含 $2$ 个数，用空格隔开。
+
+若两个数字的绝对值一样，则比较两个数字的大小。
+
+\subsection*{样例输入}
+\begin{verbatim}
+12 -8
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+-8 12
+\end{verbatim}
+
+\subsection*{样例 2 输入}
+\begin{verbatim}
+12 -80
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+12 -80
+\end{verbatim}
+
+
+\end{document}

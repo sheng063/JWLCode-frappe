@@ -1,0 +1,38 @@
+{
+  "exercise_name": "v6gq2ia5o8",
+  "exercise_number": "P-000015",
+  "title": "C1 · 整除与取模的应用 [2458646]",
+  "problem_id": "zhengchuyuqumodeyingyong",
+  "problem_name": "整除与取模的应用",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 32767,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "29 36",
+      "output": "62\n93"
+    },
+    {
+      "input": "51 97",
+      "output": "75\n19"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "29 36",
+      "output": "62\n93"
+    },
+    {
+      "idx": 2,
+      "input": "51 97",
+      "output": "75\n19"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 443,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

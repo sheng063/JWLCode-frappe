@@ -539,6 +539,11 @@
 			"read"
 		]
 	},
+	"LMS Game Student Access": {
+		"Moderator#0": [
+			"read"
+		]
+	},
 	"LMS Google Meet Settings": {
 		"Batch Evaluator#0#if_owner": [
 			"read",

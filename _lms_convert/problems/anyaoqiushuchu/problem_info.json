@@ -1,0 +1,38 @@
+{
+  "exercise_name": "v6kbgud1bd",
+  "exercise_number": "P-000032",
+  "title": "C1 · 按要求输出 [2458703]",
+  "problem_id": "anyaoqiushuchu",
+  "problem_name": "按要求输出",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 32767,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "a",
+      "output": "It is good"
+    },
+    {
+      "input": "c",
+      "output": "Yes!"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "a",
+      "output": "It is good"
+    },
+    {
+      "idx": 2,
+      "input": "c",
+      "output": "Yes!"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 784,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

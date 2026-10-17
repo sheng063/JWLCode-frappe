@@ -1,0 +1,29 @@
+{
+  "exercise_name": "utf6700tk8",
+  "exercise_number": "P-000082",
+  "title": "C1 · 你好，小猫",
+  "problem_id": "nihaoxiaomao",
+  "problem_name": "你好，小猫",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "",
+      "output": "hello\ncat"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "",
+      "output": "hello\ncat"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 284,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

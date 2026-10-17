@@ -46,6 +46,10 @@ COPYFILE_DISABLE=1 tar \
 
 echo "==> Installing LMS dependencies, building, migrating site, and clearing cache"
 compose exec -T -e SITE_NAME="${SITE_NAME}" frappe bash -lc '
+	# tar overlays retain deleted files. Remove the retired Game service and SDK.
+	for retired in realtime packages/game-sdk lms/public/game-sdk lms/lms/game_multiplayer.py; do
+		rm -rf -- "/home/frappe/bench-data/frappe-bench/apps/lms/$retired"
+	done
 	chown -R frappe:frappe /home/frappe/bench-data/frappe-bench/apps/lms
 	runuser -u frappe -- bash -lc "
 		cd /home/frappe/bench-data/frappe-bench &&

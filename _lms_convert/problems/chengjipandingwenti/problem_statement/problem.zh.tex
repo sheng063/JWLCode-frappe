@@ -1,0 +1,35 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{成绩判定问题}
+
+\subsection*{题目描述}
+蒜老师要给同学们的成绩划定等级，学生的分数是一个实数（0 ≤ n ≤ 100）。请使用 \texttt{switch} 语句，按照分数与成绩等级的对应关系划分等级。将分数强制转换为整数后除以 10（即分数整除 10 的结果）：结果为 10 时等级为 A，为 9 时等级为 B，为 8 时等级为 C，为 7 时等级为 D，为 6 时等级为 E，其余情形（结果为 0~5）等级为 F。
+
+\subsection*{输入格式}
+一个实数 n（0 ≤ n ≤ 100）。
+
+\subsection*{输出格式}
+一个字符，为学生分数对应的成绩等级（A、B、C、D、E、F 中的一个）。
+
+\subsection*{样例输入}
+\begin{verbatim}
+95
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+B
+\end{verbatim}
+
+
+\end{document}

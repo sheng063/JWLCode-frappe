@@ -1,0 +1,65 @@
+{
+  "exercise_name": "utd63atnil",
+  "exercise_number": "P-000052",
+  "title": "C1 · 数字的提取",
+  "problem_id": "shuzidetiqu",
+  "problem_name": "数字的提取",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "25\na",
+      "output": "2"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "25\na\n",
+      "output": "2"
+    },
+    {
+      "idx": 2,
+      "input": "25\nb\n",
+      "output": "5"
+    },
+    {
+      "idx": 3,
+      "input": "10\na\n",
+      "output": "1"
+    },
+    {
+      "idx": 4,
+      "input": "99\nb\n",
+      "output": "9"
+    }
+  ],
+  "secret_from_lms": [
+    {
+      "idx": 1,
+      "input": "25\na\n",
+      "output": "2"
+    },
+    {
+      "idx": 2,
+      "input": "25\nb\n",
+      "output": "5"
+    },
+    {
+      "idx": 3,
+      "input": "10\na\n",
+      "output": "1"
+    },
+    {
+      "idx": 4,
+      "input": "99\nb\n",
+      "output": "9"
+    }
+  ],
+  "statement_html_len": 370,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

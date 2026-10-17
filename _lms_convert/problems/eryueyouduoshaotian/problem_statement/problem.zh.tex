@@ -1,0 +1,35 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{二月有多少天}
+
+\subsection*{题目描述}
+设计程序读入一个年份，输出这一年二月的天数。闰年二月有 29 天，平年二月有 28 天。闰年判断标准：非整百年的年份能被 4 整除的是闰年；整百年的年份能被 400 整除的是闰年。
+
+\subsection*{输入格式}
+一个整数 n（1 ≤ n ≤ 3000）。
+
+\subsection*{输出格式}
+一个整数：闰年输出 29，平年输出 28。
+
+\subsection*{样例输入}
+\begin{verbatim}
+2000
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+29
+\end{verbatim}
+
+
+\end{document}

@@ -35,14 +35,29 @@ def require_manager():
 		frappe.throw(_("Only teachers can manage games."), frappe.PermissionError)
 
 
-def require_access():
-	if not game_visible():
+def game_is_enabled(name, user=None):
+	return can_manage_games(user) or bool(cint(frappe.db.get_value("LMS Game", name, "enabled")))
+
+
+def require_access(name=None):
+	from lms.lms.game_access import get_game_access
+	if not get_game_access()["can_enter"] or (name and not game_is_enabled(name)):
 		frappe.throw(_("Game is not available."), frappe.PermissionError)
 
 
 @frappe.whitelist()
-def get_game_settings():
+def get_game_settings(name: str | None = None):
+	from lms.lms.game_access import get_game_access, is_access_admin
+	settings = frappe.get_single("LMS Settings")
+	access = get_game_access()
 	return {
+		"access": {key: value for key, value in access.items() if key not in ("reason", "modified", "modified_by")},
+		"game_enabled": game_is_enabled(name) if name and access["can_enter"] else None,
+		"can_configure": is_access_admin(),
+		"require_course_completion": bool(cint(settings.game_require_course_completion)),
+		"default_required_course": settings.game_default_required_course or "",
+		"default_required_lesson": settings.game_default_required_lesson or "",
+		"default_lesson_title": frappe.db.get_value("Course Lesson", settings.game_default_required_lesson, "title") if settings.game_default_required_lesson else "",
 		"can_manage": can_manage_games(),
 		"enabled": bool(cint(frappe.db.get_single_value("LMS Settings", "game_enabled"))),
 	}
@@ -59,15 +74,27 @@ def set_game_enabled(enabled: int):
 	return get_game_settings()
 
 
+@frappe.whitelist(methods=["POST"])
+def set_game_availability(name: str, enabled: int):
+	require_manager()
+	if str(enabled) not in ("0", "1"):
+		frappe.throw(_("Invalid visibility setting."))
+	game = frappe.get_doc("LMS Game", name)
+	game.enabled = cint(enabled)
+	game.save(ignore_permissions=True)
+	frappe.publish_realtime("lms_game_visibility_changed", room="website", after_commit=True)
+	return {"name": game.name, "enabled": bool(game.enabled)}
+
+
 @frappe.whitelist()
 def get_games():
 	require_access()
-	return frappe.get_all("LMS Game", fields=["name", "title", "filename", "creation", "description", "cover_image", "entry_file"], order_by="creation desc")
+	return frappe.get_all("LMS Game", filters={} if can_manage_games() else {"enabled": 1}, fields=["name", "title", "enabled", "filename", "creation", "description", "cover_image", "entry_file"], order_by="creation desc")
 
 
 @frappe.whitelist()
 def get_game(name: str):
-	require_access()
+	require_access(name)
 	game = frappe.get_doc("LMS Game", name)
 	if game.entry_file:
 		from lms.lms.game_package import launch_url

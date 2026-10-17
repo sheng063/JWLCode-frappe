@@ -1,0 +1,29 @@
+{
+  "assignment": "ASG-00747",
+  "lesson": "0748 捡贝壳",
+  "title": "C1 · 捡贝壳",
+  "problem_statement": "<h4>题目描述</h4><p>蒜头君去海边玩耍看到了很多贝壳，他想捡一些贝壳装到箱子带回家。他的箱子最多能装 20 斤的东西。现在他已经装了两个贝壳到箱子里，每个贝壳重 a 斤。他的箱子还能再装多少斤的贝壳呢？</p><h4>输入格式</h4><p>输入只有一个实数，对应题目中每枚贝壳的重量 a（斤）。数据范围：0 &lt; 2 × a ≤ 20，即 0 &lt; a ≤ 10。</p><h4>输出格式</h4><p>输出只有一个小数，表示蒜头君的箱子还可以装的贝壳重量（单位：斤），即 20 − 2 × a。</p><h4>样例输入</h4><pre><code>2</code></pre><h4>样例输出</h4><pre><code>16</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main(){\n    double a;\n    cin >> a;\n    cout << 20 - 2 * a;\n    return 0;\n}",
+  "test_cases": [
+    {
+      "input": "2",
+      "expected_output": "16"
+    },
+    {
+      "input": "2.5",
+      "expected_output": "15"
+    },
+    {
+      "input": "7.8",
+      "expected_output": "4.4"
+    },
+    {
+      "input": "10",
+      "expected_output": "0"
+    },
+    {
+      "input": "3.5",
+      "expected_output": "13"
+    }
+  ]
+}

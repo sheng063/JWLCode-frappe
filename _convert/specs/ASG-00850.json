@@ -1,0 +1,25 @@
+{
+  "assignment": "ASG-00850",
+  "lesson": "0851 正数四舍五入的实现",
+  "title": "C1 · 正数四舍五入的实现",
+  "problem_statement": "<h4>题目描述</h4><p>蒜头君在探险时遇到了麻烦。大魔王给了他两个数字，要求他正确回答这两个数字四舍五入后的结果才能继续前进。请你写一个程序，帮蒜头君算出这两个数字四舍五入后的答案。</p><h4>输入格式</h4><p>输入只有一行，包含两个正数 <code>m</code> 和 <code>n</code>，用空格分开。</p><h4>输出格式</h4><p>输出两行，分别是对 <code>m</code> 和 <code>n</code> 四舍五入后的整数结果。</p><h4>样例输入</h4><pre><code>1.2 7.8</code></pre><h4>样例输出</h4><pre><code>1\n8</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main(){\n    double m, n;\n    cin >> m >> n;\n    int mzheng = m + 0.5;\n    int nzheng = n + 0.5;\n    cout << mzheng << endl << nzheng;\n    return 0;\n}\n",
+  "test_cases": [
+    {
+      "input": "1.2 7.8\n",
+      "expected_output": "1\n8"
+    },
+    {
+      "input": "3.5 2.1\n",
+      "expected_output": "4\n2"
+    },
+    {
+      "input": "4.9 3.4\n",
+      "expected_output": "5\n3"
+    },
+    {
+      "input": "0.4 5.5\n",
+      "expected_output": "0\n6"
+    }
+  ]
+}

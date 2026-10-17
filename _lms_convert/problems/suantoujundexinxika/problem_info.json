@@ -1,0 +1,29 @@
+{
+  "exercise_name": "utfjeog1r1",
+  "exercise_number": "P-000080",
+  "title": "C1 · 蒜头君的信息卡",
+  "problem_id": "suantoujundexinxika",
+  "problem_name": "蒜头君的信息卡",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "",
+      "output": "suan\n13\n165cm"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "",
+      "output": "suan\n13\n165cm"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 319,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

@@ -1,0 +1,29 @@
+{
+  "exercise_name": "v6i6nunh6h",
+  "exercise_number": "P-000023",
+  "title": "C1 · 选礼物 [2458667]",
+  "problem_id": "xuanliwu",
+  "problem_name": "选礼物",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 131072,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "120\n160 142 131",
+      "output": "2"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "120\n160 142 131",
+      "output": "2"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 880,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

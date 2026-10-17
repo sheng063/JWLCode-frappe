@@ -1,0 +1,29 @@
+{
+  "exercise_name": "utfqfvvb28",
+  "exercise_number": "P-000081",
+  "title": "C1 · 计算运算结果",
+  "problem_id": "jisuanyunsuanjieguo",
+  "problem_name": "计算运算结果",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "",
+      "output": "3 + 4 = 7"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "",
+      "output": "3 + 4 = 7"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 302,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

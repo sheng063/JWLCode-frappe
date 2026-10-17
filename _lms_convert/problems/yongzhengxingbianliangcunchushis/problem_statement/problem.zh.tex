@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{用整型变量存储实数}
+
+\subsection*{题目描述}
+学习变量时，老师反复强调根据数据范围选择变量类型的重要性。用 int 型变量存储实数会怎么样呢？请设计程序验证：读入一个实数，用 double 型变量 m 存储它，再将其值赋给 int 型变量 n（小数部分会被直接忽略，即截断取整），然后分别输出 m 和 n 的值。
+
+\subsection*{输入格式}
+输入只有一个实数 m。
+
+\subsection*{输出格式}
+两行，第一行输出 double 型变量 m 的值；第二行输出 int 型变量 n 的值（原实数的整数部分）。
+
+\subsection*{样例输入}
+\begin{verbatim}
+1.2
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+1.2
+1
+\end{verbatim}
+
+
+\end{document}

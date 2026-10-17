@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{蒜头君上班}
+
+蒜头君可以选择行走和骑车两种方式上班。但实际上，他并不清楚哪种方式更快，因为骑车总要找车、开锁、停车、锁车等，这要耽误一些时间。
+
+假设找到自行车，开锁并骑上自行车的时间为 $27$ 秒；停车锁车的时间为 $23$ 秒；步行每秒行走 $1$ 米，骑车每秒行走 $3$ 米。
+
+给了蒜头君距离公司的距离，请问是骑车快还是走路快。
+
+\subsection*{输入格式}
+输入一行，包含一个整数，表示与公司的距离，单位为米。
+
+\subsection*{输出格式}
+输出一行，如果骑车快，输出一行 \texttt{Bike} ； 如果走路快，输出一行 \texttt{Walk} ； 如果一样快，输出一行 \texttt{All} 。
+
+\subsection*{样例输入}
+\begin{verbatim}
+120
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+Bike
+\end{verbatim}
+
+
+\end{document}

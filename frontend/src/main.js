@@ -26,11 +26,14 @@ registerDirectives(app)
 app.provide('$dayjs', dayjs)
 const socket = initSocket()
 app.provide('$socket', socket)
-socket.on('lms_game_visibility_changed', () => {
+function refreshGameAccess() {
+	window.dispatchEvent(new Event('lms-game-access-changed'))
 	useSettings()
 		.loadSidebarSettings(true)
 		.catch(() => {})
-})
+}
+socket.on('lms_game_visibility_changed', refreshGameAccess)
+socket.on('lms_game_access_changed', refreshGameAccess)
 app.mount('#app')
 
 const { userResource, allUsers } = usersStore()

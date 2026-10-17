@@ -88,7 +88,10 @@
 		"column_break_gcgv",
 		"contact_us_url",
 		"jobs_tab",
-		"allow_job_posting"
+		"allow_job_posting",
+		"game_require_course_completion",
+		"game_default_required_course",
+		"game_default_required_lesson"
 	],
 	"fields": [
 		{
@@ -553,6 +556,24 @@
 			"fieldtype": "Check",
 			"label": "Show Game to Students",
 			"default": "0"
+		},
+		{
+			"fieldname": "game_require_course_completion",
+			"fieldtype": "Check",
+			"label": "Require Course Completion for Game",
+			"default": "0"
+		},
+		{
+			"fieldname": "game_default_required_course",
+			"fieldtype": "Link",
+			"options": "LMS Course",
+			"label": "Default Game Unlock Course"
+		},
+		{
+			"fieldname": "game_default_required_lesson",
+			"fieldtype": "Link",
+			"options": "Course Lesson",
+			"label": "Default Game Unlock Lesson (empty requires entire course)"
 		}
 	],
 	"grid_page_length": 50,

@@ -1,0 +1,17 @@
+Starting test run with parameters: site=school.localhost, app=lms, module=lms.tests.test_game_multiplayer, verbose=False, tests=(), force=False, profile=False, failfast=False, skip_before_tests=False, debug=False, selected_categories=[]
+View detailed logs (using --verbose): /home/frappe/bench-data/frappe-bench/logs/frappe.testing.log
+
+Running 5 unspecified-category tests for lms
+
+lms.tests.test_game_multiplayer.TestGameMultiplayer
+   [32m ✔ [0m test_example_installation_is_idempotent
+   [32m ✔ [0m test_guest_and_locked_student_cannot_authorize_or_configure
+   [32m ✔ [0m test_registry_and_teacher_configuration
+   [32m ✔ [0m test_road_king_uses_frappe_student_identity
+   [32m ✔ [0m test_unlocked_student_uses_own_identity_and_revocation_is_checked
+
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.613s
+
+OK

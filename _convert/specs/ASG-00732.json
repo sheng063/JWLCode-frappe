@@ -1,0 +1,13 @@
+{
+  "assignment": "ASG-00732",
+  "lesson": "0733 用变量实现更多运算",
+  "title": "C1 · 用变量实现更多运算",
+  "problem_statement": "<h4>题目描述</h4><p>假设一个正方形的边长为 2.5，请设计程序，使用变量存储这个正方形的边长，并计算输出该正方形的周长和面积。计算公式如下：正方形的周长 = 边长 × 4；正方形的面积 = 边长 × 边长。</p><h4>输入格式</h4><p>本题没有输入，正方形的边长固定为 2.5。</p><h4>输出格式</h4><p>第一行输出一个数字，表示正方形的周长；第二行输出一个数字，表示正方形的面积。</p><h4>样例输入</h4><pre><code></code></pre><h4>样例输出</h4><pre><code>10\n6.25</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main(){\n    double bian = 2.5;\n    cout << 4 * bian << endl;\n    cout << bian * bian;\n    return 0;\n}",
+  "test_cases": [
+    {
+      "input": "",
+      "expected_output": "10\n6.25"
+    }
+  ]
+}

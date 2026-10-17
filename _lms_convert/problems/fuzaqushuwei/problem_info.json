@@ -1,0 +1,38 @@
+{
+  "exercise_name": "v6cnjrro0t",
+  "exercise_number": "P-000005",
+  "title": "C1 · 复杂取数位 [2458600]",
+  "problem_id": "fuzaqushuwei",
+  "problem_name": "复杂取数位",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 32767,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "100",
+      "output": "1\n0\n0"
+    },
+    {
+      "input": "240",
+      "output": "2\n4\n0"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "100",
+      "output": "1\n0\n0"
+    },
+    {
+      "idx": 2,
+      "input": "240",
+      "output": "2\n4\n0"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 937,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

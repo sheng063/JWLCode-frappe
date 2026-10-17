@@ -1,0 +1,29 @@
+{
+  "exercise_name": "v6mghbjc15",
+  "exercise_number": "P-000042",
+  "title": "C1 · 程序设计 T1 [2458725]",
+  "problem_id": "chengxushejit1",
+  "problem_name": "程序设计 T1",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 32767,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "a",
+      "output": "A"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "a",
+      "output": "A"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 257,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

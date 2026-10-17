@@ -1,0 +1,38 @@
+{
+  "exercise_name": "v6lbo68gir",
+  "exercise_number": "P-000036",
+  "title": "C1 · 分段电费 [2458715]",
+  "problem_id": "fenduandianfei",
+  "problem_name": "分段电费",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 32767,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "200",
+      "output": "250"
+    },
+    {
+      "input": "520",
+      "output": "1010"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "200",
+      "output": "250"
+    },
+    {
+      "idx": 2,
+      "input": "520",
+      "output": "1010"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 838,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

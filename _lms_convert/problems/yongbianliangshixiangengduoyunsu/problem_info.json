@@ -1,0 +1,29 @@
+{
+  "exercise_name": "uteph80oss",
+  "exercise_number": "P-000067",
+  "title": "C1 · 用变量实现更多运算",
+  "problem_id": "yongbianliangshixiangengduoyunsu",
+  "problem_name": "用变量实现更多运算",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "",
+      "output": "10\n6.25"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "",
+      "output": "10\n6.25"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 293,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

@@ -13,6 +13,7 @@ class TestGame(unittest.TestCase):
 		frappe.set_user('Administrator')
 		self.teacher = self.make_user('Course Creator')
 		self.student = self.make_user('LMS Student')
+		frappe.db.set_single_value("LMS Settings", "game_require_course_completion", 0)
 		game.set_game_enabled(0)
 		self.html = '<!doctype html><html><body>游戏<script>window.score=1</script></body></html>'
 		self.content = base64.b64encode(self.html.encode()).decode()
@@ -77,7 +78,9 @@ class TestGame(unittest.TestCase):
 		with patch.object(game, 'MAX_GAME_BYTES', 10):
 			with self.assertRaises(frappe.ValidationError):
 				game.upload_game('game.html', self.content)
-		with self.assertRaises(frappe.ValidationError):
+		# Frappe validates the annotated argument before entering the handler.
+		from frappe.exceptions import FrappeTypeError
+		with self.assertRaises((frappe.ValidationError, FrappeTypeError)):
 			game.set_game_enabled('invalid')
 
 	def test_teacher_edits_cover_downloads_and_deletes(self):
@@ -122,3 +125,39 @@ class TestGame(unittest.TestCase):
 			with self.assertRaises(frappe.ValidationError):
 				game.update_game(created['name'], **args)
 		self.assertEqual(frappe.db.get_value('LMS Game',created['name'],'title'), 'game')
+
+	def test_individual_game_switch_is_independent_and_enforced(self):
+		frappe.set_user(self.teacher)
+		first = game.upload_game('first.html', self.content)['name']
+		second = game.upload_game('second.html', self.content)['name']
+		game.set_game_enabled(1)
+		with patch.object(frappe, 'publish_realtime') as publish:
+			self.assertFalse(game.set_game_availability(first, 0)['enabled'])
+			publish.assert_any_call('lms_game_visibility_changed', room='website', after_commit=True)
+		self.assertTrue(game.get_game_settings()['enabled'])
+		self.assertIn(first, [item.name for item in game.get_games()])
+		self.assertEqual(game.get_game(first)['html'], self.html)
+		frappe.set_user(self.student)
+		self.assertFalse(game.get_game_settings(first)['game_enabled'])
+		self.assertTrue(game.get_game_settings(second)['game_enabled'])
+		self.assertNotIn(first, [item.name for item in game.get_games()])
+		self.assertIn(second, [item.name for item in game.get_games()])
+		with self.assertRaises(frappe.PermissionError):
+			game.get_game(first)
+		self.assertEqual(game.get_game(second)['html'], self.html)
+		for user in (self.student, 'Guest'):
+			frappe.set_user(user)
+			with self.assertRaises(frappe.PermissionError):
+				game.set_game_availability(first, 1)
+		frappe.set_user(self.teacher)
+		with self.assertRaises(frappe.ValidationError):
+			game.set_game_availability(first, 2)
+		self.assertFalse(frappe.db.get_value('LMS Game', first, 'enabled'))
+		game.set_game_availability(first, 1)
+		frappe.set_user(self.student)
+		self.assertEqual(game.get_game(first)['html'], self.html)
+		frappe.set_user(self.teacher)
+		game.set_game_enabled(0)
+		frappe.set_user(self.student)
+		with self.assertRaises(frappe.PermissionError):
+			game.get_game(first)

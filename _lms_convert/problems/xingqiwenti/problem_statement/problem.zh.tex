@@ -1,0 +1,56 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{星期问题}
+
+蒜头君想要知道今天是星期几。
+
+现在他通过键盘输入一个整数 $x(0\sim6)$，如果：
+
+\begin{itemize}
+  \item $x=0$，表示今天是星期日（\texttt{Sunday}）；
+
+  \item $x=1$，表示今天是星期一（\texttt{Monday}）；
+
+  \item $x=2$，表示今天是星期二（\texttt{Tuesday}）；
+
+  \item $x=3$，表示今天是星期三（\texttt{Wednesday}）；
+
+  \item $x=4$，表示今天是星期四（\texttt{Thursday}）；
+
+  \item $x=5$，表示今天是星期五（\texttt{Friday}）；
+
+  \item $x=6$，表示今天是星期六（\texttt{Saturday}）；
+
+\end{itemize}
+你需要编写程序，让程序从键盘中读取一个整数 $x$，并输出对应的星期几的英文单词。
+
+\textbf{请你使用\texttt{switch}实现该程序，注意不要将单词拼写错误。}
+
+\subsection*{输入格式}
+一个整数 $x\text{ }(0\len\le6)$。
+
+\subsection*{输出格式}
+输出一个英文单词，表示今天是星期几。
+
+\subsection*{样例输入}
+\begin{verbatim}
+2
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+Tuesday
+\end{verbatim}
+
+
+\end{document}

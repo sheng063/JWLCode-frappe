@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{求不同高度的大气压值}
+
+蒜头君最近了解到海平面的大气压大约为 $100000$ Pa，还知道了海拔高度和大气压的关系。
+
+在海拔 $3000$ 米内，可以近似地认为每升高 $10$ 米，大气压减小 $100$ Pa，想去登山的蒜头君想尽快地算出山上不同高度对应的大气压值。
+
+\textbf{注意：} 海拔是指地面某个地点高出海平面的垂直距离。
+
+\subsection*{输入格式}
+输入仅一行，包括一个实数 $h(100\leh\le2500)$ ，表示山的高度。
+
+\subsection*{输出格式}
+输出一个实数，表示对应高度的大气压值。
+
+\subsection*{样例输入}
+\begin{verbatim}
+100.0
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+99000
+\end{verbatim}
+
+
+\end{document}

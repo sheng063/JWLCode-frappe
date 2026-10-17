@@ -1,0 +1,9 @@
+problem_format_version: legacy-icpc
+name: "最大连续子段和"
+source: "User-provided learning exercise"
+license: unknown
+validation: default
+limits:
+  memory: 1024
+  output: 8
+keywords: "dynamic-programming kadane arrays"

@@ -1,0 +1,25 @@
+{
+  "assignment": "ASG-00854",
+  "lesson": "0855 实现：角的个数",
+  "title": "C1 · 实现：角的个数",
+  "problem_statement": "<h4>题目描述</h4><p>一个四边形有四个角，如果剪掉一个角后，这个图形就变成五个角；如果再剪掉一个角，就变成六个角。问：在一个四边形中剪 <code>n</code> 次，每次剪掉一个角，最后图形中还剩余多少个角？</p><h4>输入格式</h4><p>输入一个整数 <code>n</code>，表示剪角的次数。</p><h4>输出格式</h4><p>一个整数：剪 <code>n</code> 次后图形中剩余的角的个数。</p><h4>样例输入</h4><pre><code>10</code></pre><h4>样例输出</h4><pre><code>14</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main(){\n    int n;\n    cin >> n;\n    cout << n + 4;\n    return 0;\n}\n",
+  "test_cases": [
+    {
+      "input": "10\n",
+      "expected_output": "14"
+    },
+    {
+      "input": "0\n",
+      "expected_output": "4"
+    },
+    {
+      "input": "5\n",
+      "expected_output": "9"
+    },
+    {
+      "input": "100\n",
+      "expected_output": "104"
+    }
+  ]
+}

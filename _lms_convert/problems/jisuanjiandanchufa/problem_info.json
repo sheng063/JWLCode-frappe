@@ -1,0 +1,29 @@
+{
+  "exercise_name": "v6720ji7qf",
+  "exercise_number": "P-000001",
+  "title": "C1 · 计算简单除法 [2458559]",
+  "problem_id": "jisuanjiandanchufa",
+  "problem_name": "计算简单除法",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 32767,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "",
+      "output": "8 / 2 = 4"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "",
+      "output": "8 / 2 = 4"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 409,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

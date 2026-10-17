@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{是否为倍数关系}
+
+输入两个数字，$a,b(0<b<a<1000)$ ，判断两个数字是否为倍数关系。
+
+\textbf{注意：} 测试数据中 $a,b$ 是两个不相等的整数，且 $a>b$。
+
+如果 $a$ 是 $b$ 的整数倍，则满足：$a$ 除以 $b$ 的\textbf{余数}为 $0$；
+
+\subsection*{输入格式}
+输入一行，包含两个数字，分别是 $a,b$ 。
+
+\subsection*{输出格式}
+输出一行，如果是倍数关系，输出 \texttt{YES} ，否则输出 \texttt{NO} 。
+
+\subsection*{样例输入}
+\begin{verbatim}
+3 1
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+YES
+\end{verbatim}
+
+
+\end{document}

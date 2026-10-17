@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{邮费}
+
+蒜邮局对邮寄包裹有如下规定：若包裹的重量超过 $30$ 千克，不予邮寄，对可以邮寄的包裹每件收手续费 $2$ 元，再加上根据下表按重量每个阶段对应的 $x$ 计算的结果：
+
+重量(千克)对应该重量的部分收费标准(元/千克)$x\le10$$1$$10<x\le20$$2$$20<x\le30$$3$
+
+请你编写一个程序，输入包裹重量，输出所需费用或 \texttt{Fail} 表示无法邮寄。
+
+\subsection*{输入格式}
+输入一个正整数 $x(1\lex\le50)$，表示邮寄包裹的重量。
+
+\subsection*{输出格式}
+如果可以邮寄，输出对应的费用（整数），如果无法邮寄则输出 \texttt{Fail}。
+
+\subsection*{样例输入}
+\begin{verbatim}
+21
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+35
+\end{verbatim}
+
+
+\end{document}

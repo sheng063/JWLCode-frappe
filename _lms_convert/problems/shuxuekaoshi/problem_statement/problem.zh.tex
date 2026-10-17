@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{数学考试}
+
+一次数学考试后，蒜头君不敢看自己的分数，他把试卷偷偷塞给你，让你判断下他是否及格。
+
+\subsection*{输入格式}
+一个整数 $n\text{ }(1\len\le100)$ 表示分数。
+
+\subsection*{输出格式}
+\begin{itemize}
+  \item 若分数大于等于 $60$ 分，则及格，告诉他通过了，输出\texttt{pass}。
+
+  \item 否则，你不需要输出任何东西，给他一个眼神就行了。
+
+\end{itemize}
+\subsection*{样例输入}
+\begin{verbatim}
+100
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+pass
+\end{verbatim}
+
+
+\end{document}

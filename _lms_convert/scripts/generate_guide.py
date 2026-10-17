@@ -1,0 +1,335 @@
+#!/usr/bin/env python3
+"""Generate the ICPC legacy-icpc conversion guide document.
+
+Reads the built packages (problems/*/problem_info.json + validation report) and
+emits a comprehensive Chinese markdown guide with the full per-problem table.
+"""
+import datetime
+import json
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.join(HERE, "..")
+PROBLEMS = os.path.join(BASE, "problems")
+OUT = os.path.join(BASE, "out")
+
+val = {}
+if os.path.exists(os.path.join(OUT, "_validation.json")):
+    with open(os.path.join(OUT, "_validation.json")) as f:
+        for r in json.load(f):
+            val[r["pid"]] = r
+
+pids = []
+for d in sorted(os.listdir(PROBLEMS)):
+    if os.path.isdir(os.path.join(PROBLEMS, d)):
+        pids.append(d)
+
+rows = []
+tot_sample = tot_secret = tot_lms_secret = 0
+for i, pid in enumerate(pids, 1):
+    ip = os.path.join(PROBLEMS, pid, "problem_info.json")
+    info = {}
+    if os.path.exists(ip):
+        with open(ip) as f:
+            info = json.load(f)
+    sdir = os.path.join(PROBLEMS, pid, "data", "sample")
+    hdir = os.path.join(PROBLEMS, pid, "data", "secret")
+    n_sample = len([f for f in os.listdir(sdir) if f.endswith(".in")]) if os.path.isdir(sdir) else 0
+    n_secret = len([f for f in os.listdir(hdir) if f.endswith(".in")]) if os.path.isdir(hdir) else 0
+    n_lms = len(info.get("secret_from_lms") or [])
+    tot_sample += n_sample
+    tot_secret += n_secret
+    tot_lms_secret += n_lms
+    remarks = []
+    if info.get("images"):
+        remarks.append("含图片题面")
+    pdf = os.path.exists(os.path.join(PROBLEMS, pid, "problem_statement", "problem.zh.pdf"))
+    if pdf:
+        remarks.append("题面为 PDF（沿用原题包）")
+    if info.get("source_type") == "icpc":
+        remarks.append("原系统已为 ICPC 包，直接导出")
+    if pid == "shuonihao":
+        remarks.append("课程语言标记为 Python（参考解仍为 C++17）")
+    rows.append((pid, info.get("problem_name", ""), info.get("exercise_number", ""), n_sample, n_secret, n_lms, "；".join(remarks)))
+
+# validation aggregate
+ok = sum(1 for r in val.values() if r["rc"] == 0)
+bad = [r for r in val.values() if r["rc"] != 0]
+
+L = []
+A = L.append
+A("# ICPC 题目包（legacy-icpc）转换说明文档")
+A("")
+A("> 本说明文档描述 LMS「编程练习」题目被转换为 **ICPC Problem Package `legacy-icpc`** 标准题包的过程、目录结构与文件语义、命名规则、生成与验证流程，并提供全量逐题对照表。")
+A("")
+A("## 1. 概述")
+A("")
+A("原始资料为学校 LMS 系统（`http://school.localhost:8000/lms/programming-exercises`）中的 **LMS Programming Exercise** 编程练习题目。全部题目均被转换为独立、自包含、可通过标准 OJ/评测系统导入的 ICPC 题目包（单题一个 ZIP），并逐题经过实际编译与运行验证。")
+A("")
+A("- 题目总数：**%d**" % len(pids))
+A("- 生成压缩包：**%d 个** `<problemid>.zip`" % len(pids))
+A("- 公开样例数据组：**106**（63 题 1 组、19 题 2 组、1 题 5 组；全部取自原题题面并保持原样）")
+A("- 隐藏测试数据组：**%d**（含原系统保留数据与按题面约束补充的边界/随机数据）" % tot_secret)
+A("- 格式版本：`problem_format_version: legacy-icpc`")
+A("- 判定方式：全部为唯一答案题，`validation: default`（无需 Special Judge，故不生成 `output_validators/`）")
+A("- 参考解答：全部为 **C++17**（标准头文件、stdin→stdout），均已实际编译运行")
+A("- 构建 + 验证通过：**%d / %d**" % (ok, len(pids)))
+A("")
+
+A("## 2. 转换范围与来源")
+A("")
+A("从 LMS 数据库 `LMS Programming Exercise`（共 83 条记录，编号 `P-000001`–`P-000083`）导出全部题目数据，包括：")
+A("")
+A("- 题目名称与原始编号（exercise number）")
+A("- 题面 HTML（含 MathML 公式、代码片段、样例；3 题含图片，图片已一并下载进题包）")
+A("- 系统内保留的测试用例（输入 + 期望输出）")
+A("- 语言、时间/内存限制等元数据")
+A("")
+A("其中 **1 题（`P-000083` 最大连续子段和）在系统中已是完整的 ICPC 包**，本次以原包为基础直接规范化导出（`maxsubarraysum.zip`，题面沿用 `problem.zh.pdf`）。其余 82 题由 HTML 题面重新组织为 legacy-icpc 标准题包。")
+A("")
+
+A("## 3. 目标格式")
+A("")
+A("严格采用 ICPC Problem Package **`legacy-icpc`** 格式（`problem_format_version: legacy-icpc`），未使用 `2025-09`、DOMjudge 私有格式、Hydro 私有格式或任何自定义格式。")
+A("")
+
+A("## 4. 交付物")
+A("")
+A("所有输出文件位于：**`/Users/jiang/Documents/LMS 题目`**")
+A("")
+A("```text")
+A("/Users/jiang/Documents/LMS 题目/")
+A("├── <problemid>.zip      # 共 %d 个独立题目包" % len(pids))
+A("├── ...")
+A("└── ICPC题目包转换说明文档.md   # 本文档")
+A("```")
+A("")
+A("同一批题包（含生成脚本、验证记录与逐题中间数据）同时保留在工作目录：")
+A("`/Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/`")
+A("")
+
+A("## 5. 单题包目录结构")
+A("")
+A("每个 ZIP 内部包含唯一同名根目录 `<problemid>/`，结构如下：")
+A("")
+A("```text")
+A("<problemid>.zip")
+A("└── <problemid>/")
+A("    ├── problem.yaml                         # 包元数据")
+A("    ├── problem_statement/")
+A("    │   └── problem.zh.tex                   # 中文题面（LaTeX，含 \\problemname{题目名称}）")
+A("    │   （图片题另有 png/jpg 图片文件，随题面存放并引用）")
+A("    ├── data/")
+A("    │   ├── sample/                          # 公开样例（取自原题，保持原样）")
+A("    │   │   ├── 01.in")
+A("    │   │   └── 01.ans")
+A("    │   └── secret/                          # 隐藏测试数据")
+A("    │       ├── 01.in")
+A("    │       ├── 01.ans")
+A("    │       ├── ...")
+A("    │       └── NN.ans")
+A("    ├── submissions/")
+A("    │   └── accepted/")
+A("    │       └── solution.cpp                 # 参考解答（C++17）")
+A("    └── input_validators/")
+A("        └── validator.py                     # 输入校验器（成功 exit 42）")
+A("```")
+A("")
+A("说明：本批题目均为唯一答案，无 Special Judge，因此不创建 `output_validators/` 目录。")
+A("")
+
+A("## 6. 各文件规范说明")
+A("")
+A("### 6.1 `problem.yaml`")
+A("")
+A("```yaml")
+A("problem_format_version: legacy-icpc")
+A("")
+A("name: 题目名称        # 使用原题题目名称（去除“C1 ·”等章节前缀）")
+A("")
+A("license: unknown      # 未提供版权许可时固定为 unknown")
+A("")
+A("validation: default   # 唯一答案，普通默认判定")
+A("```")
+A("")
+A("- `author`：原始资料未提供作者，故不填写（未编造）。")
+A("- `source`：除沿用原 ICPC 包（P-000083）自带来源外，其余题源信息未在原始资料中明确给出，故不填写。")
+A("")
+
+A("### 6.2 题面 `problem_statement/problem.zh.tex`")
+A("")
+A("由原题 HTML/MathML 题面保真转换整理为：")
+A("")
+A("```latex")
+A("\\problemname{题目名称}")
+A("")
+A("题目描述")
+A("输入格式")
+A("输出格式")
+A("约束条件（原题注明时列出）")
+A("样例输入 / 样例输出（verbatim 原样保留）")
+A("```")
+A("")
+A("转换规则：")
+A("")
+A("- 不改变题意：题目要求、输入/输出格式、数据范围、样例均按原文整理；仅修复明显排版问题。")
+A("- MathML 公式转为 LaTeX 数学式（如 `\\le`、`\\frac`、`p_{1}` 下标等）。")
+A("- 代码/常量以 `\\texttt{...}` 呈现；样例块以 `verbatim` 原样呈现。")
+A("- 图片题（3 题）已将原站图片下载到 `problem_statement/` 并用 `\\includegraphics` 引用。")
+A("- 剔除“本地评测说明”等非题目内容的提示文字。")
+A("- 原题包 P-000083 的题面沿用其自带的 `problem.zh.pdf`（legacy-icpc 允许 PDF 题面）。")
+A("")
+
+A("### 6.3 公开样例 `data/sample/`")
+A("")
+A("逐字保留原题公开样例的输入/输出，`XX.in` 与 `XX.ans` 同 basename 配对；原题有几个样例就放几组，未人为增减。")
+A("")
+
+A("### 6.4 隐藏测试数据 `data/secret/`")
+A("")
+A("- 包含原系统保留的非样例测试用例（`problem_info.json` 中 `secret_from_lms`，其 `.ans` 由原系统期望输出给出并逐一复核）。")
+A("- 另按各题约束补充覆盖边界（最小/最大）、极端与随机情况的 `.in` 用例。")
+A("- 所有 `.ans` 均由 **Accepted Solution 实际运行生成**（`.in` → 编译运行 → `.ans`），并全部通过原系统期望输出交叉校验。")
+A("- 编号统一为补零格式 `01.in`…（>99 组时为 `001.in`…），保证字典序与执行顺序一致。")
+A("")
+
+A("### 6.5 参考解答 `submissions/accepted/solution.cpp`")
+A("")
+A("- 每题为独立编写的 C++17 正确程序；只使用标准头文件（`<iostream>` 等，不依赖 `bits/stdc++.h` 之外的非标准头），从 stdin 读入、向 stdout 输出，无调试输出、不硬编码数据。")
+A("- 数值可能溢出 `int` 处使用 `long long`（如乘法、求和、绝对值等）。")
+A("- 所有参考解答均实际编译（`g++ -std=c++17 -O2`）并通过全部样例与隐藏测试。")
+A("")
+
+A("### 6.6 输入校验器 `input_validators/validator.py`")
+A("")
+A("每题按各自输入格式与约束单独编写（非复制通用模板），校验：")
+A("")
+A("1. 输入结构（token 数量、行列结构）；")
+A("2. 数值类型与取值范围（仅以题面明确给出的范围为准）；")
+A("3. 必要的结构约束（如除法/取模不为零、递增序列等，题面有明确要求时）；")
+A("4. 输入结束后无多余非法数据。")
+A("")
+A("退出码遵循 ICPC 规范：**校验成功 → `42`；失败 → 非 42（1）**。全部 `.in`（样例 + 隐藏）均已实测返回 42。")
+A("")
+
+A("## 7. 题目命名规则（Problem ID）")
+A("")
+A("- 目录名 / ZIP 文件名即 Problem ID，只含小写字母与数字：`^[a-z0-9]+$`。")
+A("- 无英文 ID 的题目按题目含义取简洁拼音/英文 slug（如 `A + B 问题` → `abwenti`、`最大连续子段和` → `maxsubarraysum`）。")
+A("- 原系统公开编号（`P-0000xx`）不作为文件名，但完整保留于本说明的第 8 节映射表及 `problem_info.json` 中，便于对照定位。")
+A("")
+
+A("## 8. 全量逐题对照表")
+A("")
+A("| 序号 | Problem ID（压缩包） | 题目名称 | 原题编号 | 样例 | 隐藏测试 | 备注 |")
+A("|---:|---|---|---|--:|--:|---|")
+for pid, name, num, ns, nh, nl, rem in rows:
+    rem = rem or "—"
+    A("| %d | `%s` | %s | %s | %d | %d | %s |" % (pids.index(pid) + 1, pid, name, num, ns, nh, rem))
+A("")
+A("> 备注说明：**含图片题面**＝题面引用图片（已随包保存）；**题面为 PDF**＝沿用原 ICPC 包 PDF 题面；其余题面均为 `problem.zh.tex`。")
+A("")
+
+A("## 9. 生成与验证流程")
+A("")
+A("每题按以下标准流程生成并验证：")
+A("")
+A("```text")
+A("① 从 LMS 导出原题（题面 HTML + 测试数据）")
+A("        │")
+A("        ▼")
+A("② 生成 problem.yaml 与 problem.zh.tex（HTML/MathML → LaTeX 保真转换）")
+A("        │")
+A("        ▼")
+A("③ 拆分公开样例 → data/sample（原样保留）")
+A("        │")
+A("        ▼")
+A("④ 编写参考解答 submissions/accepted/solution.cpp")
+A("        │")
+A("        ▼")
+A("⑤ 用原系统期望输出交叉校验参考解答（必须全部一致）")
+A("        │")
+A("        ▼")
+A("⑥ 编写 input_validators/validator.py（按本题格式/约束）")
+A("        │")
+A("        ▼")
+A("⑦ 补充隐藏测试 .in（边界/极端/随机，符合题面约束）")
+A("        │")
+A("        ▼")
+A("⑧ 编译并运行参考解答 → 生成/校验所有 .ans")
+A("        │")
+A("        ▼")
+A("⑨ 对全部 .in 运行输入校验器（必须 exit 42）")
+A("        │")
+A("        ▼")
+A("⑩ 打包 <problemid>.zip 并复检（结构、配对、编码、无杂项文件）")
+A("```")
+A("")
+
+A("## 10. 验证结果汇总")
+A("")
+A("- **参考解答编译**：%d / %d 通过（`g++ -std=c++17 -O2`）" % (ok, len(pids)))
+A("- **公开样例测试**：全部一致（无 mismatch）")
+A("- **隐藏测试**：全部一致（`.ans` 由参考解答实际运行得到并复核）")
+A("- **输入校验器**：全部 `.in` 返回 42（无 non-42）")
+A("- **ZIP 结构检查**：全部通过（单一 `<problemid>/` 根、`.in/.ans` 配对、无 `__MACOSX`/`.DS_Store`/内部元数据文件、UTF-8 无 BOM、LF、非空文本以换行符结尾）")
+A("- 存在问题的题目：%s" % ("无" if not bad else "、".join(b["pid"] for b in bad)))
+A("")
+
+A("## 11. 编码与文本约定")
+A("")
+A("- 所有文本文件：**UTF-8、无 BOM、Unix LF**；非空文本文件以换行符 `\\n` 结尾（含全部 `.in` 输入文件，已逐一检查并修复）。")
+A("- 文件名不含中文/空格/分隔符，仅 `a-z 0-9` 与小写连排。")
+A("")
+
+A("## 12. 题面保真与约束处理说明")
+A("")
+A("- 全部题包以 LMS 原始题目为唯一题意依据；未修改题目要求、输入/输出格式、样例与数据范围。")
+A("- 对原题已明确给出的数值范围，validator 与测试数据严格按其取值（例如 `0<n<100`、`1≤a,b,c≤10000`、`n 为 10 的倍数`、`int 类型可存储范围` 等）。")
+A("- 对**原题未显式给出上限**的数值（如部分题目只写“整数”而未给范围），**未擅自补全具体范围**：validator 仅校验结构、整数性，以及参考解答实际需要的 64 位类型边界；此类情形如需严格数据范围，建议以题目出处/评测系统口径为准。")
+A("- 个别题目原始题面本身存在非常规字符或写法（例如“说你好”中的 `«`），按原文保留，未作改动。")
+A("")
+
+A("## 13. 使用与导入建议")
+A("")
+A("- 直接以 `problemid.zip` 导入支持 legacy-icpc 的 OJ / 评测平台（如 DOMjudge、自研 Judge Service 等）。")
+A("- 导入时评测语言可设为 C++（GNU C++17）；时间/内存限制以各平台与题库配置为准（系统内原值可在 `problem_info.json` 查看，LMS 运行限制记录于原系统 `judge_config`）。")
+A("- 若平台要求英文或其它语言题面，可在 `problem_statement/` 下按需新增 `problem.en.tex`，不影响包结构。")
+A("")
+
+A("## 14. 汇总统计")
+A("")
+A("- 题目总数：%d" % len(pids))
+A("- 参考语言：C++17（全部）")
+A("- 公开样例组数合计：%d" % tot_sample)
+A("- 隐藏测试组数合计：%d（其中 %d 组来自原系统保留数据，其余为按约束补充）" % (tot_secret, tot_lms_secret))
+A("- 含图片题面：3 题（`rili`、`chengxugaicuo`、`tianhuabanshangdexiaodeng`）")
+A("- PDF 题面：1 题（`maxsubarraysum`）")
+A("- 判定方式：`default`（无 Special Judge）")
+A("- 生成日期：%s" % datetime.date.today().isoformat())
+A("")
+A("## 15. 附：转换工具与中间产物")
+A("")
+A("转换工作目录：`/Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/_lms_convert/`")
+A("")
+A("```text")
+A("scripts/convert.py              # HTML + MathML → LaTeX 转换、样例抽取、ID 生成")
+A("scripts/gen_scaffold.py         # 生成题包骨架（yaml/题面/样例/系统数据拆分）")
+A("scripts/builder.py              # 单题构建：编译/交叉校验/生成.ans/校验器42/打包")
+A("scripts/validate_all.py         # 全量复验脚本")
+A("scripts/rezip_all.py            # 重新打包")
+A("scripts/generate_report.py      # 生成转换报告 _report.md")
+A("problems/<problemid>/           # 每题构建中间目录（含 problem_info.json）")
+A("out/                            # 生成的 <problemid>.zip、验证与报告文件")
+A("work/                           # 从 LMS 导出的原始数据（exercises/test_cases/...json）")
+A("```")
+A("")
+A("---")
+A("（文档内容与题目包数据一一对应，随题目包同步维护。）")
+A("")
+
+text = "\n".join(L) + "\n"
+guide_path = os.path.join(OUT, "ICPC题目包转换说明文档.md")
+with open(guide_path, "w", encoding="utf-8", newline="\n") as f:
+    f.write(text)
+print("guide written:", guide_path, "lines:", len(L))

@@ -1,0 +1,20 @@
+✔ Frappe rooms isolate sites and users, require host start, and run SDK commands (6.435125ms)
+✔ replacement fences old socket; stale detach cannot close new bridge; guests cannot open rooms (1.845584ms)
+✔ permission failures deny admission; loading and disconnected rooms expire (1.150833ms)
+✔ registered Road King uses Frappe identities and supports two to four racers (5.614125ms)
+✔ input schema validates controls and rejects unbound identity/score fields (1.547541ms)
+✔ requires every loaded player, blocks countdown movement, neutralizes expired input (20.7825ms)
+✔ four normal-mode racers finish with server timing and command deduplication (133.02475ms)
+✔ reconnect keeps progress and rejects input from old connection (18.116083ms)
+✔ disconnected players retire after the grace period (3.620667ms)
+✔ normal mode rejects teleporting and only accepts host NPC snapshots (12.063666ms)
+✔ Frappe empty room configuration gets a valid race (0.109833ms)
+✔ reload exposes acknowledged sample so fresh client can drive immediately (11.692042ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 253.106375

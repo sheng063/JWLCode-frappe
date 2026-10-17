@@ -1,0 +1,8 @@
+problem_format_version: legacy-icpc
+
+name: 输出保留3位小数的浮点数
+
+license: unknown
+
+validation: default
+

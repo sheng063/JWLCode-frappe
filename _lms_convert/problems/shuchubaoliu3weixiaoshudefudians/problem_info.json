@@ -1,0 +1,65 @@
+{
+  "exercise_name": "utdoukrstp",
+  "exercise_number": "P-000051",
+  "title": "C1 · 输出保留3位小数的浮点数",
+  "problem_id": "shuchubaoliu3weixiaoshudefudians",
+  "problem_name": "输出保留3位小数的浮点数",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "3.14159",
+      "output": "3.142"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "3.14159\n",
+      "output": "3.142"
+    },
+    {
+      "idx": 2,
+      "input": "2.5\n",
+      "output": "2.500"
+    },
+    {
+      "idx": 3,
+      "input": "7.1234\n",
+      "output": "7.123"
+    },
+    {
+      "idx": 4,
+      "input": "0.0004\n",
+      "output": "0.000"
+    }
+  ],
+  "secret_from_lms": [
+    {
+      "idx": 1,
+      "input": "3.14159\n",
+      "output": "3.142"
+    },
+    {
+      "idx": 2,
+      "input": "2.5\n",
+      "output": "2.500"
+    },
+    {
+      "idx": 3,
+      "input": "7.1234\n",
+      "output": "7.123"
+    },
+    {
+      "idx": 4,
+      "input": "0.0004\n",
+      "output": "0.000"
+    }
+  ],
+  "statement_html_len": 238,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

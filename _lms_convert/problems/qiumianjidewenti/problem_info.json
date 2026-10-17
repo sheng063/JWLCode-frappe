@@ -1,0 +1,38 @@
+{
+  "exercise_name": "v6k6i2n5q9",
+  "exercise_number": "P-000034",
+  "title": "C1 · 求面积的问题 [2458705]",
+  "problem_id": "qiumianjidewenti",
+  "problem_name": "求面积的问题",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 32767,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "r\n3.0 2.1",
+      "output": "6.3"
+    },
+    {
+      "input": "t\n3.0 5.0",
+      "output": "7.5"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "r\n3.0 2.1",
+      "output": "6.3"
+    },
+    {
+      "idx": 2,
+      "input": "t\n3.0 5.0",
+      "output": "7.5"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 1113,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

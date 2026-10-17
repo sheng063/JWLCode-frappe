@@ -1,0 +1,29 @@
+{
+  "assignment": "ASG-00959",
+  "lesson": "0960 考试等级划分",
+  "title": "C1 · 考试等级划分",
+  "problem_statement": "<h4>题目描述</h4><p>给定一个百分制成绩 fen，根据成绩输出其对应的等级：90 分及以上为 A，80～89 分为 B，70～79 分为 C，70 分以下为 D。</p><h4>输入格式</h4><p>一个整数 fen，表示百分制成绩，满足 0 ≤ fen ≤ 100。</p><h4>输出格式</h4><p>一行一个字母：A、B、C 或 D（输出后换行）。</p><h4>样例输入</h4><pre><code>95</code></pre><h4>样例输出</h4><pre><code>A</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main() {\n    int fen;\n    cin >> fen;\n    if (fen >= 90) {\n        cout << \"A\" << endl;\n    } else if (fen >= 80) {\n        cout << \"B\" << endl;\n    } else if (fen >= 70) {\n        cout << \"C\" << endl;\n    } else {\n        cout << \"D\" << endl;\n    }\n    return 0;\n}\n",
+  "test_cases": [
+    {
+      "input": "95",
+      "expected_output": "A"
+    },
+    {
+      "input": "90",
+      "expected_output": "A"
+    },
+    {
+      "input": "85",
+      "expected_output": "B"
+    },
+    {
+      "input": "75",
+      "expected_output": "C"
+    },
+    {
+      "input": "65",
+      "expected_output": "D"
+    }
+  ]
+}

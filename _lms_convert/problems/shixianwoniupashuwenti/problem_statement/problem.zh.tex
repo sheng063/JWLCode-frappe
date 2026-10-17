@@ -1,0 +1,35 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{实现蜗牛爬树问题}
+
+\subsection*{题目描述}
+一只蜗牛从 n 米高的大树底部向树顶攀爬。白天它向上爬 a 米，晚上会向下滑落 b 米；第二天白天再爬 a 米，晚上再滑落 b 米，如此往复。请计算按照这样的规律，蜗牛第几天可以爬到树顶。
+
+\subsection*{输入格式}
+输入只有一行，包含三个用空格分开的整数 n、a、b，分别表示树的高度、白天爬升的高度和晚上滑落的高度。保证 a > b，并且 n - a 是 (a - b) 的整数倍。所有数值都在 int 类型变量可以存储的范围内。
+
+\subsection*{输出格式}
+输出一个整数，表示蜗牛爬到树顶所需的天数。
+
+\subsection*{样例输入}
+\begin{verbatim}
+12 3 2
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+10
+\end{verbatim}
+
+
+\end{document}

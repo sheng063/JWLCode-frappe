@@ -3,14 +3,19 @@
 import base64
 import binascii
 import mimetypes
+import hashlib
+import hmac
+import re
+from datetime import datetime, timezone
 import secrets
 import shutil
 import stat
 import zipfile
 import zlib
 from io import BytesIO
+from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit, unquote
 
 import frappe
 from frappe import _
@@ -114,10 +119,137 @@ def remove_package_after_commit(name):
 	frappe.db.after_commit.add(lambda: shutil.rmtree(root, ignore_errors=True))
 
 
+def session_is_active(sid, user):
+	"""Check the original login, including logout and expiry, without changing session.user."""
+	from frappe.sessions import get_expiry_in_seconds
+	from frappe.utils import now_datetime, get_datetime
+	if not sid or sid == 'Guest':
+		return False
+	cached = frappe.cache.hget('session', sid)
+	if cached:
+		owner, data = cached.get('user'), cached.get('data', {})
+	else:
+		row = frappe.db.get_value('Sessions', {'sid': sid}, ['user', 'sessiondata'], as_dict=True, order_by='sid')
+		if not row:
+			return False
+		owner, data = row.user, frappe.parse_json(row.sessiondata or '{}')
+	if owner != user or not data.get('last_updated'):
+		return False
+	if (now_datetime() - get_datetime(data['last_updated'])).total_seconds() > get_expiry_in_seconds(data.get('session_expiry')):
+		return False
+	end = data.get('session_end')
+	return not end or datetime.now(timezone.utc) < datetime.fromisoformat(end)
+
+
 def launch_url(game):
+	request = getattr(frappe.local, 'request', None)
+	if request and request.scheme != 'https' and request.host.split(':')[0] not in ('localhost', '127.0.0.1'):
+		frappe.throw('ZIP 游戏的安全会话需要 HTTPS，请使用站点的 HTTPS 地址。')
 	token = secrets.token_hex(32)
-	frappe.cache.set_value('game-package:' + token, {'game': game.name, 'user': frappe.session.user}, expires_in_sec=TOKEN_TTL)
+	sid = frappe.session.sid
+	if not sid or sid == 'Guest':
+		raise frappe.PermissionError
+	# A separate HttpOnly cookie lets the opaque sandbox authenticate resources.
+	# It cannot authenticate LMS API requests and exposes no login session secret.
+	from frappe.utils.password import get_encryption_key
+	binding = hmac.new(get_encryption_key().encode(), sid.encode(), hashlib.sha256).hexdigest()
+	frappe.local.cookie_manager.set_cookie('lms_game_session', binding, secure=True, httponly=True, samesite='None', max_age=TOKEN_TTL)
+	frappe.cache.set_value('game-package:' + token, {'game': game.name, 'user': frappe.session.user, 'sid': sid, 'binding': binding}, expires_in_sec=TOKEN_TTL)
 	return '/game-assets/' + token + '/' + quote(game.entry_file, safe='/')
+
+
+def prepare_html(raw, asset_root):
+	"""Keep relative asset URLs; credentialed requests carry the sandbox-only cookie."""
+	import json
+	html = raw.decode('utf-8-sig')
+	# HTMLParser preserves script contents; regex over a whole document can
+	# accidentally rewrite strings inside the game's JavaScript.
+	class CredentialHTML(HTMLParser):
+		def __init__(self):
+			super().__init__(convert_charrefs=False)
+			self.output = []
+
+		def handle_starttag(self, tag, attrs):
+			values = dict(attrs)
+			text = self.get_starttag_text()
+			source = values.get('src') or values.get('href') or ''
+			local = not urlsplit(source).scheme and not urlsplit(source).netloc
+			module = tag == 'script' and ((values.get('type') or '').lower() == 'module' or 'crossorigin' in values)
+			preload = tag == 'link' and (values.get('rel') or '').lower() == 'modulepreload'
+			if local and (module or preload):
+				text = re.sub(r"\s+crossorigin(?:\s*=\s*(?:\"[^\"]*\"|'[^']*'|[^\s>]+))?", '', text, flags=re.I)
+				text = (text[:-2] + ' crossorigin="use-credentials" />') if text.endswith('/>') else (text[:-1] + ' crossorigin="use-credentials">')
+			self.output.append(text)
+
+		def handle_startendtag(self, tag, attrs):
+			self.handle_starttag(tag, attrs)
+
+		def handle_endtag(self, tag):
+			self.output.append('</' + tag + '>')
+
+		def handle_data(self, data):
+			self.output.append(data)
+
+		def handle_entityref(self, name):
+			self.output.append('&' + name + ';')
+
+		def handle_charref(self, name):
+			self.output.append('&#' + name + ';')
+
+		def handle_comment(self, data):
+			self.output.append('<!--' + data + '-->')
+
+		def handle_decl(self, decl):
+			self.output.append('<!' + decl + '>')
+
+		def handle_pi(self, data):
+			self.output.append('<?' + data + '>')
+
+	parser = CredentialHTML()
+	parser.feed(html)
+	parser.close()
+	html = ''.join(parser.output)
+	bootstrap = """<script>(function(){
+const root = ROOT;
+const local = value => { try { return new URL(value, location.href).href.startsWith(root); } catch { return false; } };
+const originalFetch = window.fetch;
+window.fetch = function(input, init) {
+ if (local(input instanceof Request ? input.url : input)) init = Object.assign({}, init, {credentials: 'include'});
+ return originalFetch.call(this, input, init);
+};
+const originalOpen = XMLHttpRequest.prototype.open;
+XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+ const result = originalOpen.call(this, method, url, ...rest);
+ if (local(url)) this.withCredentials = true;
+ return result;
+};
+})();</script>""".replace('ROOT', json.dumps(asset_root))
+	# After a leading doctype keeps standards mode while running before game code.
+	match = re.match(r'\s*<!doctype[^>]*>', html, re.I)
+	position = match.end() if match else 0
+	return (html[:position] + bootstrap + html[position:]).encode('utf-8')
+
+
+def prepare_css(raw, path, root, asset_root):
+	"""Fonts use anonymous CORS, so embed package fonts in authenticated CSS."""
+	def embed_font(match):
+		url = match[1].strip().strip("\"'")
+		parsed = urlsplit(url)
+		if parsed.scheme or parsed.netloc:
+			return match[0]
+		resource = unquote(parsed.path)
+		if resource.startswith('/game-assets/'):
+			prefix = urlsplit(asset_root).path
+			if not resource.startswith(prefix):
+				return match[0]
+			target = (root / resource[len(prefix):]).resolve()
+		else:
+			target = (path.parent / resource).resolve()
+		if target.suffix.lower() not in ('.woff', '.woff2', '.ttf', '.otf') or not target.is_relative_to(root) or not target.is_file():
+			return match[0]
+		mime = mimetypes.guess_type(str(target))[0] or 'application/octet-stream'
+		return 'url("data:' + mime + ';base64,' + base64.b64encode(target.read_bytes()).decode() + '")'
+	return re.sub(r'url\(\s*([^)]*)\)', embed_font, raw.decode('utf-8-sig')).encode('utf-8')
 
 
 class GamePackageRenderer(BaseRenderer):
@@ -125,7 +257,12 @@ class GamePackageRenderer(BaseRenderer):
 		return self.path.startswith('game-assets/')
 
 	def render(self):
-		from lms.lms.game import game_visible
+		from lms.lms.game import game_is_enabled
+		from lms.lms.game_access import get_game_access
+		# Resource responses, including denials, must not replace LMS login cookies.
+		if getattr(frappe.local, 'cookie_manager', None):
+			frappe.local.cookie_manager.cookies.clear()
+			frappe.local.cookie_manager.to_delete.clear()
 		# Frappe's page resolver removes .html; packaged assets need the exact
 		# original request path for relative URLs and filenames to keep working.
 		request_path = getattr(getattr(frappe.local, 'request', None), 'path', self.path)
@@ -134,23 +271,33 @@ class GamePackageRenderer(BaseRenderer):
 			raise frappe.PermissionError
 		token, resource = parts[1:]
 		access = frappe.cache.get_value('game-package:' + token)
-		if not access or not frappe.db.get_value('User', access['user'], 'enabled') or not game_visible(access['user']):
+		binding = getattr(getattr(frappe.local, 'request', None), 'cookies', {}).get('lms_game_session', '')
+		if not access or not binding or not hmac.compare_digest(binding, access.get('binding', '')) or not session_is_active(access.get('sid'), access['user']) or not get_game_access(access['user'])['can_enter']:
+			raise frappe.PermissionError
+		if frappe.session.user != 'Guest' and frappe.session.sid != access.get('sid'):
 			raise frappe.PermissionError
 		if not frappe.db.exists('LMS Game', access['game']):
 			raise frappe.DoesNotExistError
+		if not game_is_enabled(access['game'], access['user']):
+			raise frappe.PermissionError
 		root = package_root(access['game'])
 		path = (root / resource).resolve()
 		if not path.is_relative_to(root) or not path.is_file():
 			raise frappe.DoesNotExistError
 		mime = {'.js': 'text/javascript', '.mjs': 'text/javascript', '.wasm': 'application/wasm'}.get(path.suffix.lower()) or mimetypes.guess_type(str(path))[0] or 'application/octet-stream'
-		response = Response(path.read_bytes(), mimetype=mime)
-		# Authorization travels in the unguessable URL: opaque iframe origins
-		# cannot depend on same-site cookies for scripts, modules or fetch calls.
 		asset_root = frappe.local.request.host_url.rstrip('/') + '/game-assets/' + token + '/'
+		body = path.read_bytes()
+		if mime == 'text/html':
+			body = prepare_html(body, asset_root)
+		elif mime == 'text/css':
+			body = prepare_css(body, path, root, asset_root)
+		response = Response(body, mimetype=mime)
 		policy = f"sandbox allow-scripts allow-pointer-lock; default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' {asset_root} https: blob:; style-src 'unsafe-inline' {asset_root} https:; img-src {asset_root} https: data: blob:; media-src {asset_root} https: data: blob:; font-src {asset_root} https: data:; connect-src {asset_root}; frame-src {asset_root}; worker-src blob:; base-uri 'none'; form-action 'none'"
 		response.headers.update({
 			'Content-Security-Policy': policy,
-			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Origin': 'null',
+			'Access-Control-Allow-Credentials': 'true',
+			'Vary': 'Origin, Cookie',
 			'Cross-Origin-Resource-Policy': 'cross-origin',
 			'Referrer-Policy': 'no-referrer',
 			'X-Content-Type-Options': 'nosniff',

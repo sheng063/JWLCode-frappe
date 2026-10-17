@@ -1,0 +1,66 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{包裹托运}
+
+春节快到了，小红和爸爸一起来到邮局，打算给家住外地的爷爷、奶奶家里捎点年货。邮局的阿姨介绍，托运包裹的运费标准是：
+
+\begin{itemize}
+  \item 包裹重量不大于 $15$ 公斤时，每公斤 $6$ 元；
+
+  \item 超过 $15$ 公斤后，其超过部分每公斤 $9$ 元；
+
+\end{itemize}
+现已知：包裹的重量为 $X$ 公斤，请同学们和小红一起帮助邮局的阿姨计算一下，包裹的运费 $Y$ 应为多少元？
+
+\subsection*{输入格式}
+输入只有一行，包含一个整数 $X$（其中 $1\leX\le100$）表示包裹的重量，单位：公斤。
+
+\subsection*{输出格式}
+输出只有一行，包含 $1$ 个数，表示包裹的运费。
+
+\subsection*{样例输入}
+\begin{verbatim}
+11
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+66
+\end{verbatim}
+
+因为 $11\le15$，则需要 $11\times6=66$ 元。
+
+\subsection*{样例 2 输入}
+\begin{verbatim}
+18
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+117
+\end{verbatim}
+
+因为 $18>15$，则超过部分为：$18-15=3$ 公斤。
+
+\begin{itemize}
+  \item 超过部分需要：$9\times3=27$ 元；
+
+  \item 没有超过部分：$6\times15=90$ 元。
+
+\end{itemize}
+共需 $27+90=117$ 元。
+
+原题使用特殊判题；本地仅作样例文本校验，尚未复现原站特殊判题规则。
+
+
+\end{document}

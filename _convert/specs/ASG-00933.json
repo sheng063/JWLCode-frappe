@@ -1,0 +1,25 @@
+{
+  "assignment": "ASG-00933",
+  "lesson": "0934 约数还是倍数",
+  "title": "C1 · 约数还是倍数",
+  "problem_statement": "<h4>题目描述</h4><p>输入两个具有倍数关系的整数，判断它们之间的大小关系，并输出正确的表达式。如果其中一个数 a 能被另一个数 b 整除，我们称 a 为 b 的倍数，b 为 a 的一个约数。</p><h4>输入格式</h4><p>输入只有一行，包含两个用空格分开的整数 a、b。它们之间成倍数关系（其中一个能被另一个整除），并且都在 int 类型变量可以存储的范围内。</p><h4>输出格式</h4><p>如果 a 大于 b，输出字符串 a / b = 后面紧跟着 a 除以 b 的整数商；否则输出字符串 b / a = 后面紧跟着 b 除以 a 的整数商。每个输出独占一行。</p><h4>样例输入</h4><pre><code>6 3</code></pre><h4>样例输出</h4><pre><code>a / b = 2</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main() {\n    int a, b;\n    cin >> a >> b;\n    if (a > b) {\n        cout << \"a / b = \" << a / b << endl;\n    } else {\n        cout << \"b / a = \" << b / a << endl;\n    }\n    return 0;\n}\n",
+  "test_cases": [
+    {
+      "input": "6 3",
+      "expected_output": "a / b = 2"
+    },
+    {
+      "input": "3 6",
+      "expected_output": "b / a = 2"
+    },
+    {
+      "input": "12 4",
+      "expected_output": "a / b = 3"
+    },
+    {
+      "input": "20 5",
+      "expected_output": "a / b = 4"
+    }
+  ]
+}

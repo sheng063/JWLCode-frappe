@@ -1,0 +1,13 @@
+
+ RUN  v4.1.7 /Users/jiang/WorkSpace/JWLCode/JWLCode-frappe/frontend
+
+
+warn - The `content` option in your Tailwind CSS configuration is missing or empty.
+warn - Configure your content sources or your generated CSS will be missing styles.
+warn - https://tailwindcss.com/docs/content-configuration
+
+ Test Files  3 passed (3)
+      Tests  30 passed (30)
+   Start at  16:50:24
+   Duration  1.17s (transform 626ms, setup 244ms, import 735ms, tests 301ms, environment 1.50s)
+

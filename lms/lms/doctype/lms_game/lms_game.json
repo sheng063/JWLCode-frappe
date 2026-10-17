@@ -7,6 +7,7 @@
 	"title_field": "title",
 	"field_order": [
 		"title",
+		"enabled",
 		"filename",
 		"html_base64",
 		"description",
@@ -19,6 +20,12 @@
 			"label": "Title",
 			"fieldtype": "Data",
 			"reqd": 1
+		},
+		{
+			"fieldname": "enabled",
+			"label": "Enabled for Students",
+			"fieldtype": "Check",
+			"default": "1"
 		},
 		{
 			"fieldname": "filename",

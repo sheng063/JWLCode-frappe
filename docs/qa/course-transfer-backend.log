@@ -1,0 +1,281 @@
+test_get_assessments_from_lesson_non_json (lms.lms.test_course_import_export.TestImportExportContentGuards.test_get_assessments_from_lesson_non_json) ... ok
+test_replace_assessment_names_handles_non_object_json (lms.lms.test_course_import_export.TestImportExportContentGuards.test_replace_assessment_names_handles_non_object_json) ... ok
+test_replace_assessment_names_passes_non_json_through (lms.lms.test_course_import_export.TestImportExportContentGuards.test_replace_assessment_names_passes_non_json_through) ... ok
+test_replace_assessment_names_skips_malformed_blocks (lms.lms.test_course_import_export.TestImportExportContentGuards.test_replace_assessment_names_skips_malformed_blocks) ... ok
+test_01_text_structure_roundtrip (__main__.CourseTransferAudit.test_01_text_structure_roundtrip) ... ok
+test_02_export_contains_manual_statement_and_cases (__main__.CourseTransferAudit.test_02_export_contains_manual_statement_and_cases) ... ok
+test_03_manual_import_into_absent_target (__main__.CourseTransferAudit.test_03_manual_import_into_absent_target) ... ok
+test_04_same_site_import (__main__.CourseTransferAudit.test_04_same_site_import) ... ok
+test_05_missing_exercise_is_retained (__main__.CourseTransferAudit.test_05_missing_exercise_is_retained) ... ok
+test_06_later_new_exercise_does_not_rebind_by_title (__main__.CourseTransferAudit.test_06_later_new_exercise_does_not_rebind_by_title) ... ok
+test_07_later_exact_docname_restores_reference (__main__.CourseTransferAudit.test_07_later_exact_docname_restores_reference) ... ok
+test_08_repeat_text_import (__main__.CourseTransferAudit.test_08_repeat_text_import) ... ok
+test_09_repeated_program_reference (__main__.CourseTransferAudit.test_09_repeated_program_reference) ... /home/frappe/.pyenv/versions/3.14.7/lib/python3.14/zipfile/__init__.py:1730: UserWarning: Duplicate name: 'assessments/test_cases/5d72fn170j.json'
+  return self._open_to_write(zinfo, force_zip64=force_zip64)
+/home/frappe/.pyenv/versions/3.14.7/lib/python3.14/zipfile/__init__.py:1730: UserWarning: Duplicate name: 'assessments/lms_programming_exercise_5d79ie39j7.json'
+  return self._open_to_write(zinfo, force_zip64=force_zip64)
+ok
+test_10_duplicate_chapter_titles_preserve_structure (__main__.CourseTransferAudit.test_10_duplicate_chapter_titles_preserve_structure) ... FAIL
+test_11_duplicate_lesson_titles_preserve_identity (__main__.CourseTransferAudit.test_11_duplicate_lesson_titles_preserve_identity) ... FAIL
+test_12_visibility_flag_roundtrip (__main__.CourseTransferAudit.test_12_visibility_flag_roundtrip) ... FAIL
+test_13_instructor_content_exercise_is_exported (__main__.CourseTransferAudit.test_13_instructor_content_exercise_is_exported) ... FAIL
+test_14_icpc_new_target_roundtrip (__main__.CourseTransferAudit.test_14_icpc_new_target_roundtrip) ... ERROR
+test_15_invalid_zip_rejected (__main__.CourseTransferAudit.test_15_invalid_zip_rejected) ... ok
+test_16_missing_course_json_rejected (__main__.CourseTransferAudit.test_16_missing_course_json_rejected) ... ok
+test_17_guest_import_denied (__main__.CourseTransferAudit.test_17_guest_import_denied) ... ok
+test_18_guest_export_denied (__main__.CourseTransferAudit.test_18_guest_export_denied) ... ok
+test_19_same_title_exercise_mapping (__main__.CourseTransferAudit.test_19_same_title_exercise_mapping) ... FAIL
+test_20_empty_program_block (__main__.CourseTransferAudit.test_20_empty_program_block) ... ERROR
+test_21_manual_reimport_new_target (__main__.CourseTransferAudit.test_21_manual_reimport_new_target) ... FAIL
+test_22_quiz_roundtrip_preserves_marks (__main__.CourseTransferAudit.test_22_quiz_roundtrip_preserves_marks) ... /home/frappe/bench-data/frappe-bench/env/lib/python3.14/site-packages/fuzzywuzzy/fuzz.py:11: UserWarning: Using slow pure-python SequenceMatcher. Install python-Levenshtein to remove this warning
+  warnings.warn('Using slow pure-python SequenceMatcher. Install python-Levenshtein to remove this warning')
+FAIL
+test_23_assignment_roundtrip (__main__.CourseTransferAudit.test_23_assignment_roundtrip) ... ok
+test_24_private_attachment_roundtrip (__main__.CourseTransferAudit.test_24_private_attachment_roundtrip) ... FAIL
+test_25_missing_quiz_rejected (__main__.CourseTransferAudit.test_25_missing_quiz_rejected) ... ok
+test_26_external_video_roundtrip (__main__.CourseTransferAudit.test_26_external_video_roundtrip) ... ok
+test_27_empty_course_roundtrip (__main__.CourseTransferAudit.test_27_empty_course_roundtrip) ... ok
+
+======================================================================
+ERROR: test_14_icpc_new_target_roundtrip (__main__.CourseTransferAudit.test_14_icpc_new_target_roundtrip)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 212, in test_14_icpc_new_target_roundtrip
+    self.import_zip(self.edit(raw, change))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 83, in import_zip
+    return frappe.get_doc('LMS Course', import_course_from_zip('/private/files/' + os.path.basename(path)))
+                                        ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/utils/typing_validations.py", line 55, in wrapper
+    return func(*args, **kwargs)
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/api.py", line 3257, in import_course_from_zip
+    return import_course_zip(zip_file_path)
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/course_import_export.py", line 345, in import_course_zip
+    create_assessment_docs(zip_file)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/course_import_export.py", line 712, in create_assessment_docs
+    create_main_assessment_docs(zip_file)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/course_import_export.py", line 707, in create_main_assessment_docs
+    build_assessment_doc(assessment_data)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/course_import_export.py", line 695, in build_assessment_doc
+    doc.insert(ignore_permissions=True)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/model/document.py", line 739, in insert
+    self.run_before_save_methods()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/model/document.py", line 1857, in run_before_save_methods
+    self.run_method("validate")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/model/document.py", line 1701, in run_method
+    out = Document.hook(fn)(self, *args, **kwargs)
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/model/document.py", line 2107, in composer
+    return composed(self, method, *args, **kwargs)
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/model/document.py", line 2081, in runner
+    add_to_return_value(self, fn(self, *args, **kwargs))
+                              ~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/model/document.py", line 1698, in fn
+    return method_object(*args, **kwargs)
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/doctype/lms_programming_exercise/lms_programming_exercise.py", line 27, in validate
+    frappe.throw("Package settings require the import service.")
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/utils/messages.py", line 159, in throw
+    msgprint(
+    ~~~~~~~~^
+    	msg,
+     ^^^^
+    ...<7 lines>...
+    	allow_dangerous_html=allow_dangerous_html,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/utils/messages.py", line 118, in msgprint
+    _raise_exception()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/utils/messages.py", line 59, in _raise_exception
+    raise exc
+frappe.exceptions.ValidationError: Package settings require the import service.
+
+======================================================================
+ERROR: test_20_empty_program_block (__main__.CourseTransferAudit.test_20_empty_program_block)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 246, in test_20_empty_program_block
+    self.import_zip(self.edit(raw, change))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 83, in import_zip
+    return frappe.get_doc('LMS Course', import_course_from_zip('/private/files/' + os.path.basename(path)))
+                                        ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/frappe/frappe/utils/typing_validations.py", line 55, in wrapper
+    return func(*args, **kwargs)
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/api.py", line 3257, in import_course_from_zip
+    return import_course_zip(zip_file_path)
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/course_import_export.py", line 346, in import_course_zip
+    create_lesson_docs(zip_file, course_doc.name, chapter_docs)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/course_import_export.py", line 629, in create_lesson_docs
+    replace_values_in_content(zip_file, lesson_doc.content) if lesson_doc.content else None
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/course_import_export.py", line 613, in replace_values_in_content
+    return replace_assessment_names(zip_file, content)
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/course_import_export.py", line 592, in replace_assessment_names
+    assessment_title = get_assessment_title(zip_file, assessment_name, block.get("type"))
+  File "/home/frappe/bench-data/frappe-bench/apps/lms/lms/lms/course_import_export.py", line 564, in get_assessment_title
+    assessment_name = "_".join(assessment_name.split(" "))
+                               ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'split'
+
+======================================================================
+FAIL: test_10_duplicate_chapter_titles_preserve_structure (__main__.CourseTransferAudit.test_10_duplicate_chapter_titles_preserve_structure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 175, in test_10_duplicate_chapter_titles_preserve_structure
+    self.assertEqual([len(frappe.get_doc('Course Chapter', ch.chapter).lessons) for ch in new.chapters], [1, 1])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [2, 0] != [1, 1]
+
+First differing element 0:
+2
+1
+
+- [2, 0]
++ [1, 1]
+
+======================================================================
+FAIL: test_11_duplicate_lesson_titles_preserve_identity (__main__.CourseTransferAudit.test_11_duplicate_lesson_titles_preserve_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 182, in test_11_duplicate_lesson_titles_preserve_identity
+    self.assertEqual(len({le.name for le in self.lessons(new)}), 2)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 2
+
+======================================================================
+FAIL: test_12_visibility_flag_roundtrip (__main__.CourseTransferAudit.test_12_visibility_flag_roundtrip)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 186, in test_12_visibility_flag_roundtrip
+    self.assertEqual(self.import_zip(self.export(c)).is_public, 0)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_13_instructor_content_exercise_is_exported (__main__.CourseTransferAudit.test_13_instructor_content_exercise_is_exported)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 195, in test_13_instructor_content_exercise_is_exported
+    self.assertTrue(any(n.startswith('assessments/lms_programming') for n in z.namelist()))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_19_same_title_exercise_mapping (__main__.CourseTransferAudit.test_19_same_title_exercise_mapping)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 237, in test_19_same_title_exercise_mapping
+    self.assertEqual(self.ref(c), old.name)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '5ddtfdg7na' != '5ddp1isbhb'
+- 5ddtfdg7na
++ 5ddp1isbhb
+
+
+======================================================================
+FAIL: test_21_manual_reimport_new_target (__main__.CourseTransferAudit.test_21_manual_reimport_new_target)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 256, in test_21_manual_reimport_new_target
+    self.assertEqual(self.ref(a), self.ref(b), 'Repeated imports should reuse the imported exercise')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '5df7k2ullv' != '5df5eqdcla'
+- 5df7k2ullv
++ 5df5eqdcla
+ : Repeated imports should reuse the imported exercise
+
+======================================================================
+FAIL: test_22_quiz_roundtrip_preserves_marks (__main__.CourseTransferAudit.test_22_quiz_roundtrip_preserves_marks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 272, in test_22_quiz_roundtrip_preserves_marks
+    self.assertEqual(actual.questions[0].marks, 5)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 5
+
+======================================================================
+FAIL: test_24_private_attachment_roundtrip (__main__.CourseTransferAudit.test_24_private_attachment_roundtrip)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/lms/scripts/qa/course_transfer_audit.py", line 292, in test_24_private_attachment_roundtrip
+    self.assertTrue(imported, f'Imported lesson still references {old_url}, but no File exists there')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: None is not true : Imported lesson still references /private/files/transfer-audit-443289f6e2.txt, but no File exists there
+
+----------------------------------------------------------------------
+Ran 31 tests in 2.892s
+
+FAILED (failures=8, errors=2)
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+MANUAL_IDS 5cthfhpson 5cu6f2ob75 DISPLAY_NUMBERS P-000084 P-000085
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None
+admin@example.com
+None
+existing_user None

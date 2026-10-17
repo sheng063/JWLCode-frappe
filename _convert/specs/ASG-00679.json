@@ -1,0 +1,13 @@
+{
+  "assignment": "ASG-00679",
+  "lesson": "0680 课前任务：打字练习",
+  "title": "C1 · 课前任务：打字练习",
+  "problem_statement": "<h4>题目描述</h4><p>本节为课前任务打字练习（重构题）。在代码编辑器中依次完成以下输入：第 1 行输入小写字母 <code>abc</code>；第 2 行按住 Shift 键输入大写字母 <code>DEF</code>；第 3 行点亮大写锁定键（Caps Lock）后输入大写字母 <code>GHI</code>；第 4 行熄灭大写锁定键后输入小写字母 <code>jkl</code>；第 5 行输入数字 <code>1230</code>；第 6 行输入符号 <code>&lt;+-*/%;&gt;</code>。请编写一个程序，不读入任何输入，将上述六行内容依次输出。</p><h4>输入格式</h4><p>无输入。</p><h4>输出格式</h4><p>依次输出六行内容：<br>abc<br>DEF<br>GHI<br>jkl<br>1230<br>&lt;+-*/%;&gt;</p><h4>样例输入</h4><pre><code></code></pre><h4>样例输出</h4><pre><code>abc\nDEF\nGHI\njkl\n1230\n&lt;+-*/%;&gt;</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main() {\n    cout << \"abc\" << endl;\n    cout << \"DEF\" << endl;\n    cout << \"GHI\" << endl;\n    cout << \"jkl\" << endl;\n    cout << \"1230\" << endl;\n    cout << \"<+-*/%;>\" << endl;\n    return 0;\n}",
+  "test_cases": [
+    {
+      "input": "",
+      "expected_output": "abc\nDEF\nGHI\njkl\n1230\n<+-*/%;>"
+    }
+  ]
+}

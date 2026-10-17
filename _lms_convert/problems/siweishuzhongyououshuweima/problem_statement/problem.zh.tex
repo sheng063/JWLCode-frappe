@@ -1,0 +1,46 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{四位数中有偶数位吗}
+
+请你通过程序设计，判断一下对于任意一个给定的四位正整数，其中是否存在一个数位上是偶数（提示：偶数是除以 $2$ 余数为 $0$ 的数）。
+
+\subsection*{输入格式}
+输入包含一个四位正整数 $n$（$1000\len\le9999$）。
+
+\subsection*{输出格式}
+输出为一行，如果 $n$ 的千位、百位、十位、个位中的任何一个为偶数，则输出 \texttt{YES}，否则输出 \texttt{NO}。
+
+\subsection*{样例输入}
+\begin{verbatim}
+9999
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+NO
+\end{verbatim}
+
+\subsection*{样例 2 输入}
+\begin{verbatim}
+1235
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+YES
+\end{verbatim}
+
+百位数字为 $2$，是一个偶数。
+
+
+\end{document}

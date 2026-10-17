@@ -1,0 +1,11 @@
+PASS entry displays single-player menu without room requests
+PASS single-player Start and keyboard controls run
+PASS single-player normal mode starts without a multiplayer room
+PASS selecting multiplayer opens in-game lobby without creating or joining
+PASS explicit Create makes exactly one actual Frappe room
+PASS two Frappe identities join and start inside the game
+PASS driving still synchronizes 23.5
+PASS return to lobby and resume same race
+PASS leave returns to single-player, closes peer room, and creates no new room
+PASS original race Home button leaves room and returns to single-player
+ALL SINGLE/MULTIPLAYER FLOW CHECKS PASSED

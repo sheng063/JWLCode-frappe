@@ -1,0 +1,60 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{幸运的数字}
+
+蒜头君认为有些数字可以给他带来好运气，他一直把 \textbf{首位和末位相乘小于首位和末位相加} 的三位数认为是自己的幸运数。
+
+\subsection*{输入格式}
+输入一个数字 $x(100\lex\le999)$
+
+\subsection*{输出格式}
+输出为一行，如果是蒜头君的幸运数，则输出 \texttt{YES}，否则输出 \texttt{NO}。
+
+\subsection*{样例输入}
+\begin{verbatim}
+888
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+NO
+\end{verbatim}
+
+\begin{itemize}
+  \item 首位和末位相乘：$8\times8=64$
+
+  \item 首位和末位相加：$8+8=16$
+
+\end{itemize}
+$64>16$，因此 $888$ 不是幸运数。
+
+\subsection*{样例 2 输入}
+\begin{verbatim}
+124
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+YES
+\end{verbatim}
+
+\begin{itemize}
+  \item 首位和末位相乘：$1\times4=4$
+
+  \item 首位和末位相加：$1+4=5$
+
+\end{itemize}
+$4<5$，因此 $124$ 是幸运数。
+
+
+\end{document}

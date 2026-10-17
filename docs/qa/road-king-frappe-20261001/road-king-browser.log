@@ -1,0 +1,7 @@
+PASS two authenticated players joined Frappe room and rendered both cars
+PASS Frappe names, room members, countdown and iframe isolation
+PASS keyboard movement mirrored to opponent 35.64 35.644076333333395
+PASS iframe reload retains progress
+PASS full page reload rejoins same race
+PASS shared race results
+ALL ROAD KING FRAPPE CHECKS PASSED

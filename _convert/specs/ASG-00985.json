@@ -1,0 +1,25 @@
+{
+  "assignment": "ASG-00985",
+  "lesson": "0986 长方形的周长",
+  "title": "C1 · 长方形的周长",
+  "problem_statement": "<h4>题目描述</h4><p>蒜头君今天刚刚学习了长方形的周长的计算方法：周长 <code>= 2 ×（长 + 宽）</code>。为了检测他的学习效果，花椰妹给他出了一个问题：给出一个长方形的长和宽，需要蒜头君计算这个长方形的周长。请你写一个程序，给定长方形的长和宽，计算并输出它的周长。</p><h4>输入格式</h4><p>输入一行，包含两个浮点数，分别表示长方形的长 <code>chang</code> 和宽 <code>kuan</code>，用空格分开。</p><h4>输出格式</h4><p>输出长方形的周长，四舍五入到小数点后 <code>3</code> 位。</p><h4>样例输入</h4><pre><code>1.5 2</code></pre><h4>样例输出</h4><pre><code>7.000</code></pre>",
+  "cpp_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\nint main(){\n    double chang, kuan;\n    cin >> chang >> kuan;\n    cout << fixed << setprecision(3) << 2 * (chang + kuan);\n    return 0;\n}\n",
+  "test_cases": [
+    {
+      "input": "1.5 2\n",
+      "expected_output": "7.000"
+    },
+    {
+      "input": "3 5\n",
+      "expected_output": "16.000"
+    },
+    {
+      "input": "2.25 4.5\n",
+      "expected_output": "13.500"
+    },
+    {
+      "input": "1.234 2.345\n",
+      "expected_output": "7.158"
+    }
+  ]
+}

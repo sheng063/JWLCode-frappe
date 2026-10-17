@@ -1,0 +1,70 @@
+{
+  "exercise_name": "utdbt4cuei",
+  "exercise_number": "P-000055",
+  "title": "C1 · 考试等级划分",
+  "problem_id": "kaoshidengjihuafen",
+  "problem_name": "考试等级划分",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "95",
+      "output": "A"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "95",
+      "output": "A"
+    },
+    {
+      "idx": 2,
+      "input": "90",
+      "output": "A"
+    },
+    {
+      "idx": 3,
+      "input": "85",
+      "output": "B"
+    },
+    {
+      "idx": 4,
+      "input": "75",
+      "output": "C"
+    },
+    {
+      "idx": 5,
+      "input": "65",
+      "output": "D"
+    }
+  ],
+  "secret_from_lms": [
+    {
+      "idx": 2,
+      "input": "90",
+      "output": "A"
+    },
+    {
+      "idx": 3,
+      "input": "85",
+      "output": "B"
+    },
+    {
+      "idx": 4,
+      "input": "75",
+      "output": "C"
+    },
+    {
+      "idx": 5,
+      "input": "65",
+      "output": "D"
+    }
+  ],
+  "statement_html_len": 265,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

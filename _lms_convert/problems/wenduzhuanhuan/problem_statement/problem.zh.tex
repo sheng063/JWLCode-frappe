@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{温度转换}
+
+花椰妹最近学习了如何将摄氏温度和华氏温度互相转换。
+
+她发现可以用这两个公式来进行转换：
+
+\begin{itemize}
+  \item 从输入的摄氏温度转为华氏温度可以通过 $1.8\times\text{输入的温度}+32$ 得到；
+
+  \item 从输入的华氏温度转为摄氏温度可以通过 $5\times(\text{输入的温度}-32)/9$ 得到。
+
+\end{itemize}
+她现在需要你帮忙写一个程序，可以快速地完成温度转换计算。
+
+\subsection*{输入格式}
+输入的第一行是一个字母，是输入的温度的温标（单位）：可能是 \texttt{C}（输入的温度是摄氏温度）或 \texttt{F}（输入的温度是华氏温度）。
+
+输入的第二行是一个数字，表示要转换的温度值。这个温度值的范围在 $-459.67$ 到 $10000$ 之间。
+
+\subsection*{输出格式}
+输出一行，包含一个数字。如果是输入的是摄氏温度，转换后保留小数点后 $2$ 位；如果输入的是华氏温度，转换后保留小数点后 $5$ 位。
+
+\subsection*{样例输入}
+\begin{verbatim}
+F
+41
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+5.00000
+\end{verbatim}
+
+
+\end{document}

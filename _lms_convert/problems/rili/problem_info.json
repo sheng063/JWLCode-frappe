@@ -1,0 +1,40 @@
+{
+  "exercise_name": "v6et6da6dv",
+  "exercise_number": "P-000009",
+  "title": "C1 · 日历 [2458628]",
+  "problem_id": "rili",
+  "problem_name": "日历",
+  "language": "C++",
+  "time_limit_seconds": 1.0,
+  "memory_limit_kb": 32767,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "2",
+      "output": "2"
+    },
+    {
+      "input": "10",
+      "output": "3"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "2",
+      "output": "2"
+    },
+    {
+      "idx": 2,
+      "input": "10",
+      "output": "3"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 1712,
+  "images": [
+    "suanfa35927-f8036b0ade92906cdf9c.png"
+  ],
+  "base_statement_url": "http://school.localhost:8000"
+}

@@ -1,0 +1,290 @@
+yarn run v1.22.22
+$ node ../packages/game-sdk/scripts/build.mjs && node ../packages/game-sdk/scripts/build-frappe.mjs && vite build --base=/assets/lms/frontend/ && yarn copy-html-entry
+vite v5.0.11 building for production...
+transforming...
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 4857 modules transformed.
+src/pages/ProfileRoles.vue (83:19): Use of eval in "src/pages/ProfileRoles.vue" is strongly discouraged as it poses security risks and may cause issues with minification.
+src/pages/ProfileRoles.vue (103:15): Use of eval in "src/pages/ProfileRoles.vue" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+[frappeui-build-config-plugin] Successfully copied index.html to ../lms/www/_lms.html
+computing gzip size...
+../lms/public/frontend/registerSW.js                                                                    0.17 kB
+../lms/public/frontend/assets/notion-Cxu9AA77.png                                                       4.19 kB
+../lms/public/frontend/assets/apple-icon-180-D_n3lJOH.png                                               4.24 kB
+../lms/public/frontend/assets/KaTeX_Size3-Regular-CTq5MqoE.woff                                         4.42 kB
+../lms/public/frontend/assets/KaTeX_Size4-Regular-Dl5lxZxV.woff2                                        4.93 kB
+../lms/public/frontend/assets/open-edx-DwSUjz6M.png                                                     4.99 kB
+../lms/public/frontend/assets/KaTeX_Size2-Regular-Dy4dx90m.woff2                                        5.21 kB
+../lms/public/frontend/assets/KaTeX_Size1-Regular-mCD8mA8B.woff2                                        5.47 kB
+../lms/public/frontend/assets/canvas-CzLOTz8k.png                                                       5.91 kB
+../lms/public/frontend/assets/KaTeX_Size4-Regular-BF-4gkZK.woff                                         5.98 kB
+../lms/public/frontend/assets/KaTeX_Size2-Regular-oD1tc_U0.woff                                         6.19 kB
+../lms/public/frontend/assets/KaTeX_Size1-Regular-C195tn64.woff                                         6.50 kB
+../lms/public/frontend/assets/sparkpost-BE6L4Zsb.webp                                                   6.88 kB
+../lms/public/frontend/assets/KaTeX_Caligraphic-Regular-Di6jR-x-.woff2                                  6.91 kB
+../lms/public/frontend/assets/KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2                                     6.91 kB
+../lms/public/frontend/assets/gmail-63izsubs.png                                                        7.27 kB
+../lms/public/frontend/assets/KaTeX_Size3-Regular-DgpXs0kz.ttf                                          7.59 kB
+../lms/public/frontend/assets/KaTeX_Caligraphic-Regular-CTRA-rTL.woff                                   7.66 kB
+../lms/public/frontend/assets/KaTeX_Caligraphic-Bold-BEiXGLvX.woff                                      7.72 kB
+../lms/public/frontend/assets/KaTeX_Script-Regular-D3wIWfF6.woff2                                       9.64 kB
+../lms/public/frontend/assets/KaTeX_SansSerif-Regular-DDBCnlJ7.woff2                                   10.34 kB
+../lms/public/frontend/assets/KaTeX_Size4-Regular-DWFBv043.ttf                                         10.36 kB
+../lms/public/frontend/assets/KaTeX_Script-Regular-D5yQViql.woff                                       10.59 kB
+../lms/public/frontend/assets/KaTeX_Fraktur-Regular-CTYiF6lA.woff2                                     11.32 kB
+../lms/public/frontend/assets/KaTeX_Fraktur-Bold-CL6g_b3V.woff2                                        11.35 kB
+../lms/public/frontend/assets/KaTeX_Size2-Regular-B7gKUWhC.ttf                                         11.51 kB
+../lms/public/frontend/assets/KaTeX_SansSerif-Italic-C3H0VqGB.woff2                                    12.03 kB
+../lms/public/frontend/assets/KaTeX_SansSerif-Bold-D1sUS0GD.woff2                                      12.22 kB
+../lms/public/frontend/assets/KaTeX_Size1-Regular-Dbsnue_I.ttf                                         12.23 kB
+../lms/public/frontend/assets/KaTeX_SansSerif-Regular-CS6fqUqJ.woff                                    12.32 kB
+../lms/public/frontend/assets/KaTeX_Caligraphic-Regular-wX97UBjC.ttf                                   12.34 kB
+../lms/public/frontend/assets/KaTeX_Caligraphic-Bold-ATXxdsX0.ttf                                      12.37 kB
+../lms/public/frontend/index.html                                                                      13.20 kB │ gzip:     2.45 kB
+../lms/public/frontend/assets/KaTeX_Fraktur-Regular-Dxdc4cR9.woff                                      13.21 kB
+../lms/public/frontend/assets/KaTeX_Fraktur-Bold-BsDP51OF.woff                                         13.30 kB
+../lms/public/frontend/assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2                                  13.57 kB
+../lms/public/frontend/assets/yandex-BsPU5tMy.png                                                      13.94 kB
+../lms/public/frontend/assets/KaTeX_SansSerif-Italic-DN2j7dab.woff                                     14.11 kB
+../lms/public/frontend/assets/KaTeX_SansSerif-Bold-DbIhKOiC.woff                                       14.41 kB
+../lms/public/frontend/assets/apple-splash-640-1136-BR98aM7H.jpg                                       15.39 kB
+../lms/public/frontend/assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff                                   16.03 kB
+../lms/public/frontend/assets/KaTeX_Math-BoldItalic-CZnvNsCZ.woff2                                     16.40 kB
+../lms/public/frontend/assets/apple-splash-1136-640-BocYFD09.jpg                                       16.43 kB
+../lms/public/frontend/assets/KaTeX_Math-Italic-t53AETM-.woff2                                         16.44 kB
+../lms/public/frontend/assets/KaTeX_Script-Regular-C5JkGWo-.ttf                                        16.65 kB
+../lms/public/frontend/assets/KaTeX_Main-BoldItalic-DxDJ3AOS.woff2                                     16.78 kB
+../lms/public/frontend/assets/KaTeX_Main-Italic-NWA7e6Wa.woff2                                         16.99 kB
+../lms/public/frontend/assets/apple-splash-750-1334-Bc9LfBe-.jpg                                       18.22 kB
+../lms/public/frontend/assets/KaTeX_Math-BoldItalic-iY-2wyZ7.woff                                      18.67 kB
+../lms/public/frontend/assets/KaTeX_Math-Italic-DA0__PXp.woff                                          18.75 kB
+../lms/public/frontend/assets/apple-splash-1334-750-ZapWTaEg.jpg                                       19.20 kB
+../lms/public/frontend/assets/KaTeX_Main-BoldItalic-SpSLRI95.woff                                      19.41 kB
+../lms/public/frontend/assets/KaTeX_SansSerif-Regular-BNo7hRIc.ttf                                     19.44 kB
+../lms/public/frontend/assets/KaTeX_Fraktur-Regular-CB_wures.ttf                                       19.57 kB
+../lms/public/frontend/assets/KaTeX_Fraktur-Bold-BdnERNNW.ttf                                          19.58 kB
+../lms/public/frontend/assets/KaTeX_Main-Italic-BMLOBm91.woff                                          19.68 kB
+../lms/public/frontend/assets/KaTeX_SansSerif-Italic-YYjJ1zSn.ttf                                      22.36 kB
+../lms/public/frontend/assets/apple-splash-828-1792-CitdGgZY.jpg                                       22.93 kB
+../lms/public/frontend/assets/apple-splash-1792-828-Cc6wR60-.jpg                                       23.38 kB
+../lms/public/frontend/assets/KaTeX_SansSerif-Bold-CFMepnvq.ttf                                        24.50 kB
+../lms/public/frontend/assets/KaTeX_Main-Bold-Cx986IdX.woff2                                           25.32 kB
+../lms/public/frontend/assets/KaTeX_Main-Regular-B22Nviop.woff2                                        26.27 kB
+../lms/public/frontend/assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf                                    27.56 kB
+../lms/public/frontend/assets/KaTeX_AMS-Regular-BQhdFMY1.woff2                                         28.08 kB
+../lms/public/frontend/assets/KaTeX_Main-Bold-Jm3AIy58.woff                                            29.91 kB
+../lms/public/frontend/assets/KaTeX_Main-Regular-Dr94JaBh.woff                                         30.77 kB
+../lms/public/frontend/assets/KaTeX_Math-BoldItalic-B3XSjfu4.ttf                                       31.20 kB
+../lms/public/frontend/assets/KaTeX_Math-Italic-flOr_0UB.ttf                                           31.31 kB
+../lms/public/frontend/assets/KaTeX_Main-BoldItalic-DzxPMmG6.ttf                                       32.97 kB
+../lms/public/frontend/assets/KaTeX_AMS-Regular-DMm9YOAa.woff                                          33.52 kB
+../lms/public/frontend/assets/KaTeX_Main-Italic-3WenGoN9.ttf                                           33.58 kB
+../lms/public/frontend/assets/apple-splash-1125-2436-C3w0dSnH.jpg                                      35.24 kB
+../lms/public/frontend/assets/apple-splash-2436-1125-UBc56n4I.jpg                                      36.05 kB
+../lms/public/frontend/assets/apple-splash-1242-2208-D1K-FjW8.jpg                                      36.19 kB
+../lms/public/frontend/assets/apple-splash-1170-2532-MJgQ9zjx.jpg                                      37.25 kB
+../lms/public/frontend/assets/yahoo-DiTp7aZW.png                                                       37.26 kB
+../lms/public/frontend/assets/apple-splash-1179-2556-CYjIoO1a.jpg                                      37.60 kB
+../lms/public/frontend/assets/apple-splash-2208-1242-B0cjc1eL.jpg                                      38.36 kB
+../lms/public/frontend/assets/apple-splash-2532-1170-DyRAcsgg.jpg                                      38.58 kB
+../lms/public/frontend/assets/apple-splash-1206-2622-CsHAWTcr.jpg                                      39.15 kB
+../lms/public/frontend/assets/apple-splash-2556-1179-B5cAG8BK.jpg                                      39.17 kB
+../lms/public/frontend/assets/apple-splash-1242-2688-Bzfl4WPX.jpg                                      39.69 kB
+../lms/public/frontend/assets/apple-splash-2622-1206-Bc7YeGWe.jpg                                      40.46 kB
+../lms/public/frontend/assets/apple-splash-2688-1242-DNx5UzH6.jpg                                      41.88 kB
+../lms/public/frontend/assets/apple-splash-1284-2778-C-TDdDbQ.jpg                                      42.45 kB
+../lms/public/frontend/assets/apple-splash-1290-2796-BQw-p_Zz.jpg                                      42.82 kB
+../lms/public/frontend/assets/apple-splash-1536-2048-DWf2LykR.jpg                                      43.84 kB
+../lms/public/frontend/assets/apple-splash-2796-1290-DRM7pqfd.jpg                                      43.92 kB
+../lms/public/frontend/assets/apple-splash-2778-1284-nkoKAVGG.jpg                                      44.50 kB
+../lms/public/frontend/assets/apple-splash-1488-2266-oCwhNquF.jpg                                      44.56 kB
+../lms/public/frontend/assets/apple-splash-1320-2868-D7rS3PbF.jpg                                      44.62 kB
+../lms/public/frontend/assets/apple-splash-2048-1536-DAUDlzu8.jpg                                      45.77 kB
+../lms/public/frontend/assets/apple-splash-2868-1320-Bq_zwKIb.jpg                                      46.01 kB
+../lms/public/frontend/assets/apple-splash-2266-1488-MbTvgHmX.jpg                                      46.58 kB
+../lms/public/frontend/assets/apple-splash-1620-2160-BcBrHuwl.jpg                                      47.62 kB
+../lms/public/frontend/assets/apple-splash-2160-1620-BiOL-rzg.jpg                                      49.28 kB
+../lms/public/frontend/assets/apple-splash-1668-2224-BloaNeC-.jpg                                      49.69 kB
+../lms/public/frontend/assets/apple-splash-1640-2360-Dh-YwmK7.jpg                                      49.82 kB
+../lms/public/frontend/assets/KaTeX_Main-Bold-waoOVXN0.ttf                                             51.34 kB
+../lms/public/frontend/assets/apple-splash-2224-1668-VL9eJ66f.jpg                                      51.35 kB
+../lms/public/frontend/assets/apple-splash-2360-1640-Cbr-_bw-.jpg                                      51.58 kB
+../lms/public/frontend/assets/apple-splash-1668-2388-2B803rpN.jpg                                      51.69 kB
+../lms/public/frontend/assets/apple-splash-2388-1668-BofeGhV_.jpg                                      53.15 kB
+../lms/public/frontend/assets/KaTeX_Main-Regular-ypZvNtVU.ttf                                          53.58 kB
+../lms/public/frontend/assets/KaTeX_AMS-Regular-DRggAlZN.ttf                                           63.63 kB
+../lms/public/frontend/assets/apple-splash-2048-2732-BjakkKKb.jpg                                      66.46 kB
+../lms/public/frontend/assets/apple-splash-2732-2048-EzPQmp1m.jpg                                      69.11 kB
+../lms/public/frontend/assets/JetBrainsMono-Regular-BQaDgvhP.woff2                                     92.16 kB
+../lms/public/frontend/assets/outlook-CSGNsWQK.png                                                    220.23 kB
+../lms/public/frontend/assets/Inter.var-C9xDBOS3.woff2                                                264.24 kB
+../lms/public/frontend/assets/Inter-Italic.var-BGHziHgI.woff2                                         297.27 kB
+../lms/public/frontend/assets/pdf.worker.min-i6jumzSv.js                                            1,365.47 kB
+../lms/public/frontend/assets/JobDetail-BGvm8kQp.css                                                    0.07 kB │ gzip:     0.08 kB
+../lms/public/frontend/assets/ProblemPackageImport-D78NcURu.css                                         0.09 kB │ gzip:     0.08 kB
+../lms/public/frontend/assets/DataImport-CBlo1gWN.css                                                   0.13 kB │ gzip:     0.11 kB
+../lms/public/frontend/assets/QuizQuestionForm-DsLsDPrJ.css                                             0.14 kB │ gzip:     0.12 kB
+../lms/public/frontend/assets/Jobs-Ddh0KubQ.css                                                         0.17 kB │ gzip:     0.14 kB
+../lms/public/frontend/assets/BatchCard-DJOYklTa.css                                                    0.35 kB │ gzip:     0.23 kB
+../lms/public/frontend/assets/PersonaForm-B9xROfzS.css                                                  0.36 kB │ gzip:     0.17 kB
+../lms/public/frontend/assets/Tabs-BnbDmBwm.css                                                         0.39 kB │ gzip:     0.23 kB
+../lms/public/frontend/assets/VideoPreviewField-CZrFvygw.css                                            0.41 kB │ gzip:     0.21 kB
+../lms/public/frontend/assets/BatchDetail-DTH-vfYr.css                                                  0.44 kB │ gzip:     0.25 kB
+../lms/public/frontend/assets/BottomSheet-ByadNJXv.css                                                  0.46 kB │ gzip:     0.19 kB
+../lms/public/frontend/assets/ProgrammingStatement-Y3Ml8BGV.css                                         0.55 kB │ gzip:     0.23 kB
+../lms/public/frontend/assets/CourseCard-C07r7MvD.css                                                   0.58 kB │ gzip:     0.34 kB
+../lms/public/frontend/assets/ProfileEvaluationSchedule-BjkVfUmW.css                                    0.95 kB │ gzip:     0.40 kB
+../lms/public/frontend/assets/CourseDetail-BoOPWzDX.css                                                 1.18 kB │ gzip:     0.49 kB
+../lms/public/frontend/assets/Creation-CvYVuSzj.css                                                     3.90 kB │ gzip:     1.06 kB
+../lms/public/frontend/assets/Lesson-Czusod3u.css                                                       4.65 kB │ gzip:     1.48 kB
+../lms/public/frontend/assets/MyCreations-BdOoP5sd.css                                                  6.14 kB │ gzip:     1.45 kB
+../lms/public/frontend/assets/ProgrammingExerciseSubmission-CfWrO3G1.css                               12.31 kB │ gzip:     2.83 kB
+../lms/public/frontend/assets/Game-pX4l5k0w.css                                                        30.75 kB │ gzip:     6.11 kB
+../lms/public/frontend/assets/katex-BgmEvzbN.css                                                       31.31 kB │ gzip:     8.08 kB
+../lms/public/frontend/assets/index-C6i09HBe.css                                                      788.45 kB │ gzip:    70.99 kB
+../lms/public/frontend/assets/routes-CrnsgQWR.js                                                        0.13 kB │ gzip:     0.14 kB │ map:      0.65 kB
+../lms/public/frontend/assets/sanitizeOnWrite-D_q88vPP.js                                               0.29 kB │ gzip:     0.24 kB │ map:      1.35 kB
+../lms/public/frontend/assets/useBatchForms-CumoErzW.js                                                 0.37 kB │ gzip:     0.28 kB │ map:      4.46 kB
+../lms/public/frontend/assets/DateRange-C7EBGsNO.js                                                     0.44 kB │ gzip:     0.32 kB │ map:      0.88 kB
+../lms/public/frontend/assets/Students-BtE_eSKh.js                                                      0.49 kB │ gzip:     0.36 kB │ map:      1.29 kB
+../lms/public/frontend/assets/NotFound-DkZWCevk.js                                                      0.58 kB │ gzip:     0.42 kB │ map:      1.15 kB
+../lms/public/frontend/assets/useStudentView-wQfJB-kT.js                                                0.65 kB │ gzip:     0.44 kB │ map:      4.04 kB
+../lms/public/frontend/assets/ProgressBar-C4WsjFvt.js                                                   0.70 kB │ gzip:     0.45 kB │ map:      1.74 kB
+../lms/public/frontend/assets/star-uMwrQz6y.js                                                          0.74 kB │ gzip:     0.47 kB │ map:      1.20 kB
+../lms/public/frontend/assets/resource-B9QhzKnU.js                                                      0.75 kB │ gzip:     0.49 kB │ map:      6.15 kB
+../lms/public/frontend/assets/ShortcutTooltip.vue_vue_type_script_setup_true_lang-CREy-sUW.js           0.75 kB │ gzip:     0.49 kB │ map:      1.67 kB
+../lms/public/frontend/assets/timezone-1qyT0Spi.js                                                      0.80 kB │ gzip:     0.49 kB │ map:      4.62 kB
+../lms/public/frontend/assets/editorPreferences-DP0fGNY2.js                                             0.96 kB │ gzip:     0.52 kB │ map:      2.62 kB
+../lms/public/frontend/assets/useKeyboardShortcuts-D6flxW0v.js                                          1.13 kB │ gzip:     0.67 kB │ map:      4.87 kB
+../lms/public/frontend/assets/HeaderButton.vue_vue_type_script_setup_true_lang-DWLru8fA.js              1.13 kB │ gzip:     0.59 kB │ map:      3.07 kB
+../lms/public/frontend/assets/QuizPage-D7ea7zdI.js                                                      1.18 kB │ gzip:     0.74 kB │ map:      2.94 kB
+../lms/public/frontend/assets/UserAvatar.vue_vue_type_script_setup_true_lang-C-H6efAx.js                1.24 kB │ gzip:     0.66 kB │ map:      2.65 kB
+../lms/public/frontend/assets/ListFooter-rmYUJwbi.js                                                    1.36 kB │ gzip:     0.72 kB │ map:      3.05 kB
+../lms/public/frontend/assets/useInertBackground-DnQS-k99.js                                            1.41 kB │ gzip:     0.75 kB │ map:      8.00 kB
+../lms/public/frontend/assets/GameMultiplayerSettings-CaHgacYa.js                                       1.61 kB │ gzip:     1.13 kB │ map:      3.31 kB
+../lms/public/frontend/assets/ProfileCertificates-CteSoX02.js                                           1.63 kB │ gzip:     0.94 kB │ map:      3.42 kB
+../lms/public/frontend/assets/CourseInstructors.vue_vue_type_script_setup_true_lang-CD0xgQOa.js         1.89 kB │ gzip:     0.60 kB │ map:      3.78 kB
+../lms/public/frontend/assets/LockedLessonNotice-cnVrWHFK.js                                            2.12 kB │ gzip:     1.07 kB │ map:      6.11 kB
+../lms/public/frontend/assets/ToggleFilter.vue_vue_type_script_setup_true_lang-urMKyPcX.js              2.12 kB │ gzip:     1.02 kB │ map:      6.27 kB
+../lms/public/frontend/assets/AxisChart.vue_vue_type_script_setup_true_lang-CcaMZhPv.js                 2.33 kB │ gzip:     1.17 kB │ map:      8.04 kB
+../lms/public/frontend/assets/PageBody.vue_vue_type_script_setup_true_lang-DefJuBXk.js                  2.34 kB │ gzip:     1.16 kB │ map:      6.05 kB
+../lms/public/frontend/assets/BatchCourseForm-BudC3Iv8.js                                               2.41 kB │ gzip:     1.26 kB │ map:      7.11 kB
+../lms/public/frontend/assets/BatchCard-DR3fJF3z.js                                                     2.44 kB │ gzip:     1.08 kB │ map:      5.20 kB
+../lms/public/frontend/assets/BottomSheet-MZHYChJl.js                                                   2.44 kB │ gzip:     1.34 kB │ map:      7.84 kB
+../lms/public/frontend/assets/BatchStudentForm-DSf_5Bio.js                                              2.58 kB │ gzip:     1.32 kB │ map:      8.02 kB
+../lms/public/frontend/assets/AssessmentForm-BIL-IGeC.js                                                2.71 kB │ gzip:     1.34 kB │ map:      7.40 kB
+../lms/public/frontend/assets/FormShell.vue_vue_type_script_setup_true_lang-62CelGK_.js                 2.75 kB │ gzip:     1.42 kB │ map:     10.30 kB
+../lms/public/frontend/assets/CourseCertification-DRPrNeto.js                                           2.80 kB │ gzip:     1.40 kB │ map:      6.77 kB
+../lms/public/frontend/assets/GameAccessNotice-DsTRqfp8.js                                              2.90 kB │ gzip:     1.76 kB │ map:      6.97 kB
+../lms/public/frontend/assets/CourseEnrollmentForm-B30yeKv0.js                                          3.05 kB │ gzip:     1.48 kB │ map:     10.11 kB
+../lms/public/frontend/assets/ProgramDetail-GeJbFxI1.js                                                 3.16 kB │ gzip:     1.54 kB │ map:      6.67 kB
+../lms/public/frontend/assets/ProfileRoles-BEFcJxKn.js                                                  3.19 kB │ gzip:     1.32 kB │ map:      4.88 kB
+../lms/public/frontend/assets/AnnouncementForm-BGJtJPXU.js                                              3.26 kB │ gzip:     1.57 kB │ map:      8.93 kB
+../lms/public/frontend/assets/AssignmentSubmissionList-BZRYp7sm.js                                      3.36 kB │ gzip:     1.48 kB │ map:      8.12 kB
+../lms/public/frontend/assets/ListPage.vue_vue_type_script_setup_true_lang-BOUA5jQx.js                  3.47 kB │ gzip:     1.55 kB │ map:     10.52 kB
+../lms/public/frontend/assets/QuizSubmissionList-CtNbKE9w.js                                            3.75 kB │ gzip:     1.79 kB │ map:      9.42 kB
+../lms/public/frontend/assets/EmailTemplateForm-Dv3e3HwT.js                                             3.76 kB │ gzip:     1.73 kB │ map:     10.41 kB
+../lms/public/frontend/assets/RoadKingPlayer-VVmb9mI9.js                                                3.81 kB │ gzip:     1.96 kB │ map:     10.37 kB
+../lms/public/frontend/assets/BulkCertificatesForm-CTshEl5N.js                                          3.84 kB │ gzip:     1.68 kB │ map:     10.65 kB
+../lms/public/frontend/assets/CourseCard-2JyLxah6.js                                                    3.87 kB │ gzip:     1.59 kB │ map:      9.25 kB
+../lms/public/frontend/assets/AssignmentForm-DMlKg1gR.js                                                4.00 kB │ gzip:     1.81 kB │ map:     12.95 kB
+../lms/public/frontend/assets/ProgramEnrollment-CCYRckLD.js                                             4.03 kB │ gzip:     1.78 kB │ map:     10.40 kB
+../lms/public/frontend/assets/Statistics-DRqTp2i_.js                                                    4.14 kB │ gzip:     1.31 kB │ map:      9.93 kB
+../lms/public/frontend/assets/ProgrammingStatement-x8XZFC82.js                                          4.17 kB │ gzip:     1.99 kB │ map:     15.72 kB
+../lms/public/frontend/assets/NewMemberModal.vue_vue_type_script_setup_true_lang-BX-LxjO0.js            4.22 kB │ gzip:     1.70 kB │ map:     10.43 kB
+../lms/public/frontend/assets/Assignments-jln9tJCD.js                                                   4.22 kB │ gzip:     2.01 kB │ map:     11.70 kB
+../lms/public/frontend/assets/NumberChart.vue_vue_type_script_setup_true_lang-DU0QTqlV.js               4.28 kB │ gzip:     2.06 kB │ map:     11.69 kB
+../lms/public/frontend/assets/GameDetail-Bga7Pnoz.js                                                    4.37 kB │ gzip:     2.07 kB │ map:      9.23 kB
+../lms/public/frontend/assets/CourseImportForm-DIxOMDZG.js                                              4.41 kB │ gzip:     1.97 kB │ map:     11.90 kB
+../lms/public/frontend/assets/ChapterForm-BkLLWRWV.js                                                   4.57 kB │ gzip:     2.14 kB │ map:     17.05 kB
+../lms/public/frontend/assets/ProgrammingExerciseSubmissions-DPP_96Mm.js                                4.63 kB │ gzip:     2.05 kB │ map:     11.66 kB
+../lms/public/frontend/assets/ProfileEditForm-BVI2jdOn.js                                               4.70 kB │ gzip:     2.06 kB │ map:     12.72 kB
+../lms/public/frontend/assets/SCORMChapter-C0zMFexB.js                                                  4.83 kB │ gzip:     2.09 kB │ map:     14.92 kB
+../lms/public/frontend/assets/GameMultiplayer-CAEzwo1y.js                                               5.20 kB │ gzip:     2.59 kB │ map:     10.84 kB
+../lms/public/frontend/assets/CertifiedParticipants-D226qBaU.js                                         5.20 kB │ gzip:     2.30 kB │ map:     13.62 kB
+../lms/public/frontend/assets/Quizzes-JcCjt2Xe.js                                                       5.42 kB │ gzip:     2.46 kB │ map:     16.63 kB
+../lms/public/frontend/assets/mode-json-DdkZrmX_.js                                                     5.79 kB │ gzip:     2.22 kB │ map:     17.10 kB
+../lms/public/frontend/assets/JobApplications-f3K7AzJ9.js                                               5.86 kB │ gzip:     2.58 kB │ map:     14.70 kB
+../lms/public/frontend/assets/MemberForm-B6CkUe-0.js                                                    5.87 kB │ gzip:     2.23 kB │ map:     16.89 kB
+../lms/public/frontend/assets/Jobs-CqcIAAat.js                                                          5.97 kB │ gzip:     2.45 kB │ map:     15.37 kB
+../lms/public/frontend/assets/gameMultiplayer-yuDTLl2y.js                                               5.99 kB │ gzip:     2.97 kB │ map:     22.14 kB
+../lms/public/frontend/assets/LiveClassForm-B4SOjAJT.js                                                 6.08 kB │ gzip:     2.36 kB │ map:     16.46 kB
+../lms/public/frontend/assets/Courses-DfRm1OND.js                                                       6.16 kB │ gzip:     2.62 kB │ map:     18.05 kB
+../lms/public/frontend/assets/Batches-DY6823dN.js                                                       6.18 kB │ gzip:     2.62 kB │ map:     16.92 kB
+../lms/public/frontend/assets/JobForm-BlYEPtSN.js                                                       6.20 kB │ gzip:     2.27 kB │ map:     15.47 kB
+../lms/public/frontend/assets/Programs-DmQ_YXH_.js                                                      6.66 kB │ gzip:     2.74 kB │ map:     19.23 kB
+../lms/public/frontend/assets/NewBatchForm-D6n8jp9K.js                                                  6.71 kB │ gzip:     2.64 kB │ map:     17.04 kB
+../lms/public/frontend/assets/NewCourseForm-yAqQYwym.js                                                 6.76 kB │ gzip:     2.97 kB │ map:     20.53 kB
+../lms/public/frontend/assets/eChartOptions-BTv6rMHX.js                                                 6.80 kB │ gzip:     2.51 kB │ map:     21.50 kB
+../lms/public/frontend/assets/Creation-BqjqGItd.js                                                      7.84 kB │ gzip:     3.51 kB │ map:     24.64 kB
+../lms/public/frontend/assets/MyCreations-CkPV_Mm6.js                                                   7.85 kB │ gzip:     3.65 kB │ map:     26.28 kB
+../lms/public/frontend/assets/JobDetail--VTR2tw9.js                                                     7.87 kB │ gzip:     3.11 kB │ map:     19.08 kB
+../lms/public/frontend/assets/ProfileEvaluator-zaWuqsHd.js                                              8.27 kB │ gzip:     2.62 kB │ map:     20.40 kB
+../lms/public/frontend/assets/MobileYou-DPPVLNuu.js                                                     8.52 kB │ gzip:     3.56 kB │ map:     33.56 kB
+../lms/public/frontend/assets/mode-python-t5jFwDBT.js                                                   8.56 kB │ gzip:     2.82 kB │ map:     25.59 kB
+../lms/public/frontend/assets/UpcomingEvaluations-BvqryZM0.js                                           9.06 kB │ gzip:     3.49 kB │ map:     22.75 kB
+../lms/public/frontend/assets/QuizQuestionForm-CzvvcVJr.js                                              9.97 kB │ gzip:     3.52 kB │ map:     29.76 kB
+../lms/public/frontend/assets/QuizForm-BKGY-SWa.js                                                     10.05 kB │ gzip:     3.62 kB │ map:     24.28 kB
+../lms/public/frontend/assets/QuizSubmission-DLnJzH5D.js                                               10.07 kB │ gzip:     3.92 kB │ map:     31.00 kB
+../lms/public/frontend/assets/Profile-DPtIuF9N.js                                                      10.25 kB │ gzip:     4.14 kB │ map:     25.73 kB
+../lms/public/frontend/assets/Tabs.vue_vue_type_script_setup_true_lang-SJWKHRip.js                     10.32 kB │ gzip:     3.98 kB │ map:     31.16 kB
+../lms/public/frontend/assets/Discussions-geJnoC8A.js                                                  10.36 kB │ gzip:     3.71 kB │ map:     26.37 kB
+../lms/public/frontend/assets/VideoPreviewField.vue_vue_type_script_setup_true_lang-D1HpFwB5.js        10.41 kB │ gzip:     4.36 kB │ map:     31.47 kB
+../lms/public/frontend/assets/AssignmentSubmission-DxRit6Ee.js                                         10.51 kB │ gzip:     3.93 kB │ map:     26.62 kB
+../lms/public/frontend/assets/ProblemPackageImport.vue_vue_type_script_setup_true_lang-BMujNTXq.js     10.53 kB │ gzip:     3.92 kB │ map:     21.57 kB
+../lms/public/frontend/assets/PageHeader.vue_vue_type_script_setup_true_lang-BC6wsfnJ.js               11.08 kB │ gzip:     3.17 kB │ map:     25.12 kB
+../lms/public/frontend/assets/Billing-ecV9GtFr.js                                                      11.89 kB │ gzip:     4.30 kB │ map:     29.66 kB
+../lms/public/frontend/assets/mode-c_cpp-ozBUq_vI.js                                                   12.36 kB │ gzip:     4.80 kB │ map:     28.71 kB
+../lms/public/frontend/assets/ProgramForm-mHFemnOA.js                                                  12.40 kB │ gzip:     4.38 kB │ map:     37.15 kB
+../lms/public/frontend/assets/ProfileAbout-BLVIiC3R.js                                                 12.59 kB │ gzip:     4.30 kB │ map:     44.58 kB
+../lms/public/frontend/assets/ProgrammingExercises-mSQO6wbR.js                                         14.24 kB │ gzip:     5.53 kB │ map:     33.91 kB
+../lms/public/frontend/assets/ProgrammingExerciseForm-kuM7u5Ik.js                                      16.87 kB │ gzip:     6.35 kB │ map:     45.60 kB
+../lms/public/frontend/assets/Home-CHkIOsFF.js                                                         17.18 kB │ gzip:     4.69 kB │ map:     39.11 kB
+../lms/public/frontend/assets/mode-css-s9HP4COU.js                                                     21.15 kB │ gzip:     7.46 kB │ map:     50.36 kB
+../lms/public/frontend/assets/mode-javascript-1vAXMyZ3.js                                              28.20 kB │ gzip:     9.25 kB │ map:     76.51 kB
+../lms/public/frontend/assets/DataImport-BxymBSyG.js                                                   36.71 kB │ gzip:    11.71 kB │ map:    108.71 kB
+../lms/public/frontend/assets/ProgrammingExerciseSubmission-Cb_asSzk.js                                41.48 kB │ gzip:    14.56 kB │ map:    123.88 kB
+../lms/public/frontend/assets/PersonaForm-COezIbAf.js                                                  46.51 kB │ gzip:    29.99 kB │ map:     66.58 kB
+../lms/public/frontend/assets/Game-C8-Kjpoh.js                                                         48.45 kB │ gzip:    18.02 kB │ map:    160.52 kB
+../lms/public/frontend/assets/BatchDetail-BA-YrNDP.js                                                  55.28 kB │ gzip:    16.17 kB │ map:    144.35 kB
+../lms/public/frontend/assets/ProfileEvaluationSchedule-BJXy9by4.js                                    57.89 kB │ gzip:    17.84 kB │ map:    177.90 kB
+../lms/public/frontend/assets/mode-html-Wmxv-MZb.js                                                    63.57 kB │ gzip:    19.66 kB │ map:    165.63 kB
+../lms/public/frontend/assets/CourseDetail-BfInVbod.js                                                116.63 kB │ gzip:    36.25 kB │ map:    326.85 kB
+../lms/public/frontend/assets/Lesson-CqrTbCHV.js                                                      133.37 kB │ gzip:    59.34 kB │ map:    545.66 kB
+../lms/public/frontend/assets/lessonType-Dh1NzxAG.js                                                  216.60 kB │ gzip:    58.77 kB │ map:    554.24 kB
+../lms/public/frontend/assets/katex.min-BheF5_yu.js                                                   260.80 kB │ gzip:    78.96 kB │ map:    983.52 kB
+../lms/public/frontend/assets/pdf-B2vUrd9-.js                                                         413.95 kB │ gzip:   124.66 kB │ map:  1,426.18 kB
+../lms/public/frontend/assets/ECharts.vue_vue_type_script_setup_true_lang-C8AJp-3p.js               1,037.31 kB │ gzip:   344.09 kB │ map:  5,875.32 kB
+../lms/public/frontend/assets/index-DpwPFzoz.js                                                     4,598.04 kB │ gzip: 1,261.74 kB │ map: 15,754.74 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[vite-plugin-static-copy] Copied 185 items.
+
+PWA v1.2.0
+mode      generateSW
+precache  0 entries (0.00 KiB)
+files generated
+  ../lms/public/frontend/sw.js.map
+  ../lms/public/frontend/sw.js
+  ../lms/public/frontend/workbox-c124084a.js.map
+  ../lms/public/frontend/workbox-c124084a.js
+warnings
+  One of the glob patterns doesn't match any files. Please remove or fix the following: {
+  "globDirectory": "/assets/lms/frontend",
+  "globPattern": "**/*.{js,ts,css,html,svg}",
+  "globIgnores": [
+    "**/node_modules/**/*",
+    "../../../home/frappe/bench-data/frappe-bench/apps/lms/lms/public/frontend/sw.js",
+    "../../../home/frappe/bench-data/frappe-bench/apps/lms/lms/public/frontend/workbox-*.js"
+  ]
+}
+
+✓ built in 27.10s
+$ cp ../lms/public/frontend/index.html ../lms/www/_lms.html
+Done in 28.23s.

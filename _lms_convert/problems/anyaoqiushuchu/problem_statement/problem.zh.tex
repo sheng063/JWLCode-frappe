@@ -1,0 +1,54 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{按要求输出}
+
+你的程序将接受到 \texttt{a}、\texttt{b}、\texttt{c} 中的一个字符。接收到 \texttt{a} 时，输出 \texttt{It is good}，接收到 \texttt{b} 的时候输出 \texttt{OMG}，接收到 \texttt{c} 时输出 \texttt{Yes!}。
+
+\subsection*{输入格式}
+输入包含一个字符 $x$（必然是 \texttt{a}、\texttt{b} 或 \texttt{c} 中的一个）。
+
+\subsection*{输出格式}
+输出为一行：
+
+\begin{itemize}
+  \item 如果输入是字符 \texttt{a}，则输出 \texttt{It is good}；
+
+  \item 如果输入是字符 \texttt{b}，则输出 \texttt{OMG}；
+
+  \item 如果输入是字符 \texttt{c}，则输出 \texttt{Yes!}；
+
+\end{itemize}
+请注意，输出内容中的大小写及符号必须与输出格式中的提示完全一致。
+
+\subsection*{样例输入}
+\begin{verbatim}
+a
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+It is good
+\end{verbatim}
+
+\subsection*{样例 2 输入}
+\begin{verbatim}
+c
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+Yes!
+\end{verbatim}
+
+
+\end{document}

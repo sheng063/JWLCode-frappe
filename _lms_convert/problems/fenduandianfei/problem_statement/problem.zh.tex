@@ -1,0 +1,54 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{分段电费}
+
+夏天到了，各家各户的用电量都增加了许多，相应的电费也交的更多了。花椰妹家今天收到了一份电费通知单。花椰妹看到上面写：
+
+\begin{itemize}
+  \item 月用电量在 $150$ 千瓦时及以下部分按每千瓦时 $1$ 元执行
+
+  \item 月用电量在 $151\sim400$ 千瓦时的部分按每千瓦时 $2$ 元执行
+
+  \item 月用电量在 $401$ 千瓦时及以上部分按每千瓦时 $3$ 元执行;
+
+\end{itemize}
+花椰妹想自己验证一下，电费通知单上应交电费的数目到底是否正确呢。请编写一个程序，已知用电总计，根据电价规定，计算出应交的电费应该是多少。
+
+\subsection*{输入格式}
+输入包含一个正整数 $n$，表示用电量。
+
+\subsection*{输出格式}
+输出为一行，包含一个正整数，表示应交电费。
+
+\subsection*{样例输入}
+\begin{verbatim}
+200
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+250
+\end{verbatim}
+
+\subsection*{样例 2 输入}
+\begin{verbatim}
+520
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+1010
+\end{verbatim}
+
+
+\end{document}

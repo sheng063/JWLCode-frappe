@@ -1,0 +1,70 @@
+{
+  "exercise_name": "ute2dfl2ob",
+  "exercise_number": "P-000064",
+  "title": "C1 · 取数位",
+  "problem_id": "qushuwei",
+  "problem_name": "取数位",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "32",
+      "output": "3\n2"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "32",
+      "output": "3\n2"
+    },
+    {
+      "idx": 2,
+      "input": "50",
+      "output": "5\n0"
+    },
+    {
+      "idx": 3,
+      "input": "99",
+      "output": "9\n9"
+    },
+    {
+      "idx": 4,
+      "input": "10",
+      "output": "1\n0"
+    },
+    {
+      "idx": 5,
+      "input": "78",
+      "output": "7\n8"
+    }
+  ],
+  "secret_from_lms": [
+    {
+      "idx": 2,
+      "input": "50",
+      "output": "5\n0"
+    },
+    {
+      "idx": 3,
+      "input": "99",
+      "output": "9\n9"
+    },
+    {
+      "idx": 4,
+      "input": "10",
+      "output": "1\n0"
+    },
+    {
+      "idx": 5,
+      "input": "78",
+      "output": "7\n8"
+    }
+  ],
+  "statement_html_len": 278,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

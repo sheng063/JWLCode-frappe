@@ -1,0 +1,211 @@
+IMPORT_OK course-transfer-browser-audit-20260908
+BEFORE_SETTINGS Skip to main content
+Learning
+Administrator
+主页
+搜索
+K
+通知
+课程
+课程项目
+班级
+学员
+认证证书
+职位
+统计
+测验
+作业
+编程练习
+更多
+Getting started
+0/8 steps
+Start now
+Getting started
+Welcome to Frappe Learning
+0/8 steps completed
+0% completed
+Skip all
+Create your first course
+Add your first chapter
+Add your first lesson
+Create your first quiz
+Invite your team and students
+Create your first batch
+Add students to your batch
+Add courses to your batch
+Help centre
+课程
+/
+Course Transfer Browser Audit 20260908
+概况
+仪表盘
+课程编辑器
+设置
+Course Transfer Browser Audit 20260908
+A
+Administrator
+
+temporary QA
+
+课程内容
+1 段 · 1 课时
+第一章
+1
+第一课
+关于本课程
+
+中文课程内容
+
+免费
+本课程包含：
+1 课时
+课程讲师
+A
+Administrator
+Course imported successfully!
+SETTINGS_BUTTONS [
+  ' Learning Administrator',
+  '主页',
+  '搜索K',
+  '通知',
+  '课程',
+  '课程项目',
+  '班级',
+  '学员',
+  '认证证书',
+  '职位',
+  '统计',
+  '测验',
+  '作业',
+  '编程练习',
+  '',
+  'Start now',
+  '',
+  '',
+  'Skip all',
+  '',
+  ' 保存',
+  '发布',
+  ''
+]
+EXPORT_OK course-transfer-browser-audit-2026090820260908213618fe991486.zip
+PAGE Skip to main content
+Learning
+Administrator
+主页
+搜索
+K
+通知
+课程
+课程项目
+班级
+学员
+认证证书
+职位
+统计
+测验
+作业
+编程练习
+更多
+Getting started
+0/8 steps
+Start now
+Getting started
+Welcome to Frappe Learning
+0/8 steps completed
+0% completed
+Skip all
+Create your first course
+Add your first chapter
+Add your first lesson
+Create your first quiz
+Invite your team and students
+Create your first batch
+Add students to your batch
+Add courses to your batch
+Help centre
+课程
+/
+Course Transfer Browser Audit 20260908
+保存
+发布
+概况
+仪表盘
+课程编辑器
+设置
+课程详情
+标题 *
+(required)
+类别
+讲师 *
+(required)
+A
+Administrator
+标签
+添加标签
+简短描述 *
+(required)
+课程封面
+颜色
+改为上传图片
+
+Upload an image to replace the color.
+
+预览视频
+上传视频
+
+Paste a YouTube link, or upload a video file (MP4, WebM, or OGG) to show a preview on the course page.
+
+课程概览
+课程描述 *
+(required)
+Heading
+
+中文课程内容
+
+相关课程
+选择相关课程
+元标记
+These tags help search engines describe and rank your course in results.
+元描述
+Meta keywords
+是否显示
+公开
+
+所有学生均可见。非公开课程仅对已注册的学生可见。
+
+即将到来
+
+尚未开放报名。
+
+精选
+
+Highlight on the homepage.
+
+自主报名
+
+允许用户自行加入课程。
+
+Enforce Lesson Completion
+
+Students must complete each lesson before the next one opens.
+
+价格与认证
+Paid course
+
+学员加入本课程需要付费。
+
+结业证书
+
+Issue a free certificate when learners complete the course.
+
+Paid certificate
+
+Sell an evaluator-graded certificate alongside this free course.
+
+Course imported successfully!
+导出
+删除
+PAGE_ERRORS []
+CLEANUP_COURSE 200 {}
+CLEANUP_UPLOAD 202 {"data":"ok"}

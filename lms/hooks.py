@@ -125,6 +125,12 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
+	"LMS Course Progress": {"on_update": "lms.lms.game_access.notify_access_change", "after_delete": "lms.lms.game_access.notify_access_change"},
+	"LMS Enrollment": {"on_update": "lms.lms.game_access.notify_access_change", "after_delete": "lms.lms.game_access.notify_access_change"},
+	"LMS Course": {"on_update": "lms.lms.game_access.notify_access_change", "after_delete": "lms.lms.game_access.notify_access_change"},
+	"Course Chapter": {"on_update": "lms.lms.game_access.notify_access_change", "after_delete": "lms.lms.game_access.notify_access_change"},
+	"Course Lesson": {"on_update": "lms.lms.game_access.notify_access_change", "after_delete": "lms.lms.game_access.notify_access_change"},
+	"LMS Settings": {"on_update": "lms.lms.game_access.notify_access_change", "after_delete": "lms.lms.game_access.notify_access_change"},
 	"File": {"validate": "lms.lms.problem_package.permissions.protect_file", "on_trash": "lms.lms.problem_package.permissions.protect_file"},
 	"*": {
 		"on_change": [
@@ -139,6 +145,7 @@ doc_events = {
 	"User": {
 		"validate": "lms.lms.user.validate_username_duplicates",
 		"before_insert": "lms.lms.user.add_lms_student_role",
+		"on_update": "lms.lms.game_access.notify_access_change",
 	},
 }
 

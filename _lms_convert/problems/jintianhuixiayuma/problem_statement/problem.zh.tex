@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+
+\newcommand{\problemname}[1]{\begin{center}\Large\bfseries #1\end{center}}
+\usepackage{enumitem}
+
+\begin{document}
+\problemname{今天会下雨吗}
+
+你需要写一个程序，读入当前的相对空气湿度 $H$（$0\leH\le100$），气象学家小蒜头认为当相对空气湿度大于 $55$ 时，就属于“很可能会下雨”的天气。请根据今天的相对空气湿度，判断今天是否是“很可能会下雨”的天气。
+
+\subsection*{输入格式}
+输入一个整数，表示相对空气湿度 $H$（$0\leH\le100$）。
+
+\subsection*{输出格式}
+输出为一行，如果 $H>55$ 则输出 \texttt{YES}，表示会下雨；否则输出 \texttt{NO}，表示不会下雨。
+
+（注意输出全为大写，不要把 \texttt{YES} 写成 \texttt{Yes} 或把 \texttt{NO} 写成 \texttt{No}）
+
+\subsection*{样例输入}
+\begin{verbatim}
+66
+\end{verbatim}
+
+\subsection*{样例输出}
+\begin{verbatim}
+YES
+\end{verbatim}
+
+
+\end{document}

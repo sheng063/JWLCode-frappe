@@ -1,0 +1,29 @@
+{
+  "exercise_name": "utfljv2rnp",
+  "exercise_number": "P-000079",
+  "title": "C1 · 多组乘法计算",
+  "problem_id": "duozuchengfajisuan",
+  "problem_name": "多组乘法计算",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "",
+      "output": "24\n42\n20"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "",
+      "output": "24\n42\n20"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 271,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

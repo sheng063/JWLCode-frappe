@@ -1,0 +1,13 @@
+{
+    "assignment": "ASG-00690",
+    "lesson": "0691 你好，小猫",
+    "title": "C1 · 你好，小猫",
+    "problem_statement": "<h4>题目描述</h4><p>使用 <code>cout</code> 输出字符串 <code>hello</code>，并在它的下一行输出字符串 <code>cat</code>。</p><h4>输入格式</h4><p>无。程序不需要读取任何输入。</p><h4>输出格式</h4><p>输出两行：第一行为 <code>hello</code>，第二行为 <code>cat</code>。</p><h4>样例输入</h4><pre><code></code></pre><h4>样例输出</h4><pre><code>hello\ncat</code></pre>",
+    "cpp_solution": "#include <iostream>\nusing namespace std;\nint main() {\n    cout << \"hello\" << endl << \"cat\";\n    return 0;\n}\n",
+    "test_cases": [
+        {
+            "input": "",
+            "expected_output": "hello\ncat"
+        }
+    ]
+}

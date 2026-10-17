@@ -1,0 +1,29 @@
+{
+  "assignment": "ASG-00782",
+  "lesson": "0783 四则运算小练",
+  "title": "C1 · 四则运算小练",
+  "problem_statement": "<h4>题目描述</h4><p>声明两个 int 类型的变量 a 和 b，分别存储来自输入的两个整数值。之后计算并输出 a + b、a − b、a * b、a / b 的结果，每个运算结果之间用一个空格隔开。注意：在 C++ 中，两个整数做除法时，结果也是整数，小数部分会被丢弃。</p><h4>输入格式</h4><p>输入只有一行，包含两个用空格隔开的整数 a 和 b（0 &lt; a &lt; 100，0 &lt; b &lt; 100）。</p><h4>输出格式</h4><p>输出一行，依次为 a + b、a − b、a * b、a / b 四个整数结果，之间用一个空格隔开。</p><h4>样例输入</h4><pre><code>3 2</code></pre><h4>样例输出</h4><pre><code>5 1 6 1</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main(){\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << \" \" << a - b << \" \" << a * b << \" \" << a / b;\n    return 0;\n}",
+  "test_cases": [
+    {
+      "input": "3 2",
+      "expected_output": "5 1 6 1"
+    },
+    {
+      "input": "5 3",
+      "expected_output": "8 2 15 1"
+    },
+    {
+      "input": "10 4",
+      "expected_output": "14 6 40 2"
+    },
+    {
+      "input": "7 2",
+      "expected_output": "9 5 14 3"
+    },
+    {
+      "input": "20 5",
+      "expected_output": "25 15 100 4"
+    }
+  ]
+}

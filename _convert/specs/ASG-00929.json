@@ -1,0 +1,29 @@
+{
+  "assignment": "ASG-00929",
+  "lesson": "0930 除法的正确运算",
+  "title": "C1 · 除法的正确运算",
+  "problem_statement": "<h4>题目描述</h4><p>在做除法运算之前，需要先确定除数不为 0，否则除法没有意义。读入两个整数 a 和 b（a 为被除数，b 为除数）：若 b 不为 0，则输出 a/b 的整数结果；若 b 为 0，则输出错误提示。</p><h4>输入格式</h4><p>两个整数 a b（a、b 为整数）。</p><h4>输出格式</h4><p>若 b ≠ 0，输出 a/b（整数除法）的结果，占一行；若 b = 0，输出 ERROR，占一行。</p><h4>样例输入</h4><pre><code>10 2</code></pre><h4>样例输出</h4><pre><code>5</code></pre>",
+  "cpp_solution": "#include <iostream>\nusing namespace std;\nint main() {\n    int a, b;\n    cin >> a >> b;\n    if (b != 0) {\n        cout << a / b << endl;\n    }\n    if (b == 0) {\n        cout << \"ERROR\" << endl;\n    }\n    return 0;\n}",
+  "test_cases": [
+    {
+      "input": "10 2",
+      "expected_output": "5"
+    },
+    {
+      "input": "10 0",
+      "expected_output": "ERROR"
+    },
+    {
+      "input": "7 2",
+      "expected_output": "3"
+    },
+    {
+      "input": "9 3",
+      "expected_output": "3"
+    },
+    {
+      "input": "8 0",
+      "expected_output": "ERROR"
+    }
+  ]
+}

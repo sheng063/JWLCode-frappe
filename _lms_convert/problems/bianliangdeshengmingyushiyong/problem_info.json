@@ -1,0 +1,29 @@
+{
+  "exercise_name": "utehfga7i1",
+  "exercise_number": "P-000068",
+  "title": "C1 · 变量的声明与使用",
+  "problem_id": "bianliangdeshengmingyushiyong",
+  "problem_name": "变量的声明与使用",
+  "language": "C++",
+  "time_limit_seconds": 2.0,
+  "memory_limit_kb": 128000,
+  "evaluation_mode": "Judge Service",
+  "source_type": "manual",
+  "samples": [
+    {
+      "input": "",
+      "output": "321"
+    }
+  ],
+  "lms_test_cases": [
+    {
+      "idx": 1,
+      "input": "",
+      "output": "321"
+    }
+  ],
+  "secret_from_lms": [],
+  "statement_html_len": 317,
+  "images": [],
+  "base_statement_url": "http://school.localhost:8000"
+}

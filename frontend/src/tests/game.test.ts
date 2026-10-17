@@ -31,21 +31,37 @@ const html =
 	'<html><body><button onclick="this.textContent=42">Play</button></body></html>'
 let enabled = false
 let manager = true
+let gameEnabled = true
 beforeEach(() => {
 	enabled = false
 	manager = true
+	gameEnabled = true
 	api.mockReset()
 	navigate.mockReset()
 	visibility.data.game = 1
 	api.mockImplementation(async (method, args) => {
+		if (method.endsWith('get_access_options'))
+			return { courses: [], batches: [], can_configure: false }
+		if (method.endsWith('get_students')) return { rows: [], total: 0 }
 		if (method.endsWith('get_game_settings'))
-			return { can_manage: manager, enabled }
+			return { can_manage: manager, enabled, game_enabled: gameEnabled }
 		if (method.endsWith('set_game_enabled')) {
 			enabled = !!args.enabled
-			return { can_manage: manager, enabled }
+			return { can_manage: manager, enabled, game_enabled: gameEnabled }
+		}
+		if (method.endsWith('set_game_availability')) {
+			gameEnabled = !!args.enabled
+			return { name: args.name, enabled: gameEnabled }
 		}
 		if (method.endsWith('get_games'))
-			return [{ name: 'test', title: 'Demo', filename: 'demo.html' }]
+			return [
+				{
+					name: 'test',
+					title: 'Demo',
+					filename: 'demo.html',
+					enabled: gameEnabled,
+				},
+			]
 		if (method.endsWith('get_game'))
 			return { name: 'test', title: 'Demo', html }
 	})
@@ -54,7 +70,7 @@ describe('Game', () => {
 	it('lets teachers toggle visibility and navigate to the game page', async () => {
 		const w = mount(Game)
 		await flushPromises()
-		await w.get('input[type=checkbox]').setValue(true)
+		await w.get('input[aria-label="向学生开放"]').setValue(true)
 		await flushPromises()
 		expect(api).toHaveBeenCalledWith('lms.lms.game.set_game_enabled', {
 			enabled: 1,
@@ -66,6 +82,50 @@ describe('Game', () => {
 			params: { gameId: 'test' },
 		})
 		expect(w.find('iframe').exists()).toBe(false)
+		w.unmount()
+	})
+	it('toggles one game independently and preserves the saved value on failure', async () => {
+		const implementation = api.getMockImplementation()!
+		api.mockImplementation(async (method, args) =>
+			method.endsWith('get_games')
+				? [
+						{
+							name: 'test',
+							title: 'Demo',
+							filename: 'demo.html',
+							enabled: true,
+						},
+						{
+							name: 'other',
+							title: 'Other',
+							filename: 'other.html',
+							enabled: true,
+						},
+					]
+				: implementation(method, args),
+		)
+		const w = mount(Game)
+		await flushPromises()
+		const toggle = w.get('input[aria-label="Demo 向学生开放"]')
+		await toggle.setValue(false)
+		await flushPromises()
+		expect(api).toHaveBeenCalledWith('lms.lms.game.set_game_availability', {
+			name: 'test',
+			enabled: 0,
+		})
+		expect((toggle.element as HTMLInputElement).checked).toBe(false)
+		expect(
+			(
+				w.get('input[aria-label="Other 向学生开放"]')
+					.element as HTMLInputElement
+			).checked,
+		).toBe(true)
+		expect(enabled).toBe(false)
+		api.mockRejectedValueOnce(new Error('failed'))
+		await toggle.setValue(true)
+		await flushPromises()
+		expect((toggle.element as HTMLInputElement).checked).toBe(false)
+		expect(w.get('[role=alert]').text()).toContain('保存失败')
 		w.unmount()
 	})
 	it('hides games and upload controls from students when disabled', async () => {
@@ -81,10 +141,11 @@ describe('Game', () => {
 		const w = mount(Game)
 		await flushPromises()
 		api.mockRejectedValueOnce(new Error('failed'))
-		await w.get('input[type=checkbox]').setValue(true)
+		await w.get('input[aria-label="向学生开放"]').setValue(true)
 		await flushPromises()
 		expect(
-			(w.get('input[type=checkbox]').element as HTMLInputElement).checked
+			(w.get('input[aria-label="向学生开放"]').element as HTMLInputElement)
+				.checked,
 		).toBe(false)
 		expect(w.get('[role=alert]').text()).toContain('保存失败')
 		w.unmount()
@@ -92,6 +153,10 @@ describe('Game', () => {
 	it('uploads the selected file and refreshes game cards', async () => {
 		const w = mount(Game)
 		await flushPromises()
+		await w
+			.findAll('button')
+			.find((b) => b.text() === '上传游戏')!
+			.trigger('click')
 		const input = w.get('input[type=file]')
 		Object.defineProperty(input.element, 'files', {
 			value: [new File([html], 'demo.html')],
@@ -101,12 +166,42 @@ describe('Game', () => {
 		await vi.waitFor(() =>
 			expect(api).toHaveBeenCalledWith(
 				'lms.lms.game.upload_game',
-				expect.objectContaining({ filename: 'demo.html' })
-			)
+				expect.objectContaining({ filename: 'demo.html' }),
+			),
 		)
 		await flushPromises()
 		expect(w.text()).toContain('上传成功')
 		expect(w.text()).toContain('Demo')
+		w.unmount()
+	})
+	it('filters games by search and format, and switches list layout', async () => {
+		const w = mount(Game)
+		await flushPromises()
+		await w.get('input[type=search]').setValue('missing')
+		expect(w.findAll('.game-card')).toHaveLength(0)
+		expect(w.text()).toContain('没有找到匹配的游戏')
+		await w.get('input[type=search]').setValue('demo')
+		expect(w.findAll('.game-card')).toHaveLength(1)
+		await w.get('select[aria-label="游戏文件格式"]').setValue('zip')
+		expect(w.findAll('.game-card')).toHaveLength(0)
+		await w.get('select[aria-label="游戏文件格式"]').setValue('html')
+		expect(w.findAll('.game-card')).toHaveLength(1)
+		await w.get('button[aria-label="列表视图"]').trigger('click')
+		expect(w.find('.list-view').exists()).toBe(true)
+		w.unmount()
+	})
+	it('opens student access management separately from the library', async () => {
+		const w = mount(Game)
+		await flushPromises()
+		expect(w.find('.access-panel').exists()).toBe(false)
+		await w
+			.findAll('button')
+			.find((b) => b.text() === '学生解锁管理')!
+			.trigger('click')
+		await flushPromises()
+		expect(w.find('.access-panel').exists()).toBe(true)
+		expect(w.text()).toContain('全站解锁规则')
+		expect(w.find('.game-grid').exists()).toBe(false)
 		w.unmount()
 	})
 })
@@ -116,19 +211,19 @@ describe('HTML game files', () => {
 		expect(
 			Buffer.from(
 				await readGameFile(new File([source], 'game.HTML')),
-				'base64'
-			).toString('utf8')
+				'base64',
+			).toString('utf8'),
 		).toBe(source)
 	})
 	it('rejects unsupported, empty and oversized files', async () => {
 		await expect(readGameFile(new File(['x'], 'game.exe'))).rejects.toThrow(
-			'HTML'
+			'HTML',
 		)
 		await expect(readGameFile(new File([], 'game.html'))).rejects.toThrow(
-			'不能为空'
+			'不能为空',
 		)
 		await expect(
-			readGameFile(new File([new Uint8Array(MAX_GAME_BYTES + 1)], 'game.html'))
+			readGameFile(new File([new Uint8Array(MAX_GAME_BYTES + 1)], 'game.html')),
 		).rejects.toThrow('5 MB')
 	})
 	it('places the content policy before game code and preserves standards mode', () => {
@@ -145,7 +240,7 @@ describe('Game detail page', () => {
 		await flushPromises()
 		expect(api).toHaveBeenCalledWith('lms.lms.game.get_game', { name: 'test' })
 		expect(w.get('iframe').attributes('sandbox')).toBe(
-			'allow-scripts allow-pointer-lock'
+			'allow-scripts allow-pointer-lock',
 		)
 		expect(w.get('iframe').attributes('srcdoc')).toContain(html)
 		const frame = w.get('iframe').element
@@ -181,6 +276,38 @@ describe('Game detail page', () => {
 		await flushPromises()
 		expect(w.find('iframe').exists()).toBe(false)
 		expect(w.text()).toContain('教师尚未开放')
+		w.unmount()
+	})
+	it('revokes only the closed game and resumes after it is enabled again', async () => {
+		manager = false
+		enabled = true
+		const w = mount(GameDetail, { props: { gameId: 'test' } })
+		await flushPromises()
+		expect(w.find('iframe').exists()).toBe(true)
+		gameEnabled = false
+		window.dispatchEvent(new Event('lms-game-access-changed'))
+		await flushPromises()
+		expect(api).toHaveBeenCalledWith('lms.lms.game.get_game_settings', {
+			name: 'test',
+		})
+		expect(w.find('iframe').exists()).toBe(false)
+		expect(w.text()).toContain('教师已关闭此游戏')
+		gameEnabled = true
+		window.dispatchEvent(new Event('lms-game-access-changed'))
+		await flushPromises()
+		expect(w.find('iframe').exists()).toBe(true)
+		w.unmount()
+	})
+	it('blocks a closed game deep link before fetching its content', async () => {
+		manager = false
+		enabled = true
+		gameEnabled = false
+		const w = mount(GameDetail, { props: { gameId: 'test' } })
+		await flushPromises()
+		expect(w.find('iframe').exists()).toBe(false)
+		expect(api).not.toHaveBeenCalledWith('lms.lms.game.get_game', {
+			name: 'test',
+		})
 		w.unmount()
 	})
 	it('shows a recoverable error for a missing game', async () => {
@@ -229,7 +356,7 @@ describe('Teacher game management', () => {
 			.trigger('click')
 		expect(api).not.toHaveBeenCalledWith(
 			'lms.lms.game.delete_game',
-			expect.anything()
+			expect.anything(),
 		)
 		confirm.mockRestore()
 		w.unmount()
@@ -310,7 +437,7 @@ describe('Teacher game management', () => {
 		await flushPromises()
 		expect(api).toHaveBeenCalledWith(
 			'lms.lms.game.update_game',
-			expect.objectContaining({ cover: '' })
+			expect.objectContaining({ cover: '' }),
 		)
 		expect(w.get('[role=alert]').text()).toContain('保存失败')
 		expect(w.emitted('saved')).toBeUndefined()
@@ -322,10 +449,12 @@ describe('ZIP games', () => {
 	it('accepts ZIP uploads up to 20 MB and rejects larger files', async () => {
 		const file = new File(['zip'], 'game.ZIP', { type: 'application/zip' })
 		expect(Buffer.from(await readGameFile(file), 'base64').toString()).toBe(
-			'zip'
+			'zip',
 		)
 		await expect(
-			readGameFile(new File([new Uint8Array(20 * 1024 * 1024 + 1)], 'game.zip'))
+			readGameFile(
+				new File([new Uint8Array(20 * 1024 * 1024 + 1)], 'game.zip'),
+			),
 		).rejects.toThrow('20 MB')
 	})
 	it('uses the authenticated package URL in the isolated iframe', async () => {
@@ -336,16 +465,16 @@ describe('ZIP games', () => {
 						name: 'zip',
 						title: 'ZIP Game',
 						url: '/game-assets/token/game/index.html',
-					}
+					},
 		)
 		const w = mount(GameDetail, { props: { gameId: 'zip' } })
 		await flushPromises()
 		expect(w.get('iframe').attributes('src')).toBe(
-			'/game-assets/token/game/index.html'
+			'/game-assets/token/game/index.html',
 		)
 		expect(w.get('iframe').attributes('srcdoc')).toBeUndefined()
 		expect(w.get('iframe').attributes('sandbox')).not.toContain(
-			'allow-same-origin'
+			'allow-same-origin',
 		)
 		w.unmount()
 	})
