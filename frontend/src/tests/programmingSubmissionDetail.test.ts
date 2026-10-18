@@ -49,11 +49,13 @@ it.each(['Failed', 'Wrong Answer'])('displays the matching failed execution outp
  ] }
  const wrapper = mount(Detail, { props: { name: 'S1' } }); await flushPromises()
  expect(wrapper.text()).toContain('错误解答')
- const input = wrapper.findAll('h3').find(h => h.text() === '最后执行的输入')!.element.nextElementSibling!
+ const input = wrapper.findAll('h3').find(h => h.text() === '最后执行的输入')!.element.parentElement!.nextElementSibling!
  expect(input.textContent).toBe('2 3')
- expect(input.nextElementSibling!.textContent).toBe('用户代码的输出')
+ expect(input.nextElementSibling!.textContent).toBe('标准输出')
+ expect(wrapper.get('[data-testid="failed-case-expected-output"]').element.textContent).toBe('999')
  expect(wrapper.get('[data-testid="failed-case-output"]').element.textContent).toBe('  4\n5\n')
- expect(wrapper.text()).not.toContain('999')
+ await wrapper.get('.failed-input-heading button').trigger('click')
+ expect(wrapper.emitted('add-test-case')?.[0][0]).toEqual({ input: '2 3', expected_output: '999' })
  wrapper.unmount()
 })
 it.each([
@@ -64,5 +66,15 @@ it.each([
  mocks.doc = { ...mocks.doc, status: 'Failed', test_cases: testCase ? [testCase] : [] }
  const wrapper = mount(Detail, { props: { name: 'S1' } }); await flushPromises()
  expect(wrapper.get('[data-testid="failed-case-output"]').text()).toBe(expected)
+ wrapper.unmount()
+})
+
+it('uses versioned feedback for historical cases and disables quick add while running', async () => {
+ mocks.doc = { ...mocks.doc, status: 'Failed', test_cases: [{ status: 'Failed', input: '2', expected_output: '', output: '3' }] }
+ mocks.call.mockImplementation(async (method: string) => method === 'frappe.client.get' ? mocks.doc : { failed_case: { input: '2', expected_output: '4', output: '3' } })
+ const wrapper = mount(Detail, { props: { name: 'S1', addingCaseDisabled: true } }); await flushPromises()
+ expect(wrapper.get('[data-testid="failed-case-expected-output"]').text()).toBe('4')
+ await wrapper.get('.failed-input-heading button').trigger('click')
+ expect(wrapper.emitted('add-test-case')).toBeUndefined()
  wrapper.unmount()
 })

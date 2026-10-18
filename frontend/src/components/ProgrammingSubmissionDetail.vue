@@ -14,9 +14,11 @@
     <h3>关键报错信息</h3>
     <pre class="error-message">{{ labels[doc.status] || doc.status }}</pre>
     <ProgrammingErrorDiagnostic v-if="['Runtime Error', 'Compilation Error'].includes(doc.status) || doc.compiler_message" :message="doc.compiler_message" :code="doc.code || ''" />
-    <h3>最后执行的输入</h3>
+    <div class="failed-input-heading"><h3>最后执行的输入</h3><button v-if="['Failed', 'Wrong Answer'].includes(doc.status) && failedCase?.input != null && failedCase?.expected_output != null" :disabled="addingCaseDisabled" @click="emit('add-test-case', { input: failedCase.input, expected_output: failedCase.expected_output })">添加到测试用例</button></div>
     <pre>{{ failedCase?.input ?? '暂无可展示的输入' }}</pre>
     <template v-if="['Failed', 'Wrong Answer'].includes(doc.status)">
+     <h3>标准输出</h3>
+     <pre data-testid="failed-case-expected-output">{{ failedCase?.expected_output === '' ? '（空输出）' : failedCase?.expected_output ?? '暂无可展示的标准输出' }}</pre>
      <h3>用户代码的输出</h3>
      <pre data-testid="failed-case-output">{{ failedCase?.output === '' ? '（无输出）' : failedCase?.output ?? '暂无可展示的输出' }}</pre>
     </template>
@@ -32,8 +34,8 @@ import ProgrammingErrorDiagnostic from '@/components/ProgrammingErrorDiagnostic.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { submissionStatusLabels as labels } from '@/utils/programmingSubmissionStatus'
 import { call } from 'frappe-ui'
-const props = defineProps<{ name: string; revision?: string }>()
-const emit = defineEmits<{ restore: [doc: any]; loaded: [doc: any] }>()
+const props = defineProps<{ name: string; revision?: string; addingCaseDisabled?: boolean }>()
+const emit = defineEmits<{ restore: [doc: any]; loaded: [doc: any]; 'add-test-case': [testCase: { input: string; expected_output: string }] }>()
 const doc = ref<any>(null)
 const loading = ref(false)
 const error = ref(false)
@@ -41,7 +43,8 @@ const copied = ref(false)
 const copyError = ref(false)
 
 const pending = computed(() => ['Queued', 'Compiling', 'Running'].includes(doc.value?.status))
-const failedCase = computed(() => doc.value?.test_cases?.find((item: any) => item.status === 'Failed'))
+const feedback = ref<any>(null)
+const failedCase = computed(() => feedback.value ?? doc.value?.test_cases?.find((item: any) => item.status === 'Failed'))
 const counts = computed(() => {
  const value = doc.value
  if (value.total_tests > 0) return `${value.passed_tests ?? 0} / ${value.total_tests} 个通过的测试用例`
@@ -56,9 +59,9 @@ async function refresh() {
  loading.value = true
  error.value = false
  try {
-  await call('lms.lms.judge_service.get_programming_submission_status', { submission: props.name })
+  const status = await call('lms.lms.judge_service.get_programming_submission_status', { submission: props.name })
   const result = await call('frappe.client.get', { doctype: 'LMS Programming Exercise Submission', name: props.name })
-  if (!disposed) { doc.value = result; emit('loaded', result) }
+  if (!disposed) { feedback.value = status?.failed_case ?? null; doc.value = result; emit('loaded', result) }
  } catch { error.value = true }
  finally { loading.value = false; if (!disposed && pending.value && !error.value) timer = setTimeout(refresh, 1500) }
 }
@@ -73,6 +76,10 @@ onBeforeUnmount(() => { disposed = true; clearTimeout(timer) })
 .submission-detail { flex: 1; min-height: 0; overflow: auto; padding: 24px; background: var(--surface-white); }
 h3 { margin-top: 20px; color: var(--ink-gray-6); font-size: 14px; }
 pre { padding: 16px; margin-top: 10px; border-radius: 8px; background: var(--surface-gray-1); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; }
+.failed-input-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; }
+.failed-input-heading h3 { margin-top: 0; }
+.failed-input-heading button { color: #2563eb; font-size: 12px; flex-shrink: 0; }
+.failed-input-heading button:disabled { opacity: .5; cursor: not-allowed; }
 .source { white-space: pre; overflow: auto; tab-size: 4; }
 .error-message { background: #fff1f2; color: #dc2626; }
 .metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 24px 0; }

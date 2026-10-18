@@ -180,7 +180,7 @@ class TestPackageJudgeService(TestCase):
 		doc.append.assert_called_once()
 		feedback = doc.append.call_args.args[1]
 		assert feedback["input"] == "0\n"
-		assert feedback["expected_output"] == ""
+		assert feedback["expected_output"] == "private answer"
 		assert feedback["status"] == "Failed"
 
 	@patch("lms.lms.judge_service.frappe.get_doc")
@@ -411,3 +411,51 @@ class TestStatusReconciliation(TestCase):
 			service.dispatch_submission(doc.name)
 		update.assert_not_called()
 		self.assertEqual(doc.status, "Passed")
+
+
+class TestTemporaryRunCases(TestCase):
+	def run_request(self, temporary, package=False):
+		from lms.lms import judge_service as service
+		import json
+		exercise = SimpleNamespace(time_limit_seconds=2, memory_limit_kb=128000,
+			test_cases=[SimpleNamespace(input="sample", expected_output="answer")],
+			active_package_version="V1" if package else None)
+		version = SimpleNamespace(name="V1", config_digest="digest",
+			judge_config=json.dumps(dict(protocol_version="icpc-legacy-v1", comparison_mode="icpc_default",
+				validator_flags=[], scoring_mode="icpc", language="C++", time_limit_seconds=2, memory_limit_kb=128000)),
+			cases=json.dumps([dict(case_id="sample", input="sample", expected_output="answer", hidden=False),
+				dict(case_id="secret", input="secret", expected_output="private", hidden=True)]))
+		settings = SimpleNamespace(service_url="http://judge", request_timeout_seconds=5, get_password=lambda _: "token")
+		with patch.object(service, "_validate_submission_access"), patch.object(service, "_get_settings", return_value=settings), \
+			patch.object(service.frappe, "get_doc", side_effect=lambda doctype, name: version if doctype == "LMS Problem Package Version" else exercise), \
+			patch("lms.lms.problem_package.api.require_capability"), patch.object(service.requests, "post") as post:
+			service.run_programming_exercise("EX", "print(42)", temporary_test_cases=temporary)
+			return post.call_args.kwargs["json"], exercise
+
+	def test_temporary_cases_append_to_public_samples_without_mutating_exercise(self):
+		for package in (False, True):
+			payload, exercise = self.run_request([{"input": "  2\n", "expected_output": "4\n"}], package)
+			assert len(payload["test_cases"]) == 2
+			assert payload["test_cases"][1]["input"] == "  2\n"
+			assert payload["test_cases"][1]["expected_output"] == "4\n"
+			assert payload["test_cases"][1]["hidden"] is False
+			assert len(exercise.test_cases) == 1
+			if package:
+				assert payload["test_cases"][1]["case_id"].startswith("temporary/")
+
+	def test_rejects_invalid_or_excessive_temporary_cases(self):
+		import frappe
+		for value in ({}, [None], [{"input": 1}], [{"input": "", "hidden": True}], [{"input": ""}] * 100):
+			with self.assertRaises(frappe.ValidationError):
+				self.run_request(value)
+
+	def test_historical_feedback_uses_bound_package_version(self):
+		from lms.lms.judge_service import _submission_failed_case
+		import json
+		doc = SimpleNamespace(package_version="OLD-VERSION", test_cases=[SimpleNamespace(status="Failed", input="2", expected_output="", output="3", hidden=1)])
+		with patch("lms.lms.judge_service.frappe.get_doc", return_value=SimpleNamespace(cases=json.dumps([
+			{"input": "2", "expected_output": "4", "hidden": True}, {"input": "secret", "expected_output": "other", "hidden": True}
+		]))) as get_doc:
+			feedback = _submission_failed_case(doc)
+			assert feedback == {"input": "2", "expected_output": "4", "output": "3", "status": "Failed", "hidden": 1}
+			get_doc.assert_called_once_with("LMS Problem Package Version", "OLD-VERSION")

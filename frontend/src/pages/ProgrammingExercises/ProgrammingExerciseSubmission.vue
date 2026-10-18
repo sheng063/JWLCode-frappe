@@ -38,7 +38,7 @@
 				<button class="pane-icon ms-auto" :aria-label="__('展开题目描述')" :aria-pressed="expandedPane === 'problem'" @click="togglePane('problem')"><span :class="expandedPane === 'problem' ? 'lucide-minimize size-4' : 'lucide-maximize size-4'" /></button>
 			</div>
 			<ProgrammingSubmissionHistory v-if="activeProblemTab === 'submissions' && !activeSubmission" :exercise="exerciseID" :member="user.data?.name" :revision="submission.doc?.modified" @select="openSubmission" />
-			<ProgrammingSubmissionDetail v-for="name in submissionTabs" v-show="activeSubmission === name" :key="name" :name="name" :revision="submission.doc?.modified" @restore="restoreSubmissionCode" @loaded="updateSubmissionStatus" />
+			<ProgrammingSubmissionDetail v-for="name in submissionTabs" v-show="activeSubmission === name" :key="name" :name="name" :revision="submission.doc?.modified" @restore="restoreSubmissionCode" @loaded="updateSubmissionStatus" :adding-case-disabled="running || submitting || runnableCases.length >= 100" @add-test-case="addFailedTestCase" />
 			<div v-show="activeProblemTab === 'description' && !activeSubmission" class="problem-content">
 			<div class="flex items-start justify-between gap-4 mb-5">
 				<h1 class="problem-title">{{ exercise.doc?.title || __('Problem Statement') }}</h1>
@@ -108,7 +108,7 @@
 						"
 						@click="runCodeOnly"
 						:loading="running"
-						:disabled="running || submitting || !!exerciseLoadError || !exercise.doc?.test_cases?.length"
+						:disabled="running || submitting || !!exerciseLoadError || !runnableCases.length"
 						class="text-ink-gray-9"
 					>
 						<template #prefix>
@@ -199,19 +199,7 @@
 				</div>
 				<template v-if="!testPanelCollapsed">
 					<div v-if="activeTestPanel === 'cases'" class="p-5">
-					<div v-if="exercise.doc?.test_cases?.length">
-						<div class="case-tabs" aria-label="测试用例">
-							<button v-for="(testCase, index) in exercise.doc.test_cases" :key="testCase.name || index" class="case-tab" :class="{ 'case-tab-active': selectedCaseIndex === index }" :aria-pressed="selectedCaseIndex === index" @click="selectedCaseIndex = index">
-								<span v-if="publicCasePassed(index)" class="lucide-square-check case-passed-icon" role="img" aria-label="已通过" />
-								用例 {{ index + 1 }}
-							</button>
-						</div>
-						<div v-if="selectedCase" class="case-fields">
-							<div><div class="case-field-label">{{ __('输入') }}</div><pre class="test-case-value">{{ selectedCase.input || '—' }}</pre></div>
-							<div><div class="case-field-label">{{ __('样例输出') }}</div><pre class="test-case-value">{{ selectedCase.expected_output }}</pre></div>
-						</div>
-					</div>
-					<div v-else class="text-sm text-ink-gray-6">{{ __('暂无测试用例。') }}</div>
+                    <ProgrammingTestCases v-model="temporaryCases" :official-cases="exercise.doc?.test_cases || []" :results="testCases" :disabled="running || submitting" />
 				</div>
 				<div v-else class="p-5">
 					<div v-if="resultMessage" class="result-notice mb-5" :class="`result-notice-${resultMessage.tone}`"><div class="font-semibold">{{ resultMessage.title }}</div><div v-if="resultMessage.detail" class="mt-2 whitespace-pre-wrap font-mono text-sm">{{ resultMessage.detail }}</div></div>
@@ -272,6 +260,7 @@
 <ProgrammingEditorSettings v-model="editorPreferences" v-model:open="editorSettingsOpen" />
 </template>
 <script setup lang="ts">
+import ProgrammingTestCases, { type TemporaryTestCase } from '@/components/ProgrammingTestCases.vue'
 import ProgrammingStatement from '@/components/ProgrammingStatement.vue'
 import ProgrammingErrorDiagnostic from '@/components/ProgrammingErrorDiagnostic.vue'
 import { submissionStatusLabel, submissionStatusLabels } from '@/utils/programmingSubmissionStatus'
@@ -409,17 +398,10 @@ const testCaseSection = ref<HTMLElement | null>(null)
 const testCases = ref<TestCase[]>([])
 const activeTestPanel = ref<'cases' | 'results'>('cases')
 const testPanelCollapsed = ref(false)
-const selectedCaseIndex = ref(0)
+const temporaryCases = ref<TemporaryTestCase[]>([])
 const selectedResultIndex = ref(0)
 const selectedTestResult = computed(() => testCases.value[selectedResultIndex.value])
 watch(testCases, () => { selectedResultIndex.value = 0 })
-const publicCasePassed = (index: number) => {
-	const result = testCases.value[index]
-	const sample = exercise.doc?.test_cases?.[index]
-	return result?.status === 'Passed' && !result.hidden && sample
-		&& (result.input || '') === (sample.input || '')
-		&& result.expected_output === sample.expected_output
-}
 const selectTestPanel = (panel: 'cases' | 'results') => {
 	activeTestPanel.value = panel
 	testPanelCollapsed.value = false
@@ -628,7 +610,14 @@ watch(() => exercise.doc?.evaluation_mode, (mode) => {
 	}
 }, { immediate: true })
 
-const selectedCase = computed(() => exercise.doc?.test_cases?.[selectedCaseIndex.value])
+const runnableCases = computed<TemporaryTestCase[]>(() => [...(exercise.doc?.test_cases || []), ...temporaryCases.value])
+function addFailedTestCase(testCase: TemporaryTestCase) {
+ if (running.value || submitting.value || runnableCases.value.length >= 100) return
+ temporaryCases.value.push({ input: testCase.input, expected_output: testCase.expected_output })
+ selectTestPanel('cases')
+ if (expandedPane.value === 'problem') expandedPane.value = null
+}
+watch(() => props.exerciseID, () => { temporaryCases.value = [] })
 
 const editorLanguage = computed<'Python' | 'C++'>(() => selectedLanguage.value)
 
@@ -837,7 +826,7 @@ const runCodeOnly = async () => {
 			await runJudgeCode()
 			// Public runs do not overwrite historical submissions.
 		} else {
-			await runCode()
+			await runCode(runnableCases.value.map(item => ({ ...item })))
 		}
 	} catch (e: any) {
 		error.value = true
@@ -849,6 +838,8 @@ const runCodeOnly = async () => {
 }
 
 const runJudgeCode = async () => {
+ const runCases = runnableCases.value.map(item => ({ input: item.input, expected_output: item.expected_output }))
+ const temporary = temporaryCases.value.map(item => ({ input: item.input, expected_output: item.expected_output }))
 	testCases.value = []
 	resultMessage.value = null
 	activeTestPanel.value = 'results'
@@ -859,6 +850,7 @@ const runJudgeCode = async () => {
 		exercise: props.exerciseID,
 		code: code.value || '',
 		language: selectedLanguage.value,
+        temporary_test_cases: temporary,
 	})
 	if (result.compiler_message) {
 		error.value = true
@@ -866,7 +858,7 @@ const runJudgeCode = async () => {
 		showResult('error', submissionStatusLabel(result.status), result.compiler_message)
 	}
 	testCases.value = (result.cases || []).map((item: any) => {
-		const testCase = exercise.doc?.test_cases?.[item.index - 1]
+		const testCase = runCases[item.index - 1]
 		return {
 			input: testCase?.input || '',
 			output: item.stdout || '',
@@ -929,15 +921,15 @@ const judgeStatusPoller = createJudgeStatusPoller({
 
 const pollJudgeStatus = (name: string) => judgeStatusPoller.start(name)
 
-const runCode = async () => {
-	if (!exercise.doc?.test_cases?.length) return
+const runCode = async (cases = exercise.doc.test_cases) => {
+	if (!cases.length) return
 
 	testCases.value = []
 	if (testCaseSection.value) {
 		testCaseSection.value.scrollIntoView({ behavior: 'smooth' })
 	}
 
-	for (const test_case of exercise.doc.test_cases) {
+	for (const test_case of cases) {
 		errorMessage.value = null
 		let result = await execute(test_case.input)
 		if (error.value) {

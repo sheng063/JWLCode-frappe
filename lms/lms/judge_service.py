@@ -124,7 +124,7 @@ def submit_programming_exercise(
 
 
 @frappe.whitelist()
-def run_programming_exercise(exercise: str, code: str, language: str = "Python"):
+def run_programming_exercise(exercise: str, code: str, language: str = "Python", temporary_test_cases: list | str | None = None):
 	"""Run public examples without creating or updating a submission document."""
 	_validate_submission_access(exercise, code, language)
 	settings = _get_settings()
@@ -133,8 +133,6 @@ def run_programming_exercise(exercise: str, code: str, language: str = "Python")
 		{"input": row.input or "", "expected_output": row.expected_output, "hidden": False}
 		for row in exercise_doc.test_cases
 	]
-	if not test_cases:
-		frappe.throw(_("At least one visible test case is required."), frappe.ValidationError)
 	payload = {
 		"language": language,
 		"source_code": code,
@@ -147,6 +145,23 @@ def run_programming_exercise(exercise: str, code: str, language: str = "Python")
 		from lms.lms.problem_package.api import require_capability
 		require_capability()
 		payload.update(_package_payload(version, public_only=True))
+	# 临时用例只附加到本次运行请求，不写回题目或正式提交记录。
+	temporary = frappe.parse_json(temporary_test_cases) if isinstance(temporary_test_cases, str) else temporary_test_cases
+	if temporary is not None and not isinstance(temporary, list):
+		frappe.throw("临时测试用例必须是列表。", frappe.ValidationError)
+	if not 1 <= len(payload["test_cases"]) + len(temporary or []) <= 100:
+		frappe.throw("运行需要 1 至 100 个测试用例。", frappe.ValidationError)
+	for item in temporary or []:
+		if (not isinstance(item, dict) or set(item) - {"input", "expected_output"}
+			or not isinstance(item.get("input"), str) or not isinstance(item.get("expected_output", ""), str)):
+			frappe.throw("临时用例必须提供文本输入和标准输出。", frappe.ValidationError)
+		if (len(item["input"].encode()) > 16 * 1024 * 1024
+			or len(item.get("expected_output", "").encode()) > payload.get("output_limit_bytes", 256000)):
+			frappe.throw("临时测试用例超过运行容量。", frappe.ValidationError)
+		case = {"input": item["input"], "expected_output": item.get("expected_output", ""), "hidden": False}
+		if payload.get("protocol_version"):
+			case["case_id"] = f"temporary/{uuid.uuid4().hex}"
+		payload["test_cases"].append(case)
 	_apply_submission_language(payload, language)
 	response = requests.post(
 		f"{settings.service_url.rstrip('/')}/internal/v1/runs",
@@ -377,7 +392,7 @@ def _record_first_failed_case(doc, payload: dict, package_cases=None):
 			continue
 		doc.append("test_cases", {
 			"input": case["input"],
-			"expected_output": case.get("expected_output", "") if not by_id or not case.get("hidden") else "",
+			"expected_output": case.get("expected_output", ""),
 			"output": result.get("stdout") or "",
 			"status": "Failed",
 			"hidden": int(bool(case.get("hidden"))),
@@ -433,7 +448,24 @@ def get_programming_submission_status(submission: str):
 		"compiler_message": doc.compiler_message,
 		"passed_tests": doc.passed_tests, "total_tests": doc.total_tests,
 		"status_version": doc.status_version,
+		"failed_case": _submission_failed_case(doc),
 	}
+
+
+def _submission_failed_case(doc):
+	"""从提交绑定的题包版本读取首个失败用例，兼容旧记录未保存标准输出的情况。"""
+	failed = next((row for row in getattr(doc, "test_cases", []) if row.status == "Failed"), None)
+	if not failed:
+		return None
+	expected = failed.expected_output
+	if doc.package_version:
+		version = frappe.get_doc("LMS Problem Package Version", doc.package_version)
+		case = next((item for item in json.loads(version.cases)
+			if item.get("input") == failed.input and bool(item.get("hidden")) == bool(failed.hidden)), None)
+		if case is not None:
+			expected = case.get("expected_output", "")
+	return {"input": failed.input, "expected_output": expected, "output": failed.output,
+		"status": "Failed", "hidden": failed.hidden}
 
 
 def _queue_status_refresh(doc):
