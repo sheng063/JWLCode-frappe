@@ -13,6 +13,7 @@ it('shows exact result and copies the submitted source or restores it', async ()
  expect(wrapper.text()).toContain('5 / 5')
  expect(wrapper.text()).toContain('Alice')
  expect(wrapper.text()).toContain('12:34:56')
+ expect(wrapper.find('[data-testid="failed-case-output"]').exists()).toBe(false)
  expect(wrapper.text()).toContain('12 ms')
  expect(wrapper.text()).toContain('2.00 MB')
  await wrapper.get('[aria-label="复制提交代码"]').trigger('click')
@@ -26,6 +27,7 @@ it('replaces metrics with failure diagnostics and preserves empty input', async 
  const wrapper = mount(Detail, { props: { name: 'S1' } }); await flushPromises()
  expect(wrapper.text()).toContain('2 / 5')
  expect(wrapper.text()).toContain('IndexError')
+ expect(wrapper.find('[data-testid="failed-case-output"]').exists()).toBe(false)
  expect(wrapper.text()).toContain('最后执行的输入')
  expect(wrapper.text()).not.toContain('执行用时')
  expect(wrapper.text()).not.toContain('暂无可展示的输入')
@@ -37,5 +39,30 @@ it('allows retry after loading fails', async () => {
  expect(wrapper.find('[role="alert"]').exists()).toBe(true)
  await wrapper.get('button').trigger('click'); await flushPromises()
  expect(wrapper.text()).toContain('print(42)')
+ wrapper.unmount()
+})
+
+it.each(['Failed', 'Wrong Answer'])('displays the matching failed execution output for %s', async (status) => {
+ mocks.doc = { ...mocks.doc, status, passed_tests: 1, test_cases: [
+  { status: 'Passed', input: '1 1', output: '2', expected_output: '2' },
+  { status: 'Failed', input: '2 3', output: '  4\n5\n', expected_output: '999' },
+ ] }
+ const wrapper = mount(Detail, { props: { name: 'S1' } }); await flushPromises()
+ expect(wrapper.text()).toContain('错误解答')
+ const input = wrapper.findAll('h3').find(h => h.text() === '最后执行的输入')!.element.nextElementSibling!
+ expect(input.textContent).toBe('2 3')
+ expect(input.nextElementSibling!.textContent).toBe('用户代码的输出')
+ expect(wrapper.get('[data-testid="failed-case-output"]').element.textContent).toBe('  4\n5\n')
+ expect(wrapper.text()).not.toContain('999')
+ wrapper.unmount()
+})
+it.each([
+ [{ status: 'Failed', input: '', output: '' }, '（无输出）'],
+ [{ status: 'Failed', input: '' }, '暂无可展示的输出'],
+ [undefined, '暂无可展示的输出'],
+])('handles empty or unavailable execution output', async (testCase, expected) => {
+ mocks.doc = { ...mocks.doc, status: 'Failed', test_cases: testCase ? [testCase] : [] }
+ const wrapper = mount(Detail, { props: { name: 'S1' } }); await flushPromises()
+ expect(wrapper.get('[data-testid="failed-case-output"]').text()).toBe(expected)
  wrapper.unmount()
 })
